@@ -1311,25 +1311,70 @@ Use the calibration anchors in the Play and Classic POS sections.
 
 ### Key references
 
-1. **Quintessa ESL Guide v3.0** (2022) — [Download PDF](https://quintessa.org/repository/files/Evidence_Support_Logic_Guide_v3.0.pdf)
-   The definitive technical reference for ESL, Italian Flag and Policy P.
-
-2. **Blockley, D.I. & Godfrey, P. (2000)** — *Doing it Differently: Systems for Rethinking Infrastructure*.
-   Thomas Telford. [Original Blockley formulation of ESL.]
-
-3. **Rose, P.R. (2001)** — *Risk Analysis and Management of Petroleum Exploration Ventures*.
-   AAPG Methods in Exploration 12. [Classic POS / multiplicative risking.]
-
-4. **Milkov, A.V. (2015)** — "Probability of success and confidence in chance factor assessment for
-   petroleum prospects." Earth-Science Reviews 150: 191–208.
-   [Comparison of methods; calibration data.]
-
-5. **Hjelm, L. (this tool)** — E-POS integrates ESL with Classic POS to provide a
-   dual-method view with a single evidence entry, bridging Italian Flag rigour with
-   the industry-standard multiplicative risking framework.
+See the dedicated **📚 Key references & source papers** section below for the full,
+grouped list (ESL, Classic POS, DHI/DFI, characteristic scoring, and assurance) —
+including which papers are bundled as PDFs with the project.
 """)
         from components.adequacy_matrix import render_adequacy_matrix_reference
         render_adequacy_matrix_reference()
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # 📚 KEY REFERENCES & SOURCE PAPERS
+    # ═══════════════════════════════════════════════════════════════════════
+    with st.expander("📚 Key references & source papers", expanded=False):
+        st.markdown("""
+The methods in E-POS are grounded in published literature. References are grouped
+by the part of the tool they underpin. Items marked **📄 in library** are bundled
+as PDFs with this project for direct consultation.
+
+#### 1 · Evidence Support Logic (ESL) & the Italian Flag
+- **Quintessa (2022)** — *Evidence Support Logic Guide, v3.0.* Quintessa Ltd.
+  The definitive technical reference for ESL, the Italian Flag, Bel/Pl intervals
+  and Policy P (the stance *w*). **📄 in library**
+- **Blockley, D.I. & Godfrey, P. (2000)** — *Doing It Differently: Systems for
+  Rethinking Construction.* Thomas Telford, London. Origin of the interval-probability
+  reasoning the Italian Flag is built on.
+- *Analysing Uncertainties: Bayes and Italian Flags* (2013) — links Italian-Flag
+  belief masses to Bayesian updating. **📄 in library**
+
+#### 2 · Geological probability of success (Classic / multiplicative POS)
+- **Rose, P.R. (2001)** — *Risk Analysis and Management of Petroleum Exploration
+  Ventures.* AAPG Methods in Exploration 12. The industry-standard multiplicative
+  POS framework used for the **P(G, Classic)** view.
+- **Milkov, A.V. (2015)** — *Risk tables for less biased and more consistent
+  estimation of the probability of geological success.* Earth-Science Reviews, v. 150.
+  Basis of the Milkov reference-table scheme on the **Reference Tables** tab.
+- Reference-table schemes also implemented in E-POS: **Malvić (2009)** and the
+  **CCOP (2000)** guidelines — see the **Reference Tables** tab.
+
+#### 3 · DHI / DFI & seismic-amplitude risking (the Bayesian update)
+- **Simm, R. (2016)** — *Seismic Amplitude and Risk: A Sense Check.* FORCE seminar,
+  *Underexplored Plays — Part II*, Nov 2016. Source of the **two-state Bayesian DFI
+  update** and the **R rule-of-thumb bands** used throughout the DFI tab. **📄 in library**
+- **Nosjean, N. et al. (2020)** — *Geological probability of success assessment for
+  amplitude-driven prospects: a Nile Delta case study.* A worked field example of
+  folding DHI evidence into POS. **📄 in library**
+- *"DHIs work well for de-risking prospects"* — *GeoExpro* feature. Accessible
+  overview of DHI performance statistics. **📄 in library**
+
+#### 4 · Characteristic / direct-hydrocarbon-indicator scoring
+- **Monigle, P. et al. (2025)** — *Integrated and improved direct hydrocarbon
+  indicators: a step forward in petroleum risk.* AAPG (Gold Open Access, CC-BY).
+  Source of the per-characteristic success-rate statistics and discernibility
+  weighting behind the **characteristic-scoring** pathway. **📄 in library**
+
+#### 5 · Calibration, assurance & general practice
+- **Bond, C.E. et al. (2022)** — *Recommended practices in exploration assurance.*
+  Guidance on independent review / QC of prospect risk assessments. **📄 in library**
+- **ExxonMobil (2018)** — *Risking V* (Risk Coordinator Meeting). Operator
+  perspective on consistent, calibrated risking. **📄 in library**
+
+---
+
+*The SAAM DHI-Index calibration used by the first DFI pathway is a proprietary
+internal database and is **not** a public reference; only a synthetic placeholder
+ships with E-POS.*
+""")
 
     # ═══════════════════════════════════════════════════════════════════════
     # 📖 UNIFIED GLOSSARY — ESL/Classic + DFI in one place
