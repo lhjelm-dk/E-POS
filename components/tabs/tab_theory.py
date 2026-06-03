@@ -1029,7 +1029,7 @@ For **ESL attribution** there are two modes:
         st.markdown(r"""
 ### Prerequisites
 
-Before opening the DFI Update tab you should have:
+Before opening the Bayesian DFI Update tab you should have:
 
 1. **A complete ESL assessment** — Play and Conditional tabs filled in, P(G, ESL) showing on the Dashboard.
 2. **A DHI Index value** for the prospect, computed from the SAAM/SaRA scoring rubric (typically a single integer in the range −23 to +50).
@@ -1051,7 +1051,7 @@ When you toggle ON for the first time, E-POS sets defaults: DHI Index = 19, wate
 
 ### Step 2 — DFI Setup sub-page
 
-Navigate to the **DFI Update** tab → **DFI Setup**. You'll see four panels:
+Navigate to the **Bayesian DFI Update** tab → **DFI Setup**. You'll see four panels:
 
 **A. DHI Index input**
 > Enter the integer score from your SAAM/SaRA scoring sheet. Hover the help icon for the typical reference table.
@@ -1085,9 +1085,9 @@ Four blocks, top to bottom:
 
 ---
 
-### Step 4 — Final Prospect POS Summary
+### Step 4 — Final Prospect POS (top-level tab)
 
-This is the **reportable view**: pillar table (prior), DFI diagnostic strip (DHI + R + V + mix), posterior bar with prior→posterior shift, and a 2×2 method×prior/posterior table. Download as a text summary for inclusion in your prospect write-up.
+This is the **reportable view**, now its own **top-level tab** (no longer under the Bayesian DFI Update tab): pillar table (prior), DFI diagnostic strip (DHI + R + V + mix), posterior bar with prior→posterior shift, and a 2×2 method×prior/posterior table. With the DFI update disabled it shows the geological POS instead, so it is always your single sign-off page. Download as a text summary for inclusion in your prospect write-up.
 
 ---
 

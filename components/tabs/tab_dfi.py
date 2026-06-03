@@ -71,7 +71,7 @@ def _render_dfi_tab(ctx) -> None:
     st.markdown(
         "<div style='background:linear-gradient(135deg,#1e3a8a,#312e81);color:#fff;"
         "padding:14px 18px;border-radius:8px;margin-bottom:10px;'>"
-        "<b style='font-size:1.1rem;'>DFI Update (Bayesian)</b><br>"
+        "<b style='font-size:1.1rem;'>Bayesian DFI Update</b><br>"
         "<span style='font-size:0.85rem;opacity:0.9;'>"
         "Update the geological prior probability with a quantitative seismic "
         "observation (DHI Index) — the update can raise <b>or</b> lower the prior. "
@@ -85,10 +85,9 @@ def _render_dfi_tab(ctx) -> None:
     if dfi_on:
         _render_dfi_pillar_warning(ctx)
 
-    sub_setup, sub_results, sub_summary = st.tabs([
+    sub_setup, sub_results = st.tabs([
         "⚙️ DFI Setup",
         "\U0001f4ca DFI Results",
-        "\U0001f4dd Final Prospect POS",
     ])
 
     with sub_setup:
@@ -101,11 +100,12 @@ def _render_dfi_tab(ctx) -> None:
             _render_disabled_placeholder("DFI Results")
         else:
             _render_dfi_results(ctx)
-    with sub_summary:
-        if not dfi_on:
-            _render_disabled_placeholder("Final Prospect POS")
-        else:
-            _render_dfi_summary(ctx)
+
+    if dfi_on:
+        st.caption(
+            "➡️ The reportable **Final Prospect POS** is now its own top-level tab "
+            "(it shows the geological POS with the DFI update layered in)."
+        )
 
 
 def _render_disabled_placeholder(sub_page_name: str) -> None:
@@ -166,4 +166,29 @@ from logic.dfi_context import (
 )
 from components.tabs.tab_dfi_setup import _render_dfi_setup
 from components.tabs.tab_dfi_results import _render_dfi_results
-from components.tabs.tab_dfi_summary import _render_dfi_summary
+from components.tabs.tab_dfi_summary import (
+    _render_dfi_summary, _render_geological_pos_summary,
+)
+
+
+def _render_final_pos_tab(ctx) -> None:
+    """Top-level **Final Prospect POS** — the reportable sign-off page.
+
+    DFI-aware: when the DFI Bayesian update is enabled it shows the full
+    prior→posterior summary (branching by evidence source); when DFI is off it
+    shows the geological POS as the final number, so the tab is always meaningful.
+    """
+    st.markdown(
+        "<div style='background:linear-gradient(135deg,#0f172a,#334155);color:#fff;"
+        "padding:14px 18px;border-radius:8px;margin-bottom:10px;'>"
+        "<b style='font-size:1.1rem;'>Final Prospect POS</b><br>"
+        "<span style='font-size:0.85rem;opacity:0.9;'>"
+        "The reportable probability of success for this prospect — geological POS, "
+        "with the Bayesian DFI update layered in when enabled."
+        "</span></div>",
+        unsafe_allow_html=True,
+    )
+    if bool(st.session_state.get("dfi_enabled", False)):
+        _render_dfi_summary(ctx)
+    else:
+        _render_geological_pos_summary(ctx)

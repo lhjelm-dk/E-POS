@@ -51,7 +51,8 @@ def _render_analysis_tab(ctx) -> None:
         "Everything on this tab characterises the <b>geological prior</b> probability "
         "of success and its uncertainty <i>before</i> any DFI/seismic update. "
         "ESL values appear as <b>P(G, ESL)</b>; the Classic product as <b>P(G, Classic)</b>. "
-        "The DFI-conditioned posterior P(G | DFI) lives on the <b>DFI Update</b> tab.</span>"
+        "The DFI-conditioned posterior P(G | DFI) lives on the <b>Bayesian DFI Update</b> "
+        "tab; the reportable result is on the <b>Final Prospect POS</b> tab.</span>"
         "</div>",
         unsafe_allow_html=True,
     )

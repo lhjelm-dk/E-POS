@@ -104,7 +104,7 @@ from components.tabs.tab_dashboard import _render_dashboard_tab
 from components.tabs.tab_play import _render_play_tab
 from components.tabs.tab_conditional import _render_conditional_tab
 from components.tabs.tab_analysis import _render_analysis_tab
-from components.tabs.tab_dfi import _render_dfi_tab
+from components.tabs.tab_dfi import _render_dfi_tab, _render_final_pos_tab
 from components.tabs.tab_theory import _render_theory_tab
 from components.tabs.tab_reference import _render_reference_tab
 
@@ -696,12 +696,14 @@ def _render_tabs(models: dict) -> None:
         esl_options=esl_opts,
     )
 
-    tab_dash, tab_play, tab_cond, tab_analysis, tab_dfi, tab_methods, tab_ref = st.tabs([
+    (tab_dash, tab_play, tab_cond, tab_analysis, tab_dfi, tab_final,
+     tab_methods, tab_ref) = st.tabs([
         "\U0001f4ca Dashboard",
         "\U0001f30d Play",
         "\U0001f50d Conditional",
         "\U0001f4c8 Analysis (P(G))",
-        "\U0001f30a DFI Update",
+        "\U0001f30a Bayesian DFI Update",
+        "\U0001f4dd Final Prospect POS",
         "\U0001f4da Theory & Guide",
         "\U0001f4cb Reference Tables",
     ])
@@ -711,6 +713,7 @@ def _render_tabs(models: dict) -> None:
     with tab_cond:      _render_conditional_tab(ctx)
     with tab_analysis:  _render_analysis_tab(ctx)
     with tab_dfi:       _render_dfi_tab(ctx)
+    with tab_final:     _render_final_pos_tab(ctx)
     with tab_methods:   _render_theory_tab(ctx)
     with tab_ref:       _render_reference_tab(ctx)
 

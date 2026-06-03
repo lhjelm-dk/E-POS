@@ -222,7 +222,7 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
                     "The update is a true Bayesian conditioning — it can raise **or** lower the "
                     "prior. A strong, conformant DFI lifts P(G); a weak/absent DFI on a "
                     "DFI-capable prospect downgrades it.\n\n"
-                    "When ON, the DFI Update (Bayesian) tab becomes active. You supply a DHI "
+                    "When ON, the Bayesian DFI Update tab becomes active. You supply a DHI "
                     "Index (-23 to +50) and fluid-failure weights; the app computes posterior "
                     "P(G | DFI, ESL) and P(G | DFI, Classic) against the SAAM calibration. "
                     "Defaults on first activation: DHI=19, water=0.80, LSG=0.20, other=0.00."
@@ -239,7 +239,7 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
                     f"{st.session_state.get('dfi_fluid_water', 0.8):.0%}/"
                     f"{st.session_state.get('dfi_fluid_lsg',   0.2):.0%}/"
                     f"{st.session_state.get('dfi_fluid_other', 0.0):.0%}. "
-                    "Edit on the DFI Update tab."
+                    "Edit on the Bayesian DFI Update tab."
                 )
             else:
                 st.caption("DFI not in use — comparison table will show priors only.")

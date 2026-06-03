@@ -538,6 +538,103 @@ def _render_dfi_summary_custom(ctx) -> None:
     )
 
 
+def _render_geological_pos_summary(ctx) -> None:
+    """Final Prospect POS when the DFI update is **not** applied.
+
+    Shows the geological prior P(G) (ESL mass-rollup and Classic) with its Bel/Pl
+    envelope as the reportable final number, plus a Risk Overview and a copy/export
+    block — mirroring the DFI summary's layout minus the posterior. Rendered by the
+    top-level Final Prospect POS tab when ``dfi_enabled`` is off.
+    """
+    import datetime
+
+    w_cur = float(ctx.uncertainty_weight)
+    prior_classic = _classic_prior_pillars_from_ctx(ctx, w_cur)
+    prior_esl_pillars = _esl_prior_pillars_from_ctx_at_w(ctx, w_cur)
+    esl_prior_pg = _esl_rollup_prior_at_w(ctx, w_cur)
+    bel = ctx.total_for
+    pl = 1.0 - ctx.total_against
+
+    prospect_title = st.session_state.get("meta_title") or ctx.prospect_title or "Prospect"
+    analyst = st.session_state.get("meta_analyst", "")
+    basin = st.session_state.get("meta_basin", "")
+    review_date = st.session_state.get("meta_date", str(datetime.date.today()))
+
+    st.markdown(
+        f"<div style='background:linear-gradient(135deg,#0f172a,#1e3a5f);color:#fff;"
+        f"padding:14px 18px;border-radius:8px;margin-bottom:10px;'>"
+        f"<b style='font-size:1.15rem;'>{prospect_title}</b>  "
+        f"<span style='opacity:0.7;font-size:0.85rem;'> · Final POS Summary · "
+        f"geological prior (no DFI update) · {review_date}</span><br>"
+        f"<span style='font-size:0.82rem;opacity:0.85;'>Analyst: {analyst or '—'} · "
+        f"Basin: {basin or '—'} · Stance w = {w_cur:.2f}</span>"
+        f"</div>",
+        unsafe_allow_html=True,
+    )
+
+    st.info(
+        "The **DFI Bayesian update is not applied**, so the final POS below is the "
+        "geological prior. To layer in seismic (DHI) evidence, enable the "
+        "**DFI-capable prospect?** toggle on the **Dashboard**, then set up the update "
+        "on the **Bayesian DFI Update** tab — the posterior will then appear here."
+    )
+
+    # ── Risk Overview — geological prior, no DFI rows ──
+    from components.prospect_hub import _get_esl_overview_data
+    from components.overview_table import render_overview_table
+    _ov_data = _get_esl_overview_data({"play": ctx.play, "conditional": ctx.conditional})
+    if _ov_data:
+        st.markdown("##### Risk Overview — geological prior (per-pillar)")
+        render_overview_table("esl", _ov_data)
+
+    # ── Headline POS ──
+    st.markdown("##### Prospect POS (geological prior)")
+    c1, c2, c3 = st.columns(3)
+    c1.metric("P(G, ESL)", f"{esl_prior_pg*100:.1f}%",
+              help=f"Headline ESL mass-rollup at stance w = {w_cur:.2f}. "
+                   f"∏-pillars Init Pg = {prior_esl_pillars.prior_pg*100:.1f}%.")
+    c2.metric("P(G, Classic)", f"{prior_classic.prior_pg*100:.1f}%",
+              help="Total prospect Pg via Classic POS at current stance.")
+    c3.metric("ESL Bel–Pl envelope", f"{bel*100:.1f}–{pl*100:.1f}%",
+              help="Uncertainty envelope from the ESL Italian flag "
+                   "(w=0 lower bound → w=1 upper bound).")
+
+    # ── Top-5 weakest elements ──
+    st.markdown("##### Top 5 weakest risk elements")
+    from components.risk_summary import render_top5_weakest
+    render_top5_weakest(ctx.conditional, w_cur, pillar_display=ctx.pillar_display)
+
+    st.divider()
+
+    # ── Reportable text ──
+    st.markdown("##### Reportable summary (copy or download)")
+    lines = [
+        f"Prospect: {prospect_title}",
+        f"Analyst : {analyst or '—'}   Basin: {basin or '—'}   Date: {review_date}",
+        f"Stance w: {w_cur:.2f}",
+        "",
+        "DFI update: NOT APPLIED (geological prior only)",
+        "",
+        "Headline POS:",
+        f"  P(G, ESL)     : {esl_prior_pg*100:.1f}%   "
+        f"(mass-rollup; ∏-pillars Init Pg = {prior_esl_pillars.prior_pg*100:.1f}%)",
+        f"  P(G, Classic) : {prior_classic.prior_pg*100:.1f}%",
+        f"  ESL Bel/Pl    : {bel*100:.1f}% – {pl*100:.1f}%",
+        "",
+        "To include seismic (DHI) evidence, enable the DFI update on the Dashboard "
+        "and configure it on the Bayesian DFI Update tab.",
+    ]
+    summary_text = "\n".join(lines)
+    st.text_area("Summary text", value=summary_text, height=240,
+                 key="final_pos_geo_text", label_visibility="collapsed")
+    safe_title = "".join(c if c.isalnum() or c in " -_" else "_" for c in prospect_title)
+    st.download_button(
+        "📥 Download POS summary (.txt)", data=summary_text,
+        file_name=f"{safe_title or 'prospect'}_POS_summary.txt",
+        key="final_pos_geo_dl",
+    )
+
+
 # Workbook scaling: GeoX P(DFI|case) = Gaussian-PDF(DHI/100, mean, sd) × 20/100.
 # The factor is a constant across classes so it cancels in our internal posterior,
 # but GeoX expects the scaled value entered directly.
