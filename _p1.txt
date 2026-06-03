@@ -1,0 +1,88 @@
+Integrated and improved direct
+hydrocarbon indicators: A step
+forward in petroleum risk
+discrimination
+P. W. Monigle, T. S. Hedayati, and F. J. Goulding
+ABSTRACT
+In petroleum exploration, discriminating between success and
+failure is essential to constructing a successful exploration port-
+folio. Economic evaluations for individual prospects rely heavily
+on both chance of success (COS) and materiality to build a com-
+mercial portfolio. Where subsurface geophysical response is
+amenable, incorporating direct hydrocarbon indicator (DHI)
+observations have been shown to improve risk characterization
+and success rates. In recent years, industry has explored more
+challenging geological traps with subtle geophysical responses
+(i.e., Guyana–Suriname) that require evolving approaches. This
+paper describes a step change in the DHI evaluation process and
+integration with geological risk linked to volume estimation.
+More recently, the DHI evaluation process adopted
+expectation-based metrics and now leverages machine learning
+for scoring, which leads to improved accuracy, while mitigating
+human bias. These adaptations allow the process to be more
+broadly applicable across a global portfolio of prospects. Dis-
+cernibility, an innovative metric, describes the expectations and
+conﬁdence in geophysical observations and helps guide both risking
+and resource estimation. A signi ﬁcant challenge to predictability
+involves reconciling contradictory information between geological
+and geophysical observations. Applying the new integrated work-
+ﬂow, geoscientists integrate geological and geophysical observations
+through a Bayesian framework guided by discernibility. This
+framework allows for integration of all observations into a single
+COS value in a simple, repeatable manner. Benchmarking stud-
+ies indicate that this new approach is ?50% better at discrimi-
+nating success from failure and is ?30% more accurate over
+prior workﬂows.
+Copyright ©2025. The American Association of Petroleum Geologists. All rights reserved. Gold Open
+Access. This paper is published under the terms of the CC-BY license.
+Manuscript received March 29, 2024; provisional acceptance June 14, 2024; revised manuscript
+received October 8, 2024; revised provisional acceptance February 12, 2025; second revised
+manuscript received March 13, 2025; ﬁnal acceptance March 28, 2025.
+DOI:10.1306/04042524030
+AAPG Bulletin, v. 109, no. 5 (May 2025), pp. 617 –636 617
+AUTHORS
+P. W. Monigle ~ ExxonMobil Upstream
+Company, Spring, Texas; patrick.w.
+monigle@exxonmobil.com
+Patrick Monigle is a geophysical advisor at
+ExxonMobil with 10 years of experience in
+petroleum geoscience, encompassing
+exploration, development, and research with
+notable expertise in the Guyana–Suriname
+Basin. His academic journey took him from
+N CS t a t et oO r e g o nS t a t eU n i v e r s i t y ,w h e r e
+he earned his Ph.D. in geophysics in 2014.
+His interests include geophysical reservoir
+characterization, hydrocarbon response, and
+the integration/intersection of geophysical
+methods, geomodeling, and stratigraphic
+analysis.
+T. S. Hedayati ~ ExxonMobil Upstream
+Company, Spring, Texas; tiffany.s.
+hedayati@exxonmobil.com
+Tiffany Hedayati is a geoscience advisor at
+ExxonMobil with 16 years of experience in
+petroleum geoscience, spanning roles from
+exploration to production and specializing in
+risk analysis. She earned her geoscience
+degree from The University of Texas at
+Austin in 2008. She is dedicated to
+accurately characterizing risks and
+quantifying subsurface prospects. Her
+m i s s i o ni st or e v o l u t i o n i z ea n ds t a n d a r d i z e
+risk analysis across exploration, driving more
+informed and confident decision-making.
+F. J. Goulding ~ ExxonMobil Technology
+and Engineering Company, Spring, Texas;
+frank.j.goulding@exxonmobil.com
+Frank J. Goulding is the chief geoscientist at
+ExxonMobil, bringing 37 years of experience
+in petroleum geoscience across exploration,
+development, production, and research
+assignments. He graduated from the
+University of Calgary with a degree in
+geophysics in 1987. His interests include
+seismic interpretation, hydrocarbon
+response, stratigraphy, and production and
+development geoscience.
+Downloaded from http://pubs.geoscienceworld.org/aapg/aapgbull/article-pdf/109/5/617/7232867/bltn24030.pdf by guest on 01 June 2026

@@ -1,0 +1,58 @@
+{
+  "version": "placeholder-v0",
+  "source": "Synthetic placeholder values — replace with proprietary calibration at data/saam_calibration.json",
+  "description": "Plausible-but-synthetic Gaussian likelihood parameters for the DFI Bayesian uplift. The DHI Index is expressed as a fraction (DHI/100), where DHI ranges -23..+50 → fraction -0.23..+0.50. Each class has its empirical mean, calculated sample SD, and the chi-squared upper-confidence-bound SD (used by default; the calculated SD is selectable as an alternative).",
+  "units": {
+    "dhi_index_range_integer": [-23, 50],
+    "dhi_index_fraction_range": [-0.23, 0.50],
+    "mean_sd_in": "fraction (DHI/100)"
+  },
+  "classes": {
+    "Success": {
+      "mean": 0.20,
+      "sd_calculated": 0.10,
+      "sd_upper":      0.12,
+      "n": 100,
+      "comment": "Aggregate HC success (any oil/gas) — default class when no specific fluid type chosen"
+    },
+    "Oil": {
+      "mean": 0.20,
+      "sd_calculated": 0.10,
+      "sd_upper":      0.15,
+      "n": 30
+    },
+    "OilGas": {
+      "mean": 0.20,
+      "sd_calculated": 0.08,
+      "sd_upper":      0.13,
+      "n": 25
+    },
+    "Gas": {
+      "mean": 0.21,
+      "sd_calculated": 0.11,
+      "sd_upper":      0.14,
+      "n": 60
+    },
+    "H2O_failure": {
+      "mean": 0.02,
+      "sd_calculated": 0.09,
+      "sd_upper":      0.12,
+      "n": 55,
+      "comment": "Wells that tested water in an evaluable reservoir"
+    },
+    "LSG_failure": {
+      "mean": 0.13,
+      "sd_calculated": 0.09,
+      "sd_upper":      0.12,
+      "n": 35,
+      "comment": "Low-Saturation Gas / NFO / other-fluid failures in evaluable reservoir (shared with Other-fluids class)"
+    },
+    "Reservoir_failure": {
+      "mean": 0.05,
+      "sd_calculated": 0.09,
+      "sd_upper":      0.15,
+      "n": 20,
+      "comment": "Reservoir failed / non-evaluable (used for both eval and non-eval reservoir failure modes)"
+    }
+  }
+}

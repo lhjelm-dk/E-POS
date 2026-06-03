@@ -1,0 +1,506 @@
+{
+  "model_id": "default",
+  "model_name": "Standard 4-Pillar ESL Model",
+  "version": "1.0",
+  "description": "Imported from risk_model_nodes.xlsx",
+  "pillars": [
+    {
+      "pillar_id": "Charge",
+      "display_name": "Charge",
+      "color": "#F69292",
+      "play": {
+        "node_id": "CHARGE_PLAY",
+        "name": "Charge",
+        "success_criteria": "The probability that the shared charge elements such as source richness maturation migration and timing conditions are sufficient to charge at least one accumulation in the play area with the minimum recoverable hydrocarbon volume or more",
+        "description": "PLAY-LEVEL: The probability that the shared charge elements — source richness, maturation, expulsion, and regional migration pathway — are sufficient to charge at least one accumulation anywhere in the play area. DO NOT include prospect-specific migration path — that belongs in Conditional Charge.",
+        "considerations": "Things to consider when assigning play charge risk:\n\n• Lateral migration: Is there evidence of carrier bed continuity and migration fairway geometry that would allow hydrocarbons to reach this play area from the kitchen?\n\n• Source rock presence: Is a source rock proven or inferred in the play area or kitchen? Consider organic richness (TOC), kerogen type, and maturation stage.\n\n• HC generation and maturation: Is the source rock at the right maturity window for the target phase (oil ~0.6–1.3% Ro; gas condensate ~1.3–2.0% Ro)?\n\n• Timing of migration: Has migration occurred, or is it ongoing?\n\n• Column height adequacy: Is the expected fetch area and source volume sufficient to fill the closure to at least P90 EUR?\n\n• Fluid phase prediction: What HC phase is expected? Consider GOR from geochemical modeling and API gravity from analogues.",
+        "default_s_n": 0.9,
+        "default_s_neg": 0.1,
+        "default_w": 0.5,
+        "aggregation_rule": "ESL-ALL (min/min)",
+        "sub_groups": []
+      },
+      "conditional_operator": "ESL-ALL (min/min)",
+      "conditional_groups": [
+        {
+          "group_id": "MIGRATION",
+          "group_label": "Migration",
+          "aggregation_rule": "ESL-ALL (min/min)",
+          "elements": [
+            {
+              "node_id": "MIG_EFF",
+              "name": "Migration Efficiency",
+              "success_criteria": "Sufficient to fill P99 EUR",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 0.9,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "MIG_HC_SAT",
+              "name": "Migration Min. HC saturation",
+              "success_criteria": ">P90 within trap",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 0.8,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            }
+          ]
+        },
+        {
+          "group_id": "MIG_PATHWAYS",
+          "group_label": "Migration pathways (fetch to reservoir)",
+          "aggregation_rule": "ESL-ALL (min/min)",
+          "elements": [
+            {
+              "node_id": "MIG_PATH_DIST",
+              "name": "Migration pathways: distance",
+              "success_criteria": "Within fetch distance",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 0.7,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "MIG_PATH_CARR",
+              "name": "Migration pathways: carrier beds",
+              "success_criteria": "Presence of carrier beds",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 0.6,
+              "default_s_neg": 0.2,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "MIG_PATH_THIEF",
+              "name": "Migration pathways: Thief beds",
+              "success_criteria": "Absence of thief beds",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 0.8,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            }
+          ]
+        },
+        {
+          "group_id": "LOCAL_SOURCE",
+          "group_label": "Local Source condition",
+          "aggregation_rule": "ESL-ALL (min/min)",
+          "elements": [
+            {
+              "node_id": "SRC_QUALITY",
+              "name": "Source rock quality",
+              "success_criteria": "Supports given HC phase",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 0.7,
+              "default_s_neg": 0.1,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "SRC_VOLUME",
+              "name": "Source Volume",
+              "success_criteria": "Sufficient to fill P90 EUR",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 0.9,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "SRC_PRESENCE",
+              "name": "Presence of HC source rocks",
+              "success_criteria": "Supports given HC phase",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 0.8,
+              "default_s_neg": 0.1,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "HC_GENERATION",
+              "name": "HC Generation",
+              "success_criteria": "Poro/perm >P90 before time of HC-entry",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 0.8,
+              "default_s_neg": 0.1,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            }
+          ]
+        },
+        {
+          "group_id": "MIG_TIMING",
+          "group_label": "Migration timing",
+          "aggregation_rule": "ESL-ALL (min/min)",
+          "elements": [
+            {
+              "node_id": "MIG_TIMING_DIAG",
+              "name": "Migration pre-dates reservoir diagenesis",
+              "success_criteria": "Poro/perm >P90 before time of HC-entry",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 1.0,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "MIG_TIMING_TRAP",
+              "name": "Migration postdates trap formation",
+              "success_criteria": "A closure containing P99 EUR is formed before migration terminates",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 1.0,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "pillar_id": "Closure",
+      "display_name": "Closure",
+      "color": "#8CB7FC",
+      "play": {
+        "node_id": "CLOSURE_PLAY",
+        "name": "Closure",
+        "success_criteria": "The probability that a structural or stratigraphic closure is present to contain at least one accumulation in the play area with minimum hydrocarbon volume or more",
+        "description": "The probability that a valid trapping geometry (closure) is present at the correct stratigraphic level to contain at least one accumulation. This pillar assesses GEOMETRY ONLY — 4-way dip, 3-way fault-assisted, stratigraphic pinch-out, or combined traps. Seal capacity is NOT assessed here — it belongs in Retention.",
+        "considerations": "Things to consider when assigning play closure risk:\n\n• Closure type: What is the trapping mechanism?\n\n• Seismic confidence: What is the structural confidence on the mapped closure?\n\n• Depth conversion uncertainty: Could velocity errors open or close the structure?\n\n• ⚠️ Do NOT assess seal here. Seal capacity belongs in the Retention pillar.",
+        "default_s_n": 1.0,
+        "default_s_neg": 0.0,
+        "default_w": 0.5,
+        "aggregation_rule": "ESL-ALL (min/min)",
+        "sub_groups": []
+      },
+      "conditional_operator": "ESL-ALL (min/min)",
+      "conditional_groups": [
+        {
+          "group_id": "CLOS_ID",
+          "group_label": "Identification",
+          "aggregation_rule": "ESL-ALL (min/min)",
+          "elements": [
+            {
+              "node_id": "CLOS_PRESENCE",
+              "name": "Closure Presence",
+              "success_criteria": "Structural confidence in a valid geometry at correct stratigraphic level",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 0.7,
+              "default_s_neg": 0.1,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            }
+          ]
+        },
+        {
+          "group_id": "CLOS_SIZE",
+          "group_label": "Size",
+          "aggregation_rule": "ESL-ALL (min/min)",
+          "elements": [
+            {
+              "node_id": "CLOS_VOLUME",
+              "name": "Adequate volume within Closure",
+              "success_criteria": "Given presence the trap can hold >P99 EUR",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 1.0,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "pillar_id": "Reservoir",
+      "display_name": "Reservoir",
+      "color": "#FFD44B",
+      "play": {
+        "node_id": "RESERVOIR_PLAY",
+        "name": "Reservoir",
+        "success_criteria": "The probability that an effective reservoir of sufficient quality is present to contain at least one accumulation in the play area with minimum hydrocarbon volume or more",
+        "description": "The probability that an effective reservoir of sufficient quality is present to contain at least one accumulation in the play area.",
+        "considerations": "Things to consider when assigning play reservoir risk:\n\n• Reservoir rock presence: Is a reservoir-quality rock proven or predicted?\n\n• Reservoir effectiveness: Sufficient porosity and permeability?\n\n• Heterogeneity: Consider baffles and tight streaks.\n\n• HC column height: Is the expected column height sufficient?",
+        "default_s_n": 0.7,
+        "default_s_neg": 0.1,
+        "default_w": 0.5,
+        "aggregation_rule": "ESL-ALL (min/min)",
+        "sub_groups": []
+      },
+      "conditional_operator": "ESL-ALL (min/min)",
+      "conditional_groups": [
+        {
+          "group_id": "RES_ROCK_PRES",
+          "group_label": "Reservoir rock presence",
+          "aggregation_rule": "ESL-ALL (min/min)",
+          "elements": [
+            {
+              "node_id": "RES_THICKNESS",
+              "name": "Reservoir rock presence: Thickness",
+              "success_criteria": "Detectable Thickness (>P90)",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 0.9,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "RES_AREA",
+              "name": "Reservoir rock presence: Area",
+              "success_criteria": "Extent across trap min. area",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 1.0,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            }
+          ]
+        },
+        {
+          "group_id": "RES_EFFECT",
+          "group_label": "Reservoir effectiveness",
+          "aggregation_rule": "ESL-ALL (min/min)",
+          "elements": [
+            {
+              "node_id": "RES_POROSITY",
+              "name": "Reservoir effectiveness: Porosity",
+              "success_criteria": "Porosity >P90",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 1.0,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "RES_PERMEAB",
+              "name": "Reservoir effectiveness: Permeability",
+              "success_criteria": "Permeability >P90",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 0.7,
+              "default_s_neg": 0.1,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "RES_NG",
+              "name": "Reservoir effectiveness: N/G",
+              "success_criteria": "Expected N/G - facies",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 0.9,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "RES_DRIVE",
+              "name": "Reservoir effectiveness: Drive",
+              "success_criteria": "Expected Drive mechanism",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 0.8,
+              "default_s_neg": 0.3,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "pillar_id": "Retention",
+      "display_name": "Retention",
+      "color": "#B5E6A2",
+      "play": {
+        "node_id": "RETENTION_PLAY",
+        "name": "Retention",
+        "success_criteria": "The probability that HydroCarbons are contained by seals and preserved from spillage and degradation in at least one accumulation in the play area with minimum hydrocarbon volume or more",
+        "description": "The probability that hydrocarbons are contained by seals and preserved from spillage and degradation in at least one accumulation.",
+        "considerations": "Things to consider when assigning play retention risk:\n\n• Top seal capacity: Regionally continuous, sufficient capillary entry pressure?\n\n• Lateral / fault seal: Confidence in across-fault seal?\n\n• Preservation: Has the structural geometry been stable?\n\n• Degradation: Biodegradation, thermal cracking, oxidation risks.\n\n• ⚠️ Seal capacity belongs here (Retention), NOT in Closure.",
+        "default_s_n": 0.8,
+        "default_s_neg": 0.1,
+        "default_w": 0.5,
+        "aggregation_rule": "ESL-ALL (min/min)",
+        "sub_groups": []
+      },
+      "conditional_operator": "ESL-ALL (min/min)",
+      "conditional_groups": [
+        {
+          "group_id": "SEAL_EFFECT",
+          "group_label": "Seal effectiveness",
+          "aggregation_rule": "ESL-ALL (min/min)",
+          "elements": [
+            {
+              "node_id": "SEAL_TOP",
+              "name": "Seal effectiveness: Top Seal",
+              "success_criteria": "Top Seal Capacity retain >P90 EUR",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 0.9,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "SEAL_FRAC",
+              "name": "Seal effectiveness: Fractures",
+              "success_criteria": "Absence of open fractures above min. area",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 1.0,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "SEAL_CONT",
+              "name": "Seal effectiveness: Continuity",
+              "success_criteria": "Seal is continuous across min. area",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 1.0,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "SEAL_BASE",
+              "name": "Seal effectiveness: Base seal",
+              "success_criteria": "Base seal capacity retain >P90 EUR",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 1.0,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "SEAL_LAT",
+              "name": "Seal effectiveness: Lateral seal",
+              "success_criteria": "Lateral seal Capacity retain >P90 EUR",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 0.7,
+              "default_s_neg": 0.3,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "SEAL_FAULT",
+              "name": "Seal effectiveness: Cross Fault seal",
+              "success_criteria": "Cross Fault seal capacity retain >P90 EUR",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 1.0,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            }
+          ]
+        },
+        {
+          "group_id": "PRES_SPILL",
+          "group_label": "Preservation from subsequent spillage",
+          "aggregation_rule": "ESL-ALL (min/min)",
+          "elements": [
+            {
+              "node_id": "PRES_TILT",
+              "name": "Preservation: By tilt and spill",
+              "success_criteria": "Tilt and spill still preserves >P90 EUR",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 1.0,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "PRES_BREACH",
+              "name": "Preservation: By seal breaching and fault leakage",
+              "success_criteria": "Seal breaching and fault leakage still preserves >P90 EUR",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 1.0,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "PRES_FLUSH",
+              "name": "Preservation: By Flushing / Depletion",
+              "success_criteria": "Flushing / Depletion still preserves >P90 EUR",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 1.0,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            }
+          ]
+        },
+        {
+          "group_id": "PRES_DEGRAD",
+          "group_label": "Preservation from degradation",
+          "aggregation_rule": "ESL-ALL (min/min)",
+          "elements": [
+            {
+              "node_id": "DEGRAD_THERM",
+              "name": "Degradation: Thermal",
+              "success_criteria": "Thermal cracking still preserves >P90 EUR",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 0.8,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "DEGRAD_OXI",
+              "name": "Degradation: Oxidation",
+              "success_criteria": "Oxidation still preserves >P90 EUR",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 0.8,
+              "default_s_neg": 0.0,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            },
+            {
+              "node_id": "DEGRAD_BACT",
+              "name": "Degradation: Bacterial",
+              "success_criteria": "Bacterial activity still preserves >P90 EUR",
+              "description": "FILL IN s_n and s_neg_n",
+              "considerations": "",
+              "default_s_n": 0.8,
+              "default_s_neg": 0.1,
+              "default_w": 0.5,
+              "notes": "FILL IN s_n and s_neg_n"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

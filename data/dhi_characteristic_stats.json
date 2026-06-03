@@ -1,0 +1,114 @@
+{
+  "version": "Monigle2025",
+  "source": "Monigle, Hedayati & Goulding 2025, AAPG Bulletin v109/5 (May 2025) pp.617-636, DOI:10.1306/04042524030 — Integrated and improved direct hydrocarbon indicators: A step forward in petroleum risk discrimination",
+  "description": "DHI attribute success/failure counts read from Monigle 2025 Figure 4 (revised 2021+ system, 5 quality attributes). The legacy pre-2020 system (Figure 3: 6 quality + 4 confidence attributes) is not used by the app — the production iCOS scoring since 2021 retains only these five quality attributes after internal benchmarking found the others did not predict success globally.",
+  "modes": {
+    "5_current": {
+      "label": "Current 5 (2021+)",
+      "description": "Five quality attributes from the production iCOS scoring system since 2021. Anomaly consistency and the four confidence attributes were dropped because internal benchmarking showed they did not predict success globally. Stats from Monigle Figure 4 (185 re-scored prospects).",
+      "attribute_roles_used": ["current_5"]
+    }
+  },
+  "attributes": {
+    "anomaly_strength": {
+      "display_name": "Anomaly strength",
+      "role": "current_5",
+      "active_modes": ["5_current"],
+      "in_r_calc": true,
+      "placeholder": false,
+      "comment": "New 2020 — replaced AVO class and amplitude strength.",
+      "mode_stats": {
+        "5_current": {
+          "categories": ["Dimming", "Weak", "Moderate", "Strong", "Very strong"],
+          "success": [0, 7, 15, 28, 14],
+          "failure": [4, 12, 20, 12, 2]
+        }
+      }
+    },
+    "lateral_amplitude_contrast": {
+      "display_name": "Lateral amplitude contrast",
+      "role": "current_5",
+      "active_modes": ["5_current"],
+      "in_r_calc": true,
+      "placeholder": false,
+      "comment": "Revised 2021+ definition (Monigle Fig 4); 'Negative' captures anti-correlated AVO.",
+      "mode_stats": {
+        "5_current": {
+          "categories": ["Negative", "Low", "Medium", "High", "Very high"],
+          "success": [1, 1, 32, 23, 6],
+          "failure": [15, 5, 26, 7, 0]
+        }
+      }
+    },
+    "fit_to_structure": {
+      "display_name": "Fit to structure",
+      "role": "current_5",
+      "active_modes": ["5_current"],
+      "in_r_calc": true,
+      "placeholder": false,
+      "comment": "Defined relative to prospect-specific container geometry (Monigle Fig 4).",
+      "mode_stats": {
+        "5_current": {
+          "categories": ["None", "Poor", "Fair", "Good", "Excellent"],
+          "success": [2, 14, 30, 17, 1],
+          "failure": [15, 19, 13, 3, 0]
+        }
+      }
+    },
+    "amplitude_terminations": {
+      "display_name": "Amplitude terminations",
+      "role": "current_5",
+      "active_modes": ["5_current"],
+      "in_r_calc": true,
+      "placeholder": false,
+      "comment": "Categories scored relative to prospect (Monigle Fig 4).",
+      "mode_stats": {
+        "5_current": {
+          "categories": ["Very poor", "Poor", "Fair", "Good", "Excellent"],
+          "success": [3, 7, 14, 26, 13],
+          "failure": [12, 29, 4, 3, 1]
+        }
+      }
+    },
+    "fluid_contact_reflection": {
+      "display_name": "Fluid contact reflection",
+      "role": "current_5",
+      "active_modes": ["5_current"],
+      "in_r_calc": true,
+      "placeholder": false,
+      "comment": "Definition narrowed relative to expectation (Monigle Fig 4).",
+      "mode_stats": {
+        "5_current": {
+          "categories": ["None", "Poor", "Fair", "Good", "Excellent"],
+          "success": [3, 22, 14, 12, 16],
+          "failure": [16, 26, 3, 6, 1]
+        }
+      }
+    },
+
+    "anomaly_consistency": {
+      "display_name": "Anomaly consistency",
+      "role": "transitional",
+      "active_modes": [],
+      "in_r_calc": false,
+      "placeholder": false,
+      "comment": "Transitional attribute (added 2020, removed 2021 — Monigle: least predictive). Retained in JSON for documentation; not active in the current mode.",
+      "mode_stats": {
+        "5_current": {
+          "categories": ["Very low", "Low", "Moderate", "High", "Very high"],
+          "success": [0, 10, 23, 23, 10],
+          "failure": [2, 15, 22, 13, 0]
+        }
+      }
+    }
+  },
+  "discernibility": {
+    "comment": "Per Monigle 2025 — combines expectations (is a DFI plausibly visible?) and confidence (is the data good enough to see it?). Bucket weight d squashes R toward 1: R_effective = R^d.",
+    "buckets": {
+      "high":     {"d": 1.0,  "description": "Full weight — DFI evidence drives the update at its computed strength."},
+      "moderate": {"d": 0.6,  "description": "Reduced weight — observation real but data or expectations limit interpretation."},
+      "low":      {"d": 0.3,  "description": "Mostly inconclusive — DFI evidence barely affects the prior."},
+      "absent":   {"d": 0.0,  "description": "No discernibility — DFI evidence is ignored; posterior = prior."}
+    }
+  }
+}

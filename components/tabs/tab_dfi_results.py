@@ -1,0 +1,603 @@
+"""DFI Results sub-page — DFI-modified per-pillar values, attribution tables,
+characteristic-source results + sensitivity. Extracted from ``tab_dfi``.
+"""
+from __future__ import annotations
+
+import streamlit as st
+
+from logic.dfi_context import (
+    esl_prior_pillars_from_ctx_at_w   as _esl_prior_pillars_from_ctx_at_w,
+    esl_rollup_prior_at_w             as _esl_rollup_prior_at_w,
+    classic_prior_pillars_from_ctx    as _classic_prior_pillars_from_ctx,
+    get_effective_calibration         as _get_effective_calibration,
+    pillar_pairs_from_priorpillars    as _pillar_pairs_from_priorpillars,
+)
+
+from components.tabs.tab_dfi_plots import (
+    _render_dfi_trajectory_plot,
+    _render_sensitivity_sweep,
+    _render_iso_dhi_plot,
+)
+
+
+def _render_dfi_results(ctx) -> None:
+    """DFI Results sub-page — per-pillar updates, posterior trajectory.
+
+    Branches by ``dfi_source``: characteristic-mode uses Simm 2-state Bayes,
+    DHI Index mode uses the full 8-outcome SAAM Bayes (with per-pillar attribution,
+    sensitivity sweep, iso-DHI plot, etc.).
+    """
+    # Characteristic-mode dispatch — no SAAM math, simpler displays
+    if st.session_state.get("dfi_source") == "characteristic":
+        _render_dfi_results_characteristic(ctx)
+        return
+    # Custom R tool dispatch — two-state Simm Bayes on the user-defined R
+    if st.session_state.get("dfi_source") == "custom":
+        _render_dfi_results_custom(ctx)
+        return
+
+    import numpy as np
+    import plotly.graph_objects as go
+    from logic.dfi_bayes import (
+        FluidWeights, compute_dfi_posterior,
+        attribute_classic, attribute_esl_optionA, attribute_esl_optionB,
+        ESLMasses, PriorPillars,
+    )
+
+    # ── Gather inputs from session state (single source of truth) ──
+    from logic.dfi_inputs import read_dfi_inputs
+    _inp = read_dfi_inputs(st.session_state)
+    dhi, sd_mode, fluid_type = _inp.dhi, _inp.sd_mode, _inp.fluid_type
+    fw = _inp.fluid_weights
+    esl_attr_mode = _inp.esl_attribution
+    calib = _get_effective_calibration()
+
+    # ── Build priors and posteriors at current stance for both methods ──
+    w_cur = ctx.uncertainty_weight
+    prior_esl     = _esl_prior_pillars_from_ctx_at_w(ctx, w_cur)   # pillars → Init Pg diagnostic
+    prior_classic = _classic_prior_pillars_from_ctx(ctx, w_cur)
+    esl_prior_pg  = _esl_rollup_prior_at_w(ctx, w_cur)             # headline mass-rollup = DFI prior
+    post_esl     = compute_dfi_posterior(prior_esl,     dhi, calib, fw, sd_mode, fluid_type,
+                                         prior_pg_override=esl_prior_pg)
+    post_classic = compute_dfi_posterior(prior_classic, dhi, calib, fw, sd_mode, fluid_type)
+
+    # ── Headline metrics (4 tiles + 2 diagnostics) ──
+    st.markdown("##### Headline numbers")
+    m1, m2, m3, m4 = st.columns(4)
+    with m1:
+        st.metric("P(G, ESL) — prior",
+                  f"{esl_prior_pg*100:.2f}%",
+                  help="Headline mass-rollup P(G, ESL) at current stance — the number "
+                       f"booked elsewhere. (∏-pillars Init Pg = {prior_esl.prior_pg*100:.1f}%, "
+                       "used internally for the 8-outcome failure split.)")
+    with m2:
+        st.metric("P(G | DFI, ESL) — posterior",
+                  f"{post_esl.posterior_pg*100:.2f}%",
+                  delta=f"{(post_esl.posterior_pg - esl_prior_pg)*100:+.2f}%",
+                  help="ESL prior updated by the DFI observation.")
+    with m3:
+        st.metric("P(G, Classic) — prior",
+                  f"{prior_classic.prior_pg*100:.2f}%",
+                  help="Total prospect Pg via Classic POS at current stance.")
+    with m4:
+        st.metric("P(G | DFI, Classic) — posterior",
+                  f"{post_classic.posterior_pg*100:.2f}%",
+                  delta=f"{(post_classic.posterior_pg - prior_classic.prior_pg)*100:+.2f}%",
+                  help="Classic prior updated by the DFI observation.")
+
+    d1, d2, d3, d4 = st.columns(4)
+    with d1:
+        st.metric("R_SAAM (ESL)",      f"{post_esl.r_saam:.2f}",
+                  help="L_success / E[L | failure] using ESL prior.")
+    with d2:
+        st.metric("DHI Volume Weight (ESL)",   f"{post_esl.dhi_volume_weight:.2f}")
+    with d3:
+        st.metric("R_SAAM (Classic)",  f"{post_classic.r_saam:.2f}")
+    with d4:
+        st.metric("DHI Volume Weight (Classic)", f"{post_classic.dhi_volume_weight:.2f}")
+
+    st.divider()
+
+    # ── DFI-modified per-pillar tables ──
+    st.markdown("##### DFI-modified per-pillar values (at current stance)")
+
+    # Classic attribution: log-split (workbook method)
+    classic_attr = attribute_classic(prior_classic, post_classic)
+
+    # ESL attribution: A (equal-multiplicative + mass round-trip) or B (Bel/Pl-preserving)
+    # Build per-pillar ESLMasses from ctx (play element + ESL-combined cond)
+    esl_masses_in: dict[str, dict[str, ESLMasses]] = {}
+    for pid in ("Charge", "Closure", "Reservoir", "Retention"):
+        play_el = ctx.play.get(pid, {})
+        cond_r  = ctx.conditional_results.get(pid, {"for": 0.5, "against": 0.1})
+        esl_masses_in[pid.lower()] = {
+            "play": ESLMasses(
+                s_for=float(play_el.get("support_for", 0.5)),
+                s_against=float(play_el.get("support_against", 0.1)),
+            ),
+            "cond": ESLMasses(
+                s_for=float(cond_r["for"]),
+                s_against=float(cond_r["against"]),
+            ),
+        }
+    # Map "trap" → "closure" mismatch: PriorPillars uses trap_*, we use closure key
+    esl_masses_keyed = {
+        "charge":    esl_masses_in["charge"],
+        "trap":      esl_masses_in["closure"],  # PriorPillars uses 'trap'
+        "reservoir": esl_masses_in["reservoir"],
+        "retention": esl_masses_in["retention"],
+    }
+    if esl_attr_mode == "A":
+        esl_attr_masses = attribute_esl_optionA(
+            prior_esl, esl_masses_keyed, post_esl.posterior_pg, w_cur,
+        )
+    else:
+        esl_attr_masses = attribute_esl_optionB(
+            prior_esl, esl_masses_keyed, dhi, calib, fw, sd_mode, fluid_type,
+        )
+
+    col_esl, col_cls = st.columns(2)
+    with col_esl:
+        st.markdown(f"**ESL** *(attribution: option {esl_attr_mode})*")
+        _render_pillar_attribution_table_esl(
+            esl_masses_keyed, esl_attr_masses, w_cur, ctx,
+        )
+    with col_cls:
+        st.markdown("**Classic** *(workbook log-attribution, reservoir-aware)*")
+        _render_pillar_attribution_table_classic(prior_classic, classic_attr, ctx)
+
+    st.divider()
+
+    # ── Posterior trajectory plot (4 curves: prior/posterior × ESL/Classic) ──
+    st.markdown("##### Posterior trajectory — P(G) vs stance w")
+    _render_dfi_trajectory_plot(ctx, dhi, calib, fw, sd_mode, fluid_type)
+
+    st.divider()
+
+    # ── Sensitivity sweep (workbook "Mod POS, wgt & str graphs" generalised) ──
+    st.markdown("##### Sensitivity sweep — explore how the posterior moves")
+    _render_sensitivity_sweep(ctx, dhi, calib, fw, sd_mode, fluid_type)
+
+    st.divider()
+
+    # ── Prior→Posterior map with iso-DHI curves (workbook "DHI adjustment of POS") ──
+    st.markdown("##### Prior → Posterior map — iso-DHI Index curves")
+    _render_iso_dhi_plot(ctx, dhi, calib, fw, sd_mode, fluid_type)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Helper renderers — pillar tables and trajectory
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _render_dfi_results_characteristic(ctx) -> None:
+    """DFI Results when source = characteristic scoring.
+
+    No 8-outcome decomposition, no per-pillar attribution, no GeoX/fluid-mix.
+    Shows: ESL & Classic priors → posteriors via Simm 2-state Bayes, headline
+    R/score, prior→posterior trajectory across stance w.
+    """
+    from logic.dhi_characteristics import simm_bayes_posterior
+
+    r_eff   = float(st.session_state.get("dhi_char_r_eff",   1.0))
+    r_char  = float(st.session_state.get("dhi_char_r_char",  1.0))
+    score   = float(st.session_state.get("dhi_char_score",   50.0))
+    bucket  = str(st.session_state.get("dhi_char_bucket",    "high"))
+
+    # ── Priors at current stance ──
+    w_cur = float(ctx.uncertainty_weight)
+    prior_esl     = _esl_prior_pillars_from_ctx_at_w(ctx, w_cur)   # pillars → Init Pg diagnostic
+    prior_classic = _classic_prior_pillars_from_ctx(ctx, w_cur)
+    esl_prior_pg  = _esl_rollup_prior_at_w(ctx, w_cur)             # headline mass-rollup = the DFI prior
+    post_esl_pg     = simm_bayes_posterior(esl_prior_pg,           r_eff)
+    post_classic_pg = simm_bayes_posterior(prior_classic.prior_pg, r_eff)
+
+    de = (post_esl_pg     - esl_prior_pg)           * 100
+    dc = (post_classic_pg - prior_classic.prior_pg) * 100
+
+    # ── Headline numbers ──
+    st.markdown("##### Headline numbers (characteristic-scoring source)")
+    c1, c2, c3, c4 = st.columns(4)
+    with c1: st.metric("R_eff",            f"{r_eff:.2f}",
+                        help=f"R_char = {r_char:.2f} squashed by discernibility ({bucket}).")
+    with c2: st.metric("DHI Char Score",   f"{score:.0f}%",
+                        help="R_eff / (R_eff + 1) — Monigle-style 0–100 % score.")
+    with c3: st.metric("P(G | DFI, ESL)",
+                        f"{post_esl_pg*100:.1f}%",
+                        delta=f"{de:+.1f} pp")
+    with c4: st.metric("P(G | DFI, Classic)",
+                        f"{post_classic_pg*100:.1f}%",
+                        delta=f"{dc:+.1f} pp")
+
+    st.info(
+        "In characteristic mode the posterior comes from Simm's 2-state Bayes "
+        "(R_eff applied to the geological prior). The SAAM-specific views "
+        "(per-pillar attribution, fluid-mix sweep, iso-DHI plot, GeoX hand-off) "
+        "are not available because the 6-attribute characteristic scoring does not "
+        "decompose the failure modes into water/LSG/other × eval/non-eval reservoir."
+    )
+
+    # ── Prior → Posterior trajectory across stance w (shared component) ──
+    st.markdown("##### Posterior trajectory — P(G) vs stance w")
+    from components.dfi_shared import render_simm_trajectory
+    render_simm_trajectory(ctx, r_eff, key="dfi_char_trajectory")
+
+    # ── Sensitivity sweep over the 5/10 DHI attributes ──
+    _render_characteristic_sensitivity(ctx, esl_prior_pg, w_cur)
+
+
+def _render_dfi_results_custom(ctx) -> None:
+    """DFI Results when source = Custom R tool.
+
+    Two-state Simm Bayes on the user-defined R (stored as ``dhi_custom_r`` by the
+    setup page). Mirrors the characteristic results, minus the attribute sweep.
+    """
+    from logic.dhi_characteristics import simm_bayes_posterior
+
+    r_val = float(st.session_state.get("dhi_custom_r",     1.0))
+    score = float(st.session_state.get("dhi_custom_score", 50.0))
+
+    w_cur = float(ctx.uncertainty_weight)
+    prior_classic = _classic_prior_pillars_from_ctx(ctx, w_cur)
+    esl_prior_pg  = _esl_rollup_prior_at_w(ctx, w_cur)
+    post_esl_pg     = simm_bayes_posterior(esl_prior_pg,           r_val)
+    post_classic_pg = simm_bayes_posterior(prior_classic.prior_pg, r_val)
+
+    de = (post_esl_pg     - esl_prior_pg)           * 100
+    dc = (post_classic_pg - prior_classic.prior_pg) * 100
+
+    st.markdown("##### Headline numbers (custom R tool)")
+    c1, c2, c3, c4 = st.columns(4)
+    with c1: st.metric("R", f"{r_val:.2f}",
+                       help="P(DFI|HC) / P(DFI|No-HC) at the DHI-strength slider "
+                            "(set on the DFI Setup sub-tab).")
+    with c2: st.metric("DHI score", f"{score:.0f}%",
+                       help="R / (R + 1) — Monigle-style 0–100 score.")
+    with c3: st.metric("P(G | DFI, ESL)", f"{post_esl_pg*100:.1f}%", delta=f"{de:+.1f} pp")
+    with c4: st.metric("P(G | DFI, Classic)", f"{post_classic_pg*100:.1f}%", delta=f"{dc:+.1f} pp")
+
+    st.info(
+        "In custom mode the posterior comes from Simm's 2-state Bayes (R applied to the "
+        "geological prior). R is read off your user-defined bell curves on the DFI Setup "
+        "sub-tab. The SAAM-specific decomposition (per-pillar attribution, fluid-mix sweep, "
+        "GeoX hand-off) is not available, but the **DHI-strength sweep** and **iso-R "
+        "prior→posterior map** below are the custom-tool analogues of the SAAM sensitivity "
+        "and iso-DHI plots."
+    )
+
+    st.markdown("##### Posterior trajectory — P(G) vs stance w")
+    from components.dfi_shared import render_simm_trajectory
+    render_simm_trajectory(ctx, r_val, key="dfi_custom_trajectory")
+
+    # ── Reconstruct R(DHI strength) from the persisted custom setup (shared
+    #    single-source helper, same one the Setup page uses) so the Results tab
+    #    can sweep strength without re-entering the curves. ──
+    import numpy as np
+    import plotly.graph_objects as go
+    from logic.dfi_custom import custom_config_from_state
+    _cfg = custom_config_from_state(st.session_state)
+    slider = _cfg.slider
+    _R_at = _cfg.r_at
+
+    # ── Sensitivity sweep — posterior vs DHI strength (analogue of the SAAM sweep) ──
+    st.divider()
+    st.markdown("##### Sensitivity sweep — posterior vs DHI strength")
+    xs = np.linspace(-100.0, 100.0, 201)
+    r_curve    = [_R_at(float(x)) for x in xs]
+    esl_post_s = [simm_bayes_posterior(esl_prior_pg,           R) * 100 for R in r_curve]
+    cls_post_s = [simm_bayes_posterior(prior_classic.prior_pg, R) * 100 for R in r_curve]
+    figs = go.Figure()
+    figs.add_hline(y=esl_prior_pg * 100, line_dash="dot", line_color="#16a34a",
+                   annotation_text=f"ESL prior {esl_prior_pg*100:.1f}%",
+                   annotation_position="left")
+    figs.add_hline(y=prior_classic.prior_pg * 100, line_dash="dot", line_color="#1e40af",
+                   annotation_text=f"Classic prior {prior_classic.prior_pg*100:.1f}%",
+                   annotation_position="left")
+    figs.add_trace(go.Scatter(x=xs, y=esl_post_s, mode="lines", name="P(G | DFI, ESL)",
+                              line=dict(color="#16a34a", width=2)))
+    figs.add_trace(go.Scatter(x=xs, y=cls_post_s, mode="lines", name="P(G | DFI, Classic)",
+                              line=dict(color="#1e40af", width=2)))
+    figs.add_vline(x=slider, line_dash="dash", line_color="#6b7280",
+                   annotation_text=f"current {slider:+.0f}", annotation_position="top")
+    figs.add_trace(go.Scatter(
+        x=[slider, slider], y=[post_esl_pg * 100, post_classic_pg * 100], mode="markers",
+        marker=dict(symbol="star", size=14, color=["#16a34a", "#1e40af"],
+                    line=dict(color="white", width=1)),
+        showlegend=False, hoverinfo="skip"))
+    figs.update_xaxes(title_text="DHI strength")
+    figs.update_yaxes(title_text="Posterior P(G | DFI) (%)", range=[0, 100])
+    figs.update_layout(height=380, margin=dict(t=20, b=40, l=55, r=20),
+                       legend=dict(orientation="h", x=0.5, y=-0.18, xanchor="center"))
+    st.plotly_chart(figs, use_container_width=True)
+    st.caption(
+        "How the posterior would move if the **DHI-strength reading** were different, with "
+        "your curves held fixed. Dotted lines = the unchanged ESL/Classic priors; the curves "
+        "cross them where R = 1 (the strength at which the evidence is neutral). The ★ marks "
+        f"the current reading ({slider:+.0f}). This is the custom-tool analogue of the SAAM "
+        "fluid-mix/strength sensitivity sweep."
+    )
+
+    # ── Prior → Posterior map — iso-R curves (analogue of the iso-DHI plot) ──
+    st.divider()
+    st.markdown("##### Prior → Posterior map — iso-R curves")
+    ISO_R = [1/3, 1/1.5, 1.0, 1.5, 3.0, 10.0]
+    pg_grid = np.linspace(0.0, 1.0, 51)
+    figm = go.Figure()
+    figm.add_trace(go.Scatter(x=[0, 100], y=[0, 100], mode="lines",
+                              line=dict(color="#9ca3af", width=1, dash="dot"),
+                              name="no change (y = x)", hoverinfo="skip"))
+    _n = len(ISO_R)
+    def _iso_col(i: int) -> str:
+        t = i / max(1, _n - 1)
+        r = int(30 + (180 - 30) * t); g = int(60 + (190 - 60) * t); b = int(160 + (230 - 160) * t)
+        return f"rgb({r},{g},{b})"
+    for i, R in enumerate(ISO_R):
+        ys = [simm_bayes_posterior(float(p), R) * 100 for p in pg_grid]
+        figm.add_trace(go.Scatter(
+            x=[p * 100 for p in pg_grid], y=ys, mode="lines",
+            line=dict(color=_iso_col(i), width=1.8),
+            name=f"R = {R:.2f}".rstrip("0").rstrip("."),
+            hovertemplate=f"R = {R:.2f}<br>prior %{{x:.0f}}%% → posterior %{{y:.1f}}%%<extra></extra>"))
+    # Current-R curve highlighted in violet (matches the Setup R-curve colour)
+    ys_cur = [simm_bayes_posterior(float(p), r_val) * 100 for p in pg_grid]
+    figm.add_trace(go.Scatter(
+        x=[p * 100 for p in pg_grid], y=ys_cur, mode="lines",
+        line=dict(color="#7c3aed", width=3), name=f"current R = {r_val:.2f}",
+        hovertemplate=f"current R = {r_val:.2f}<br>prior %{{x:.0f}}%% → posterior %{{y:.1f}}%%<extra></extra>"))
+    # ★ prospect at (ESL prior, posterior at current R)
+    figm.add_trace(go.Scatter(
+        x=[esl_prior_pg * 100], y=[post_esl_pg * 100], mode="markers+text",
+        marker=dict(symbol="star", size=18, color="#dc2626", line=dict(color="white", width=1.5)),
+        text=[f"  ★ {post_esl_pg*100:.1f}%"], textposition="middle right",
+        textfont=dict(size=11, color="#7f1d1d"), name="this prospect (ESL)",
+        hovertemplate="<b>This prospect</b><br>prior %{x:.1f}%% → posterior %{y:.1f}%%<extra></extra>"))
+    figm.add_trace(go.Scatter(
+        x=[esl_prior_pg * 100, esl_prior_pg * 100],
+        y=[esl_prior_pg * 100, post_esl_pg * 100], mode="lines",
+        line=dict(color="#dc2626", width=1, dash="dot"), showlegend=False, hoverinfo="skip"))
+    figm.update_xaxes(title_text="Initial Pg (geological prior) %", range=[0, 100])
+    figm.update_yaxes(title_text="DFI-modified posterior POS %", range=[0, 100])
+    figm.update_layout(height=460, margin=dict(t=20, b=55, l=60, r=20),
+                       legend=dict(orientation="v", x=1.02, y=1.0,
+                                   bordercolor="#e5e7eb", borderwidth=1, font=dict(size=10)))
+    st.plotly_chart(figm, use_container_width=True)
+    st.caption(
+        "Each curve is one fixed likelihood ratio R; the dotted diagonal is the no-change "
+        "line (posterior = prior). Curves **above** the diagonal raise P(G), **below** lower "
+        "it. The violet curve is your **current R**; the ★ is this prospect at its ESL prior. "
+        "Because R is a constant multiplicative shift in log-odds, every curve has the "
+        "characteristic S-shape — the update bites hardest near a 50 % prior and vanishes at "
+        "the 0 %/100 % extremes. This is the custom-tool analogue of the SAAM iso-DHI map "
+        "(R replaces the DHI Index as the family parameter)."
+    )
+
+
+def _render_characteristic_sensitivity(ctx, prior_pg: float, w_cur: float) -> None:
+    """How does the posterior move as each DHI attribute is swept across its
+    categories? Two views: a tornado (posterior swing per attribute, others held
+    at current) and a single-attribute line sweep."""
+    import plotly.graph_objects as go
+    from components.colors import cos_color
+    from logic.dhi_characteristics import (
+        load_characteristic_stats, compute_r_char, compute_r_char_inferred,
+        apply_discernibility, simm_bayes_posterior, R_HARD_CAP, R_FLOOR,
+    )
+
+    cstats   = load_characteristic_stats()
+    mode_key = str(st.session_state.get("dhi_char_mode", "5_current"))
+    bucket   = cstats.buckets[str(st.session_state.get("dhi_char_bucket", "high"))]
+    sel_cur  = dict(st.session_state.get("dhi_char_selections", {}))
+    pos_cur  = dict(st.session_state.get("dhi_char_positions", {}))
+    inferred = bool(st.session_state.get("dhi_char_inferred", False))
+    apply_cap = bool(st.session_state.get("dhi_char_apply_cap", True))
+    rel_middle = bool(st.session_state.get("dhi_char_rel_middle", False))
+    cap_kw = (dict(hard_cap=R_HARD_CAP, floor=R_FLOOR) if apply_cap
+              else dict(hard_cap=float("inf"), floor=0.0))
+
+    # only attributes that actually move R (display-only confidence excluded)
+    r_attrs = cstats.attributes_in_r_for_mode(mode_key)
+    if not r_attrs:
+        return
+
+    def _posterior_for(selections: dict) -> float:
+        r = compute_r_char(cstats, selections, mode_key=mode_key,
+                           relative_to_middle=rel_middle, **cap_kw)["r_char"]
+        r_eff = apply_discernibility(r, bucket)
+        return simm_bayes_posterior(prior_pg, r_eff) * 100.0
+
+    def _posterior_for_pos(positions: dict) -> float:
+        r = compute_r_char_inferred(cstats, positions, mode_key=mode_key,
+                                    relative_to_middle=rel_middle, **cap_kw)["r_char"]
+        r_eff = apply_discernibility(r, bucket)
+        return simm_bayes_posterior(prior_pg, r_eff) * 100.0
+
+    st.markdown("##### Sensitivity sweep — which DHI attributes move the posterior?")
+    st.caption(
+        "Each attribute is swept across **all its categories** while the others stay "
+        "at your current slider positions. The bar spans the resulting posterior P(G) "
+        "from the worst to the best category — longer bars = the prospect's posterior "
+        "is more sensitive to that attribute (given the current scores). The ◆ marks "
+        "your current selection."
+    )
+
+    base_post = _posterior_for_pos(pos_cur) if inferred else _posterior_for(sel_cur)
+    x_grid = [j / 20.0 for j in range(21)]   # 0..1 fine sweep for inferred
+    rows = []
+    for key, attr in r_attrs.items():
+        cats = attr.categories(mode_key)
+        if inferred:
+            posts = []
+            for xv in x_grid:
+                trial = dict(pos_cur); trial[key] = xv
+                posts.append(_posterior_for_pos(trial))
+            cur_post = _posterior_for_pos(pos_cur)
+        else:
+            posts = []
+            for c in cats:
+                trial = dict(sel_cur); trial[key] = c
+                posts.append(_posterior_for(trial))
+            cur_cat = sel_cur.get(key, cats[len(cats) // 2])
+            cur_post = posts[cats.index(cur_cat)] if cur_cat in cats else base_post
+        lo, hi = min(posts), max(posts)
+        rows.append({
+            "attr": attr.display_name, "lo": lo, "hi": hi,
+            "cur": cur_post, "swing": hi - lo,
+        })
+    rows.sort(key=lambda r: r["swing"])   # smallest at bottom → largest on top
+
+    fig = go.Figure()
+    for r in rows:
+        fig.add_trace(go.Scatter(
+            x=[r["lo"], r["hi"]], y=[r["attr"], r["attr"]],
+            mode="lines", line=dict(color="#9ca3af", width=8),
+            hoverinfo="skip", showlegend=False,
+        ))
+        fig.add_trace(go.Scatter(
+            x=[r["lo"], r["hi"]], y=[r["attr"], r["attr"]],
+            mode="markers",
+            marker=dict(size=11, color=[cos_color(r["lo"] / 100), cos_color(r["hi"] / 100)],
+                        line=dict(color="#111827", width=0.7)),
+            customdata=[r["swing"], r["swing"]],
+            hovertemplate="%{y}<br>P(G)=%{x:.1f}%  (swing %{customdata:.1f} pp)<extra></extra>",
+            showlegend=False,
+        ))
+        fig.add_trace(go.Scatter(
+            x=[r["cur"]], y=[r["attr"]], mode="markers",
+            marker=dict(symbol="diamond", size=12, color="#111827"),
+            hovertemplate="%{y}<br>current: %{x:.1f}%<extra></extra>",
+            showlegend=False,
+        ))
+    fig.add_vline(x=base_post, line_dash="dot", line_color="#1f2937",
+                  annotation_text=f"current P(G,ESL) = {base_post:.1f}%",
+                  annotation_position="top")
+    fig.update_xaxes(title_text="Posterior P(G | DFI, ESL) (%)", range=[0, 100])
+    fig.update_layout(height=max(240, 60 + 42 * len(rows)),
+                      margin=dict(t=30, b=40, l=10, r=10))
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Single-attribute line sweep (the closest analogue to the DHI-Index sweep)
+    attr_names = [a.display_name for a in r_attrs.values()]
+    name_to_key = {a.display_name: k for k, a in r_attrs.items()}
+    pick = st.selectbox("Sweep one attribute in detail", attr_names, index=0,
+                        key="dhi_char_sweep_pick")
+    pk = name_to_key[pick]
+    pattr = cstats.attributes[pk]
+    pcats = pattr.categories(mode_key)
+    Kp = len(pcats)
+    fig2 = go.Figure()
+    if inferred:
+        # near-continuous sweep across x∈[0,1]
+        xs = [j / 100.0 for j in range(101)]
+        pposts = []
+        for xv in xs:
+            trial = dict(pos_cur); trial[pk] = xv
+            pposts.append(_posterior_for_pos(trial))
+        x_plot = [x * (Kp - 1) for x in xs]   # 0..K-1 axis aligned with categories
+        fig2.add_trace(go.Scatter(
+            x=x_plot, y=pposts, mode="lines",
+            line=dict(color="#1e40af", width=2),
+            hovertemplate="pos %{x:.2f}<br>P(G)=%{y:.1f}%<extra></extra>",
+        ))
+        cur_x = float(pos_cur.get(pk, 0.5)) * (Kp - 1)
+        cur_post = _posterior_for_pos(pos_cur)
+        fig2.add_trace(go.Scatter(
+            x=[cur_x], y=[cur_post], mode="markers",
+            marker=dict(symbol="diamond", size=16, color="#111827"),
+            name="current", showlegend=False, hoverinfo="skip",
+        ))
+        fig2.update_xaxes(title_text=f"{pick} — continuous position",
+                          tickmode="array", tickvals=list(range(Kp)), ticktext=pcats)
+    else:
+        pposts = []
+        for c in pcats:
+            trial = dict(sel_cur); trial[pk] = c
+            pposts.append(_posterior_for(trial))
+        cur_cat = sel_cur.get(pk, pcats[len(pcats) // 2])
+        fig2.add_trace(go.Scatter(
+            x=pcats, y=pposts, mode="lines+markers",
+            line=dict(color="#1e40af", width=2),
+            marker=dict(size=12, color=[cos_color(p / 100) for p in pposts],
+                        line=dict(color="#111827", width=0.7)),
+            text=[f"{p:.1f}%" for p in pposts], textposition="top center",
+            hovertemplate="%{x}<br>P(G)=%{y:.1f}%<extra></extra>",
+        ))
+        if cur_cat in pcats:
+            fig2.add_trace(go.Scatter(
+                x=[cur_cat], y=[pposts[pcats.index(cur_cat)]], mode="markers",
+                marker=dict(symbol="diamond-open", size=20, color="#111827",
+                            line=dict(width=2.5)),
+                name="current", showlegend=False, hoverinfo="skip",
+            ))
+        fig2.update_xaxes(title_text=f"{pick} category")
+    fig2.add_hline(y=prior_pg * 100, line_dash="dot", line_color="#6b7280",
+                   annotation_text=f"prior {prior_pg*100:.1f}%", annotation_position="right")
+    fig2.update_yaxes(title_text="Posterior P(G | DFI, ESL) (%)", range=[0, 100])
+    fig2.update_layout(height=320, margin=dict(t=20, b=40, l=50, r=10))
+    st.plotly_chart(fig2, use_container_width=True)
+    st.caption(
+        "Marker colour uses the shared Probability scale. Where the curve is **flat**, "
+        "the prospect's posterior barely depends on that attribute given the other "
+        "scores; where it's **steep**, that attribute is pivotal. Non-monotonic dips "
+        "(e.g. a mid category outperforming a 'better' one) reflect genuine small-N "
+        "structure in Monigle's drilled-prospect histograms."
+    )
+
+
+def _render_pillar_attribution_table_classic(prior, posterior, ctx) -> None:
+    """Side-by-side prior vs posterior table with delta column for Classic."""
+    import pandas as pd
+    rows = []
+    for (name, _key, pri_v), (_n2, _k2, post_v) in zip(
+        _pillar_pairs_from_priorpillars(prior),
+        _pillar_pairs_from_priorpillars(posterior),
+    ):
+        rows.append({
+            "Pillar / Scope": name,
+            "Prior":     f"{pri_v*100:.1f}%",
+            "Posterior": f"{post_v*100:.1f}%",
+            "Δ":         f"{(post_v - pri_v)*100:+.1f}%",
+        })
+    rows.append({
+        "Pillar / Scope": "**Product = P(G, Classic)**",
+        "Prior":     f"**{prior.prior_pg*100:.2f}%**",
+        "Posterior": f"**{posterior.prior_pg*100:.2f}%**",
+        "Δ":         f"**{(posterior.prior_pg - prior.prior_pg)*100:+.2f}%**",
+    })
+    df = pd.DataFrame(rows)
+    st.dataframe(df, hide_index=True, use_container_width=True)
+
+
+def _render_pillar_attribution_table_esl(masses_prior, masses_post, w, ctx) -> None:
+    """ESL per-pillar table showing (S_for, S_against, Policy P) before & after."""
+    import pandas as pd
+    rows = []
+    total_for_prior, total_against_prior = ctx.total_for, ctx.total_against
+    for pillar in ("charge", "trap", "reservoir", "retention"):
+        for scope in ("play", "cond"):
+            mp = masses_prior[pillar][scope]
+            mn = masses_post[pillar][scope]
+            disp = (("Charge" if pillar == "charge" else
+                     "Closure" if pillar == "trap" else
+                     "Reservoir" if pillar == "reservoir" else
+                     "Retention")
+                    + " / " + ("Play" if scope == "play" else "Cond"))
+            pri_p = mp.s_for + w * max(0.0, 1 - mp.s_for - mp.s_against)
+            post_p = mn.s_for + w * max(0.0, 1 - mn.s_for - mn.s_against)
+            rows.append({
+                "Pillar / Scope": disp,
+                "S_for prior":     f"{mp.s_for:.3f}",
+                "S_for post":      f"{mn.s_for:.3f}",
+                "S_against prior": f"{mp.s_against:.3f}",
+                "S_against post":  f"{mn.s_against:.3f}",
+                "Policy P prior":  f"{pri_p*100:.1f}%",
+                "Policy P post":   f"{post_p*100:.1f}%",
+                "ΔP":              f"{(post_p - pri_p)*100:+.1f}%",
+            })
+    df = pd.DataFrame(rows)
+    st.dataframe(df, hide_index=True, use_container_width=True)
+    st.caption(
+        "ESL attribution updates each pillar's (S_for, S_against) masses. "
+        "Option A preserves commitment C = S_for + S_against per pillar; "
+        "Option B redistributes the Bel and Pl posterior shifts."
+    )
+
+
