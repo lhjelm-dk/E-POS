@@ -386,9 +386,20 @@ def _render_dfi_setup_characteristic(ctx) -> None:
     positions:  dict[str, float] = {}  # continuous slider position x∈[0,1]
     with col_in:
         st.markdown(f"##### Score the prospect on {n_total} DHI attributes")
-        st.caption(
+        _rel_mid_now = bool(st.session_state.get("dhi_char_rel_middle", False))
+        _anchor_caption = (
             "Each slider's **middle** position is the neutral / non-informative baseline "
-            "(LR = 1). Moving toward the ends pushes R up or down."
+            "(LR = 1); moving toward the ends pushes R up or down. *(Scale-middle anchoring "
+            "is ON — see the controls below.)*"
+            if _rel_mid_now else
+            "Each category maps to a likelihood ratio measured **vs the dataset base rate**: "
+            "a category whose success rate equals the overall base rate gives LR = 1, above "
+            "it lifts R, below it lowers R. So the *middle* category is **not** automatically "
+            "neutral — its own success rate decides. *(Switch to scale-middle anchoring in the "
+            "controls below if you want the middle category pinned to LR = 1.)*"
+        )
+        st.caption(
+            _anchor_caption
             + ("  \n*Inferred mode:* the slider is continuous; the verbal category and "
                "monotone success rate under the handle are shown beneath each slider."
                if inferred else "")

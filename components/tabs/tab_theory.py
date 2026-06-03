@@ -894,40 +894,47 @@ For **ESL attribution** there are two modes:
             "— without smoothing the LR would be infinite)."
         )
         st.markdown("---")
-        st.markdown("#### Step C3 — Anchor the LRs to the slider's middle position")
+        st.markdown("#### Step C3 — Convert each success rate to a likelihood ratio")
         st.markdown(
-            "Each slider's **middle** category (e.g. 'Moderate' for anomaly strength, 'Fair' for "
-            "fit to structure) is treated as the **neutral / non-informative** observation. The "
-            "raw Monigle middle-category LRs are typically not 1 — they reflect the dataset's "
-            "overall success bias. To match the slider UX (middle = no information, R = 1), each "
-            "attribute's LR is rescaled relative to its middle category:"
+            "Monigle reports a **success rate** per verbal category — e.g. 82 % of drilled prospects "
+            "with a *Fair* fluid-contact reflection found hydrocarbons. That figure is "
+            "$P(\\text{HC}\\,|\\,\\text{category})$ *inside Monigle's drilled population*, so it "
+            "already carries that population's overall base rate. To use it as evidence on **your** "
+            "prospect (which has its own ESL prior), strip the base rate out and keep only the "
+            "evidential strength — the **likelihood ratio**:"
         )
-        st.latex(r"\text{LR}_k^{\text{rel}}(c) \;=\; \text{LR}_k(c) \;/\; \text{LR}_k(c_{\text{mid}})")
+        st.latex(r"\text{LR}_k(c) \;=\; \frac{\text{odds}\big(\text{SR}_k(c)\big)}{\text{odds}(\text{base rate})}"
+                 r" \;=\; \frac{\text{SR}_k(c)/\big(1-\text{SR}_k(c)\big)}{N_\text{HC}/N_\text{dry}}")
         st.markdown(
-            "This means an all-middle slider configuration produces R_char = 1 by construction "
-            "(no update), and moving any slider away from the middle either favours success "
-            "(LR_rel > 1) or favours failure (LR_rel < 1) per the Monigle calibration."
+            "A category whose success rate **equals the dataset's overall rate** contributes "
+            "LR = 1 (no information); above it lifts R, below it lowers R. This is the "
+            "**base-rate-relative** convention — the conceptually correct Bayesian likelihood "
+            "ratio, and the **default** in E-POS. Worked example (fluid contact reflection, "
+            "base rate 56 %): *Fair* at 82 % → LR = (0.82/0.18) ÷ (67/52) ≈ **3.25** (a genuine "
+            "strong-uplift signal), *Good* at 67 % → LR ≈ **1.51**, *None* at 16 % → LR ≈ **0.17**."
         )
         st.info(
-            "**Modeling caveat — this re-anchoring is a deliberate choice, not pure Bayes.** "
-            "A strict likelihood ratio uses the raw $\\text{LR}_k(c)$, which carries the dataset's "
-            "overall base rate (most Monigle prospects with *any* DHI succeeded, so even a middling "
-            "anomaly has LR > 1). Dividing by the middle-category LR removes that base-rate term — "
-            "which is correct here because the **base rate already lives in the prior P(G)**: the "
-            "geological assessment is what sets the starting odds, and double-counting the DHI "
-            "dataset's success bias would inflate the posterior. Re-anchoring keeps the DHI sliders "
-            "as a *pure relative-evidence* dial (middle = 'this attribute tells me nothing beyond "
-            "my prior'). The trade-off: R_char is then a **relative** likelihood ratio, not the "
-            "absolute one Monigle reports — so do not compare R_char numbers against the paper's "
-            "raw LRs directly."
+            "**Optional legacy anchoring — *scale-middle* (off by default).** A toggle on the "
+            "DFI Setup page re-anchors every attribute so its **middle verbal category** is forced "
+            "to LR = 1, by dividing through by the middle-category LR:  \n"
+            "$\\text{LR}_k^{\\text{mid}}(c) = \\text{LR}_k(c)\\,/\\,\\text{LR}_k(c_\\text{mid})$  \n"
+            "so an all-middle slider configuration yields $R_\\text{char}=1$ by construction. The "
+            "rationale is that *if* your ESL prior is implicitly conditioned on a 'typical scored-DHI "
+            "prospect', the middle category carries no information beyond that prior. The pitfall — "
+            "and why it is **no longer the default** — is that it discards real evidence whenever the "
+            "middle category is itself far from the base rate. The non-monotonic fluid-contact case is "
+            "the cautionary example: *Fair* (82 %) is the middle, so scale-middle anchoring reports it "
+            "as **neutral** and even paints *Good* (67 %, genuinely LR 1.51) as a downgrade. Use it "
+            "only if your prior elicitation explicitly assumes a typical DHI is already present."
         )
         st.markdown("---")
         st.markdown("#### Step C4 — Combine the six LRs (naive conditional independence)")
         st.markdown(
             "Assuming the six attributes contribute independently — *which is not strictly true; "
-            "see the caveat below* — the prospect-level R_char is the product:"
+            "see the caveat below* — the prospect-level R_char is the product of the per-attribute "
+            "likelihood ratios (base-rate-relative by default, or scale-middle if that toggle is on):"
         )
-        st.latex(r"R_\text{char} \;=\; \prod_{k=1}^{6} \text{LR}_k^{\text{rel}}(c_k)")
+        st.latex(r"R_\text{char} \;=\; \prod_{k=1}^{6} \text{LR}_k(c_k)")
         st.markdown(
             "**Caveat (independence assumption).** The six attributes correlate in reality — e.g. "
             "a prospect with a strong anomaly tends also to show good amplitude terminations. "
