@@ -498,11 +498,11 @@ def _render_prospect_hub(models: dict) -> None:
     )
     c_title, c_analyst, c_basin, c_date, c_ver = st.columns([3, 2, 2, 2, 2])
     with c_title:
-        st.text_input("Prospect title", value="New Prospect", key="meta_title")
+        st.text_input("Prospect title", value="AlphaGammaFoxtrot", key="meta_title")
     with c_analyst:
         st.text_input("Analyst", value="Lars Hjelm", key="meta_analyst")
     with c_basin:
-        st.text_input("Basin / Play", value="North Sea", key="meta_basin")
+        st.text_input("Basin / Play", value="Komsaadehvii", key="meta_basin")
     with c_date:
         st.text_input("Date", value=datetime.date.today().strftime("%d. %m. %Y"), key="meta_date")
     with c_ver:

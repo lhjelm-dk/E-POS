@@ -422,9 +422,9 @@ def _render_hcwc_mixture(dfi_weight: float, *, key: str) -> None:
     ca, cb, cc = st.columns(3)
     apex   = ca.number_input("Apex elevation (m)",          value=-2000.0, step=10.0, key=f"{key}_apex")
     spill  = ca.number_input("Spill elevation (m)",         value=-2500.0, step=10.0, key=f"{key}_spill")
-    geo_c  = cb.number_input("Geological best contact (m)", value=-2350.0, step=10.0, key=f"{key}_geoc")
+    geo_c  = cb.number_input("Geological best contact (m)", value=-2250.0, step=10.0, key=f"{key}_geoc")
     geo_sd = cb.number_input("Geological spread (± m)",     value=90.0, min_value=1.0, step=5.0, key=f"{key}_geosd")
-    dfi_c  = cc.number_input("DFI-rated contact (m)",       value=-2300.0, step=10.0, key=f"{key}_dfic")
+    dfi_c  = cc.number_input("DFI-rated contact (m)",       value=-2150.0, step=10.0, key=f"{key}_dfic")
     dfi_sd = cc.number_input("DFI spread (± m)",            value=25.0, min_value=1.0, step=5.0, key=f"{key}_dfisd")
 
     xs, geo, dfi, comb = hcwc_mixture(apex, spill, geo_c, geo_sd, dfi_c, dfi_sd, dfi_weight)
@@ -452,8 +452,12 @@ def _render_hcwc_mixture(dfi_weight: float, *, key: str) -> None:
                        xanchor="left", yanchor="top", font=dict(size=10, color="#64748b"))
     fig.update_yaxes(title_text="HCWC elevation (m)", row=1, col=1)
     fig.update_xaxes(visible=False)
-    fig.update_layout(height=400, margin=dict(t=34, b=10, l=60, r=10), showlegend=False)
-    st.plotly_chart(fig, use_container_width=True, key=f"{key}_mix")
+    # Each of the three density panels is portrait — its width is ~½ its height.
+    # Fixed figure size (not container-stretched) so the aspect ratio is honoured:
+    # plot height ≈ H-50 = 430; per-panel data width = (W-70)·0.92/3 ≈ 215 ≈ 430/2.
+    fig.update_layout(width=770, height=480, margin=dict(t=40, b=10, l=60, r=10),
+                      showlegend=False)
+    st.plotly_chart(fig, use_container_width=False, key=f"{key}_mix")
     st.caption(
         f"**Combined HCWC = {(1-w)*100:.0f}% · Geo-VOL + {w*100:.0f}% · DFI-VOL** "
         f"(the DFI weight is the DHI score / Volume Weight V). A strong DHI pulls the "
