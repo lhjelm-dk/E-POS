@@ -301,7 +301,7 @@ def _render_dfi_setup_characteristic(ctx) -> None:
         load_characteristic_stats, compute_r_char, compute_r_char_inferred,
         apply_discernibility, simm_bayes_posterior, dhi_score_from_r,
         inferred_success_curve, inferred_success_rate_at, inferred_lr_at,
-        SIMM_RULE_OF_THUMB, cap_for_bucket,
+        SIMM_RULE_OF_THUMB, cap_for_bucket, CHARACTERISTIC_DEFAULT_SELECTIONS,
     )
 
     try:
@@ -421,11 +421,16 @@ def _render_dfi_setup_characteristic(ctx) -> None:
                 cats = attr.categories(mode_key)
                 K = len(cats)
                 mid_idx = K // 2
+                # Analyst-requested default selection (falls back to the middle category).
+                _def_cat = CHARACTERISTIC_DEFAULT_SELECTIONS.get(key)
+                if _def_cat not in cats:
+                    _def_cat = cats[mid_idx]
                 label = attr.display_name + (" 🟡" if attr.placeholder else "")
                 if inferred:
                     # Continuous 0..1 slider (100 steps), mode-suffixed key
                     pos_key = f"dhi_char_pos_{key}_{mode_key}"
-                    x = float(st.session_state.get(pos_key, 0.5))
+                    _def_pos = (cats.index(_def_cat) / (K - 1)) if K > 1 else 0.5
+                    x = float(st.session_state.get(pos_key, _def_pos))
                     x = st.slider(
                         label, 0.0, 1.0, x, 0.01, key=pos_key,
                         help=attr.comment if attr.comment else None,
@@ -443,7 +448,7 @@ def _render_dfi_setup_characteristic(ctx) -> None:
                     # Mode-suffixed session key so user keeps separate settings per mode
                     sess_key = f"dhi_char_{key}_{mode_key}"
                     stored = st.session_state.get(sess_key)
-                    value = stored if stored in cats else cats[mid_idx]
+                    value = stored if stored in cats else _def_cat
                     sel = st.select_slider(
                         label,
                         options=cats,

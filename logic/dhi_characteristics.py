@@ -53,6 +53,17 @@ DISCERNIBILITY_CAPS: dict[str, tuple[float, float]] = {
 }
 
 
+# Default characteristic-scoring selection seeded into the sliders on first use
+# (per analyst request). Keyed by attribute; values are category labels.
+CHARACTERISTIC_DEFAULT_SELECTIONS: dict[str, str] = {
+    "anomaly_strength":           "Very strong",
+    "lateral_amplitude_contrast": "Medium",
+    "fit_to_structure":           "Fair",
+    "amplitude_terminations":     "Poor",
+    "fluid_contact_reflection":   "Poor",
+}
+
+
 def cap_for_bucket(bucket_name: str, *, enabled: bool = True) -> tuple[float, float]:
     """Return ``(floor, hard_cap)`` for R_char given the discernibility bucket.
 
