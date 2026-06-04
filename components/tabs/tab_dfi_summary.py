@@ -88,13 +88,22 @@ def _render_dfi_summary(ctx) -> None:
             "does not change the per-pillar masses above the divider. The prior→posterior "
             "bar visual is in the next block."
         )
+        # Posterior Bel/Pl envelope: re-run the 8-outcome update at each ESL extreme
+        # so the DFI posterior carries the same uncertainty band as the prior.
+        _bel = ctx.total_for
+        _pl = 1.0 - ctx.total_against
+        _post_bel = compute_dfi_posterior(prior_esl, dhi, calib, fw, sd_mode, fluid_type,
+                                          prior_pg_override=_bel).posterior_pg
+        _post_pl = compute_dfi_posterior(prior_esl, dhi, calib, fw, sd_mode, fluid_type,
+                                         prior_pg_override=_pl).posterior_pg
         _ov_data["dfi"] = {
             "method_label": "SAAM DHI-Index · 8-outcome Bayes",
             "esl_prior": esl_prior_pg, "esl_post": post_esl.posterior_pg,
             "esl_delta_pp": delta_esl * 100,
             "classic_prior": prior_classic.prior_pg, "classic_post": post_classic.posterior_pg,
             "classic_delta_pp": delta_classic * 100,
-            "bel": ctx.total_for, "pl": 1.0 - ctx.total_against,
+            "bel": _bel, "pl": _pl,
+            "esl_post_bel": _post_bel, "esl_post_pl": _post_pl,
             "diagnostics": f"DHI Index={dhi:+.0f} · R_SAAM={post_esl.r_saam:.2f} · "
                            f"V={post_esl.dhi_volume_weight:.2f} · "
                            f"∏-pillars Init Pg={prior_esl.prior_pg*100:.1f}%",
@@ -275,13 +284,17 @@ def _render_dfi_summary_characteristic(ctx) -> None:
             "characteristic update acts on the combined prospect Pg (Simm 2-state Bayes) "
             "— it does not change the per-pillar masses above the divider."
         )
+        _bel = ctx.total_for
+        _pl = 1.0 - ctx.total_against
         _ov_data["dfi"] = {
             "method_label": "Characteristic scoring · Simm 2-state Bayes",
             "esl_prior": esl_prior_pg, "esl_post": post_esl_pg,
             "esl_delta_pp": delta_esl * 100,
             "classic_prior": prior_classic.prior_pg, "classic_post": post_classic_pg,
             "classic_delta_pp": delta_classic * 100,
-            "bel": ctx.total_for, "pl": 1.0 - ctx.total_against,
+            "bel": _bel, "pl": _pl,
+            "esl_post_bel": simm_bayes_posterior(_bel, r_eff),
+            "esl_post_pl": simm_bayes_posterior(_pl, r_eff),
             "diagnostics": f"R_char={r_char:.2f} · R_eff={r_eff:.2f} · "
                            f"DHI Score={score:.0f}% · {bucket} · "
                            f"∏-pillars Init Pg={prior_esl.prior_pg*100:.1f}%",
@@ -438,13 +451,17 @@ def _render_dfi_summary_custom(ctx) -> None:
             "consolidated **before → after** DFI update appended at the bottom. The custom "
             "DFI update acts on the combined prospect Pg (Simm 2-state Bayes)."
         )
+        _bel = ctx.total_for
+        _pl = 1.0 - ctx.total_against
         _ov_data["dfi"] = {
             "method_label": "Custom R tool · Simm 2-state Bayes",
             "esl_prior": esl_prior_pg, "esl_post": post_esl_pg,
             "esl_delta_pp": delta_esl * 100,
             "classic_prior": prior_classic.prior_pg, "classic_post": post_classic_pg,
             "classic_delta_pp": delta_classic * 100,
-            "bel": ctx.total_for, "pl": 1.0 - ctx.total_against,
+            "bel": _bel, "pl": _pl,
+            "esl_post_bel": simm_bayes_posterior(_bel, r_val),
+            "esl_post_pl": simm_bayes_posterior(_pl, r_val),
             "diagnostics": f"R={r_val:.2f} · DHI Score={score:.0f}% · "
                            f"slider={slider:+.0f} · "
                            f"∏-pillars Init Pg={prior_esl.prior_pg*100:.1f}%",

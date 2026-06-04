@@ -409,23 +409,30 @@ def _render_esl_table(data: dict) -> None:
     if dfi:
         m_label = dfi.get("method_label", "DFI update")
         diag = dfi.get("diagnostics", "")
-        env_str = ""
-        if dfi.get("bel") is not None and dfi.get("pl") is not None:
-            env_str = f"{dfi['bel']*100:.1f}%–{dfi['pl']*100:.1f}%"
 
         def _dfi_row(emoji: str, name: str, prior: float, post: float,
-                     dpp: float, env: str = "") -> str:
+                     dpp: float, prior_env=None, post_env=None) -> str:
+            # prior_env / post_env = (bel, pl) → render a Bel·POS·Pl range flag so the
+            # posterior gets the *same* envelope representation as the prior.
             arrow = "↑" if dpp > 0.05 else ("↓" if dpp < -0.05 else "→")
             dc = "#16a34a" if dpp >= 0 else "#dc2626"
-            env_html = (f" <span style='color:#9ca3af;font-size:11px;'>[{env}]</span>"
-                        if env else "")
+            if prior_env and prior_env[0] is not None and prior_env[1] is not None:
+                prior_cell = (f"<td class='flag-cell' colspan='2'>"
+                              f"{_classic_range_flag(prior_env[0], prior, prior_env[1])}</td>")
+            else:
+                prior_cell = f"<td class='prob-cell' colspan='2'>{prior*100:.1f}%</td>"
+            if post_env and post_env[0] is not None and post_env[1] is not None:
+                post_cell = (f"<td class='flag-cell'>"
+                             f"{_classic_range_flag(post_env[0], post, post_env[1])}</td>")
+            else:
+                post_cell = f"<td class='prob-cell' style='font-weight:700;'>{post*100:.1f}%</td>"
             return (
                 "<tr class='data-row'>"
                 f"<td class='pillar-name'>{emoji} {name}</td>"
-                f"<td class='prob-cell' colspan='2'>{prior*100:.1f}%{env_html}</td>"
-                "<td class='sep-col'></td>"
-                f"<td class='prob-cell' style='font-weight:700;'>{post*100:.1f}%</td>"
-                f"<td class='prob-cell' style='color:{dc};font-weight:700;'>"
+                + prior_cell
+                + "<td class='sep-col'></td>"
+                + post_cell
+                + f"<td class='prob-cell' style='color:{dc};font-weight:700;'>"
                 f"{arrow} {dpp:+.1f} pp</td>"
                 "</tr>"
             )
@@ -444,7 +451,9 @@ def _render_esl_table(data: dict) -> None:
             "<th>Δ</th>"
             "</tr>"
             + _dfi_row("🟢", "P(G, ESL)", dfi.get("esl_prior", 0.0),
-                       dfi.get("esl_post", 0.0), dfi.get("esl_delta_pp", 0.0), env_str)
+                       dfi.get("esl_post", 0.0), dfi.get("esl_delta_pp", 0.0),
+                       prior_env=(dfi.get("bel"), dfi.get("pl")),
+                       post_env=(dfi.get("esl_post_bel"), dfi.get("esl_post_pl")))
             + _dfi_row("📊", "P(G, Classic)", dfi.get("classic_prior", 0.0),
                        dfi.get("classic_post", 0.0), dfi.get("classic_delta_pp", 0.0))
         )
