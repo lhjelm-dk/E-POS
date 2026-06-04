@@ -32,3 +32,8 @@ data/saam_calibration.json
 
 # Open Office lock files
 ~$*
+
+# scratch / tooling
+chunk_*.txt
+.claude/launch.json
+.claude/settings.local.json

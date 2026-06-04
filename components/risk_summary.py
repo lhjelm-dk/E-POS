@@ -419,7 +419,7 @@ def render_pg_ui_trajectory(
     )
 
     # Full reading guide hidden behind expander
-    with st.expander("📖 Reading this plot", expanded=False):
+    with st.expander("Reading this plot", expanded=False):
         st.markdown(
             "**Blue curve:** stance trajectory — sweeps w from 0 to 1 in 21 steps, each point is "
             f"`(P(G, {method_label}), UI)` at that stance. "

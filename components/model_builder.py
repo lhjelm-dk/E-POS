@@ -85,7 +85,7 @@ def render_model_section() -> None:
             st.caption("")  # spacing
 
         # ── Editor expander ───────────────────────────────────────────────
-        with st.expander("🛠️ View / Edit Risk Model", expanded=False):
+        with st.expander("View / Edit Risk Model", expanded=False):
             _render_model_editor(active)
 
 
@@ -286,7 +286,7 @@ def _render_model_editor(active: RiskModel) -> None:
     else:
         pillar_names = [p.get("display_name") or p.get("pillar_id") or f"Pillar {i+1}"
                         for i, p in enumerate(pillars_list)]
-        pillar_tabs = st.tabs([f"🔷 {n}" for n in pillar_names])
+        pillar_tabs = st.tabs([f"{n}" for n in pillar_names])
 
         for tab, pdict in zip(pillar_tabs, pillars_list):
             with tab:

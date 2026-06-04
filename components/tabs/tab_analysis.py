@@ -333,7 +333,7 @@ def _render_analysis_tab(ctx) -> None:
             "Black line = P(G, ESL) — straight, because ESL applies Policy P once at the end. "
             "○ = pillar Bel/Pl endpoints · red dashed = current stance."
         )
-        with st.expander("📖 Reading this plot", expanded=False):
+        with st.expander("Reading this plot", expanded=False):
             st.markdown(
                 "**Coloured lines:** each pillar's P(pillar, ESL) = Policy P(Play, w) × Policy P(Cond, w), "
                 "where Cond uses the ESL-aggregated mass pair across that pillar's sub-elements. "
@@ -825,7 +825,7 @@ def _render_analysis_tab(ctx) -> None:
     st.markdown(
         "<div style='background:linear-gradient(135deg,#1e3a5f,#0f172a);color:#fff;"
         "padding:14px 18px;border-radius:8px;margin-bottom:8px;'>"
-        "<b style='font-size:1.05rem;'>🔢 Classic POS — derived from ESL</b><br>"
+        "<b style='font-size:1.05rem;'>Classic POS — derived from ESL</b><br>"
         "<span style='font-size:0.82rem;opacity:0.85;'>"
         "Each pillar's Policy P is multiplied together (Rose &amp; Associates method). "
         "No extra input needed — updates automatically as you refine your ESL assessment."

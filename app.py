@@ -698,14 +698,14 @@ def _render_tabs(models: dict) -> None:
 
     (tab_dash, tab_play, tab_cond, tab_analysis, tab_dfi, tab_final,
      tab_methods, tab_ref) = st.tabs([
-        "\U0001f4ca Dashboard",
-        "\U0001f30d Play",
-        "\U0001f50d Conditional",
+        "Dashboard",
+        "Play",
+        "Conditional",
         "Geological POS",
-        "\U0001f30a Bayesian DFI Update",
-        "\U0001f4dd Final Prospect POS",
-        "\U0001f4da Theory & Guide",
-        "\U0001f4cb Reference Tables",
+        "Bayesian DFI Update",
+        "Final Prospect POS",
+        "Theory & Guide",
+        "Reference Tables",
     ])
 
     with tab_dash:      _render_dashboard_tab(ctx)

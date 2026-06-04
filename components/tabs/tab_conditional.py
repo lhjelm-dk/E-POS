@@ -68,7 +68,7 @@ def _render_conditional_tab(ctx) -> None:
         ESL_TO_CLASSIC_RECOMMENDATION as _ESL2CLASSIC,
         DEFAULT_CLASSIC_POS_MODE as _DEF_CLASSIC_MODE,
     )
-    with st.expander("⚙️ Operator Settings — how sub-elements are combined", expanded=False):
+    with st.expander("Operator Settings — how sub-elements are combined", expanded=False):
         _cond_cats = list(conditional.keys())
         _all_op_opts = list(ESL_MODE_OPTIONS) + ["Product (Π)", "Mean"]
         _classic_op_opts = list(_CLASSIC_OP_OPTS)

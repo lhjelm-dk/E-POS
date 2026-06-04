@@ -28,7 +28,7 @@ def _render_theory_tab(ctx) -> None:
     st.markdown(
         "<div style='background:linear-gradient(135deg,#0f172a,#1e3a5f);color:#fff;"
         "padding:16px 20px;border-radius:10px;margin-bottom:12px;'>"
-        "<b style='font-size:1.2rem;'>📚 Theory & Guide</b><br>"
+        "<b style='font-size:1.2rem;'>Theory & Guide</b><br>"
         "<span style='font-size:0.85rem;opacity:0.85;'>"
         "Everything you need to understand how E-POS works — the reasoning, the maths, the workflow, and the references."
         "</span></div>",
@@ -38,24 +38,23 @@ def _render_theory_tab(ctx) -> None:
     st.markdown(
         "<div style='background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;"
         "padding:10px 14px;margin-bottom:12px;font-size:0.9rem;color:#334155;'>"
-        "<b>Where to start:</b> &nbsp;🚀 <b>Start here</b> if you're new · "
-        "🧠 <b>Concepts</b> for the reasoning · 🧮 <b>The maths</b> for full derivations "
-        "(optional) · 🛠️ <b>In practice</b> when writing up · 📖 <b>Reference</b> to look up "
-        "a term or paper.<br><span style='color:#64748b;'>Difficulty tags on each section: "
-        "🟢 intro · 🔵 practitioner · ⚫ deep dive.</span></div>",
+        "<b>Where to start:</b> &nbsp;<b>Start here</b> if you're new · "
+        "<b>Concepts</b> for the reasoning · <b>The maths</b> for full derivations "
+        "(optional) · <b>In practice</b> when writing up · <b>Reference</b> to look up "
+        "a term or paper.</div>",
         unsafe_allow_html=True,
     )
 
     (_tab_start, _tab_concepts, _tab_maths,
      _tab_practice, _tab_ref) = st.tabs([
-        "🚀 Start here",
-        "🧠 Concepts",
-        "🧮 The maths",
-        "🛠️ In practice",
-        "📖 Reference",
+        "Start here",
+        "Concepts",
+        "The maths",
+        "In practice",
+        "Reference",
     ])
 
-    with _tab_start.expander("🟢 🚀 Quick-start: how to use E-POS in 5 steps", expanded=False):
+    with _tab_start.expander("Quick-start: how to use E-POS in 5 steps", expanded=False):
         st.markdown("""
 **E-POS is built around one insight:** the quality of your evidence matters more than your point-estimate probability.
 The Italian Flag makes that quality visible. You enter evidence once, and three methods update automatically.
@@ -86,7 +85,7 @@ The Italian Flag makes that quality visible. You enter evidence once, and three 
 > Record analyst, date and QC review in the Audit Trail before exporting.
 """)
 
-    with _tab_concepts.expander("🔵 🎯 Why prospect risking is hard — independence, double-dipping & conditional risk",
+    with _tab_concepts.expander("Why prospect risking is hard — independence, double-dipping & conditional risk",
                                 expanded=False):
         st.markdown(r"""
 ### Risk probabilities are genuinely difficult to assess
@@ -166,7 +165,7 @@ independent when they share one kitchen **under-represents** the common-cause ri
   **once**.
 """)
 
-    with _tab_concepts.expander("🟢 🟩⬜🟥 Evidence Support Logic (ESL) — fundamentals", expanded=False):
+    with _tab_concepts.expander("🟩⬜🟥 Evidence Support Logic (ESL) — fundamentals", expanded=False):
         st.markdown(r"""
 ### The Italian Flag
 
@@ -235,7 +234,7 @@ P(G) = P(Play) × P(Cond)
 ```
 """)
 
-    with _tab_concepts.expander("🔵 📐 Chance Adequacy Matrix (CAM) — interpretation guide", expanded=False):
+    with _tab_concepts.expander("Chance Adequacy Matrix (CAM) — interpretation guide", expanded=False):
         st.markdown(r"""
 ### What the CAM shows
 
@@ -291,7 +290,7 @@ levels lie. Use these to read off the implied Pg for any (POS, C) position.
 """)
         st.info("Open the **Geological POS tab → Chance Adequacy Matrix** to interact with the live plot.")
 
-    with _tab_concepts.expander("🔵 🔢 P(G, Classic) — the multiplicative method", expanded=False):
+    with _tab_concepts.expander("P(G, Classic) — the multiplicative method", expanded=False):
         st.markdown(r"""
 ### What P(G, Classic) does
 
@@ -325,7 +324,7 @@ P(G, ESL) so decision-makers familiar with either method can read the assessment
 See results in **Geological POS tab → Derived Methods → P(G, Classic)**.
 """)
 
-    with _tab_concepts.expander("🔵 ⚖️ Why P(G, ESL) ≠ P(G, Classic) — the four structural reasons", expanded=False):
+    with _tab_concepts.expander("Why P(G, ESL) ≠ P(G, Classic) — the four structural reasons", expanded=False):
         st.markdown(r"""
 ### The core question
 
@@ -468,7 +467,7 @@ between them is the quantified evidence of your uncertainty — and that belongs
 in the risk narrative, not hidden in a single number.
 """)
 
-    with _tab_concepts.expander("🔵 🌳 Current assessment — ESL combination hierarchy", expanded=False):
+    with _tab_concepts.expander("Current assessment — ESL combination hierarchy", expanded=False):
         st.caption(
             "Visual representation of how evidence flows from sub-elements through pillar combinations to P(G)."
         )
@@ -482,11 +481,11 @@ in the risk narrative, not hidden in a single number.
         st.markdown(
             "<div style='background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;"
             "padding:14px 18px;border-radius:8px;margin:4px 0 10px;'>"
-            "<b style='font-size:1.05rem;'>🌊 Bayesian DFI Update — the maths</b><br>"
+            "<b style='font-size:1.05rem;'>Bayesian DFI Update — the maths</b><br>"
             "<span style='font-size:0.82rem;opacity:0.9;'>"
             "How a seismic Direct Fluid Indicator updates the geological prior via Bayes' "
             "theorem — the two full derivations below. Workflow & decision tree are under "
-            "<b>🚀 Start here</b>; pitfalls & reporting under <b>🛠️ In practice</b>."
+            "<b>Start here</b>; pitfalls & reporting under <b>In practice</b>."
             "</span></div>",
             unsafe_allow_html=True,
         )
@@ -496,7 +495,7 @@ in the risk narrative, not hidden in a single number.
             "**📖 Reference** sub-tab."
         )
 
-    with _tab_maths.expander("⚫ 📐 Bayesian DFI — full derivation (light-stats friendly)", expanded=False):
+    with _tab_maths.expander("Bayesian DFI — full derivation (light-stats friendly)", expanded=False):
         st.markdown(r"""
 ### Why use Bayes for DFI at all?
 
@@ -867,7 +866,7 @@ For **ESL attribution** there are two modes:
   then redistributing — useful when you want each pillar's defensible range to remain meaningful after the update.
 """)
 
-    with _tab_maths.expander("⚫ 🧮 Alternative: Characteristic scoring (Simm 2016 + Monigle 2025)", expanded=False):
+    with _tab_maths.expander("Alternative: Characteristic scoring (Simm 2016 + Monigle 2025)", expanded=False):
         st.markdown(
             "The 8-outcome SAAM Bayes above is one of **two** pathways the app supports "
             "for deriving the DHI strength R. The second pathway — **characteristic "
@@ -1065,7 +1064,7 @@ For **ESL attribution** there are two modes:
         )
 
 
-    with _tab_start.expander("🟢 🛠 How to use this tool — step-by-step workflow", expanded=False):
+    with _tab_start.expander("How to use this tool — step-by-step workflow", expanded=False):
         st.markdown(r"""
 ### Prerequisites
 
@@ -1140,7 +1139,7 @@ In the Audit Trail:
 - Final P(G | DFI, ESL) and P(G | DFI, Classic), plus the spread between them.
 """)
 
-    with _tab_start.expander("🔵 🌳 DFI decision tree — should I apply the update?", expanded=False):
+    with _tab_start.expander("DFI decision tree — should I apply the update?", expanded=False):
         st.markdown(r"""
 Use this tree before turning on the DFI toggle. **Stop and reconsider** at any 'No' branch.
 
@@ -1193,7 +1192,7 @@ Q1.  Do you have seismic coverage of the prospect with adequate
 You can still use E-POS — just **leave the toggle OFF**. The dashboard will show only the ESL and Classic priors. The audit trail should record *why* DFI was not applied (no seismic, no SAAM score, or judgement that it is uninformative).
 """)
 
-    with _tab_practice.expander("🔵 ⚠️ DFI pitfalls & calibration tips", expanded=False):
+    with _tab_practice.expander("DFI pitfalls & calibration tips", expanded=False):
         st.markdown(r"""
 ### Pitfall 1 — Over-confident water fraction
 
@@ -1252,7 +1251,7 @@ After computing the posterior, ask: *does this number match what I'd expect from
 R = 3 means *the observation is 3× more likely under success than under failure*. Ask: *is this seismic anomaly really 3× more diagnostic than my prior suggests?* If you can't articulate the answer in geophysical terms, R is probably overstated and the SAAM class assignment may be wrong.
 """)
 
-    with _tab_practice.expander("🔵 📋 DFI reporting — what to include in a prospect write-up", expanded=False):
+    with _tab_practice.expander("DFI reporting — what to include in a prospect write-up", expanded=False):
         st.markdown(r"""
 ### Minimum reportable set
 
@@ -1332,7 +1331,7 @@ In these cases the audit trail must state: *"Posterior shown for completeness; r
 The Final Prospect POS Summary's **download (.txt)** button produces this audit trail in a copy-paste-ready format.
 """)
 
-    with _tab_practice.expander("🔵 📐 DHI → volumetrics: joining geological & DFI-defined volumes",
+    with _tab_practice.expander("DHI → volumetrics: joining geological & DFI-defined volumes",
                                 expanded=False):
         st.markdown(r"""
 A DHI doesn't only change **risk** — Monigle 2025 stress it should also constrain the
@@ -1375,7 +1374,7 @@ likelihoods against the DHI score before committing the volume distribution.
 recommendation on the current prospect.*
 """)
 
-    with _tab_practice.expander("🔵 📏 Calibration guidance", expanded=False):
+    with _tab_practice.expander("Calibration guidance", expanded=False):
         st.markdown("""
 ### Calibration — what do the numbers mean?
 
@@ -1404,7 +1403,7 @@ including which papers are bundled as PDFs with the project.
     # ═══════════════════════════════════════════════════════════════════════
     # 📚 KEY REFERENCES & SOURCE PAPERS
     # ═══════════════════════════════════════════════════════════════════════
-    with _tab_ref.expander("🟢 📚 Key references & source papers", expanded=False):
+    with _tab_ref.expander("Key references & source papers", expanded=False):
         st.markdown("""
 The methods in E-POS are grounded in published literature. References are grouped
 by the part of the tool they underpin. Items marked **📄 in library** are bundled
@@ -1462,7 +1461,7 @@ ships with E-POS.*
     # ═══════════════════════════════════════════════════════════════════════
     # 📖 UNIFIED GLOSSARY — ESL/Classic + DFI in one place
     # ═══════════════════════════════════════════════════════════════════════
-    with _tab_ref.expander("🟢 📖 Glossary & Abbreviations (ESL + DFI)", expanded=False):
+    with _tab_ref.expander("Glossary & Abbreviations (ESL + DFI)", expanded=False):
         st.markdown(r"""
 A single reference for every term in E-POS — the ESL/Classic core and the Bayesian DFI workflow.
 

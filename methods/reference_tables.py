@@ -1066,9 +1066,9 @@ def render_reference_tables() -> None:
     # METHOD TABS
     # ════════════════════════════════════════════════════════════════════════
     m_tab, mal_tab, ccop_tab = st.tabs([
-        "📗 Milkov (2015) — 6 factors",
-        "📘 Malvić (2009) — 5 factors",
-        "📙 CCOP (2000) — 5 factors / 7 sections",
+        "Milkov (2015) — 6 factors",
+        "Malvić (2009) — 5 factors",
+        "CCOP (2000) — 5 factors / 7 sections",
     ])
 
     # ── MILKOV 2015 ──────────────────────────────────────────────────────────

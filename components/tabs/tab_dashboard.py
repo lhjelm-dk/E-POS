@@ -60,7 +60,7 @@ def _render_dashboard_tab(ctx) -> None:
         isinstance(el, dict) and (el.get("support_for", 0) > 0 or el.get("support_against", 0) > 0)
         for el in play.values()
     )
-    with st.expander("🗺️ How E-POS works — workflow overview (click to open)", expanded=not _has_any_evidence):
+    with st.expander("How E-POS works — workflow overview (click to open)", expanded=not _has_any_evidence):
         # Concept flowchart as HTML table — no external dependencies
         st.markdown(
             """
@@ -163,7 +163,7 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
                 "unknowns the benefit of the doubt (optimistic). It changes only how "
                 "unknowns are scored — never the hard evidence itself."
             )
-            with st.expander("ℹ️ What is Stance on unknowns (w)?", expanded=False):
+            with st.expander("What is Stance on unknowns (w)?", expanded=False):
                 st.markdown(
                     "**Stance (w)** controls how the uncommitted *white* evidence contributes to POS:\n\n"
                     "| w | Interpretation |\n|---|---|\n"
@@ -576,7 +576,7 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
     st.divider()
 
     # Prospect Risk Data — export / import
-    with st.expander("📁 Prospect Risk Data — export & import", expanded=False):
+    with st.expander("Prospect Risk Data — export & import", expanded=False):
         _esl_result = _compute_esl_for_hub(models)
         if _esl_result:
             _logic_rows, _node_index, _mode_index, _dep_index = _esl_result
@@ -691,7 +691,7 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
 
     # Sign-off + Risk Model
     st.divider()
-    with st.expander("✍️ Assessment Sign-off & Audit Trail", expanded=False):
+    with st.expander("Assessment Sign-off & Audit Trail", expanded=False):
         from components.audit import render_audit_panel
         render_audit_panel(
             pos=policy_pos(total_for, total_against, uncertainty_weight),

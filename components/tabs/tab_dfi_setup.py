@@ -49,7 +49,7 @@ def _render_dfi_setup(ctx) -> None:
         unsafe_allow_html=True,
     )
     with st.container(border=True):
-        st.markdown("### 🔀 DFI evidence source")
+        st.markdown("### DFI evidence source")
         source = st.radio(
             "Choose how the DHI strength R is derived:",
             options=["DHI Index (SAAM)", "Characteristic scoring (Monigle 2025)",
@@ -135,7 +135,7 @@ def _render_dfi_setup(ctx) -> None:
             "(conservative SD, water-dominated failure mix, attribution A) suit "
             "most prospects — open **Advanced** only to override them."
         )
-        with st.expander("⚙️ Advanced / Research inputs — SD mode · fluid mix · attribution",
+        with st.expander("Advanced / Research inputs — SD mode · fluid mix · attribution",
                          expanded=False):
             sd_mode = st.radio(
                 "**SD mode**",
@@ -284,7 +284,7 @@ def _render_dfi_setup(ctx) -> None:
     _render_geox_pdfi_panel(dhi, calib, sd_mode, fluid_type)
 
     # ── Calibration editor (collapsed by default) ──
-    with st.expander("📐 Edit calibration values (live update affects bell curves and posteriors)", expanded=False):
+    with st.expander("Edit calibration values (live update affects bell curves and posteriors)", expanded=False):
         _render_calibration_editor(calib)
 
 
@@ -686,7 +686,7 @@ def _render_dfi_setup_characteristic(ctx) -> None:
 
     # ── Per-attribute success-rate "small multiples" (the data behind each LR) ──
     from components.colors import cos_color as _cos
-    with st.expander("📊 Per-attribute success rates — the drilled-prospect data behind each LR",
+    with st.expander("Per-attribute success rates — the drilled-prospect data behind each LR",
                      expanded=False):
         st.caption(
             "For each attribute: the **observed success rate** of every verbal category "
@@ -852,7 +852,7 @@ def _render_dfi_setup_characteristic(ctx) -> None:
     )
 
     # ── Simm 2016 Rule-of-Thumb reference tile ──
-    with st.expander("📖 Simm 2016 R Rule-of-Thumb — sanity-check reference", expanded=False):
+    with st.expander("Simm 2016 R Rule-of-Thumb — sanity-check reference", expanded=False):
         st.markdown(
             "Independent reference scale from **Simm (2016)** — uncalibrated R values "
             "for typical prospect scenarios. Compare your R_eff above against this "
@@ -890,7 +890,7 @@ def _render_dfi_setup_custom(ctx) -> None:
         render_simm_verdict_banner, SIMM_BAND_EDGES, SIMM_R_TICKS,
     )
 
-    st.markdown("### 🛠️ Custom R tool — define your own DHI likelihoods")
+    st.markdown("### Custom R tool — define your own DHI likelihoods")
     st.info(
         "**What the curves mean in the geological risk model.**  \n"
         "• **Success cases** (Oil / Gas / Oil+Gas in an evaluable reservoir) describe how a "
@@ -941,13 +941,13 @@ def _render_dfi_setup_custom(ctx) -> None:
     if not multicase:
         col_hc, col_no = st.columns(2)
         with col_hc:
-            st.markdown("##### 🟢 P(DFI | HC) — success curve")
+            st.markdown("##### P(DFI | HC) — success curve")
             hc_p1  = st.number_input("HC min (P1)",  value=_f("dfi_custom_hc_p1",  -50.0),
                                      min_value=-200.0, max_value=200.0, step=5.0, key="dfi_custom_hc_p1")
             hc_p99 = st.number_input("HC max (P99)", value=_f("dfi_custom_hc_p99", 100.0),
                                      min_value=-200.0, max_value=200.0, step=5.0, key="dfi_custom_hc_p99")
         with col_no:
-            st.markdown("##### 🔴 P(DFI | No-HC) — failure curve")
+            st.markdown("##### P(DFI | No-HC) — failure curve")
             no_p1  = st.number_input("No-HC min (P1)",  value=_f("dfi_custom_no_p1",  -100.0),
                                      min_value=-200.0, max_value=200.0, step=5.0, key="dfi_custom_no_p1")
             no_p99 = st.number_input("No-HC max (P99)", value=_f("dfi_custom_no_p99", 50.0),
@@ -1001,7 +1001,7 @@ def _render_dfi_setup_custom(ctx) -> None:
             "You can type any positive numbers — they are converted to percentages internally, "
             "so only their *ratios* matter. The normalised mix is shown below each group."
         )
-        st.markdown("##### 🟢 Success cases (hydrocarbons present)")
+        st.markdown("##### Success cases (hydrocarbons present)")
         _case_inputs(SUCCESS_KEYS, green, "Success")
         _succ_sum = sum(max(weights[k], 0.0) for k in SUCCESS_KEYS) or 1.0
         st.caption(
@@ -1009,7 +1009,7 @@ def _render_dfi_setup_custom(ctx) -> None:
             + ", ".join(f"{CASE_LABELS[k]} **{weights[k]/_succ_sum:.0%}**" for k in SUCCESS_KEYS)
             + f"  *(entered weights sum to {sum(weights[k] for k in SUCCESS_KEYS):.2f})*"
         )
-        st.markdown("##### 🔴 Failure cases (no producible HC)")
+        st.markdown("##### Failure cases (no producible HC)")
         _case_inputs(FAILURE_KEYS, red, "Failure")
         _fail_sum = sum(max(weights[k], 0.0) for k in FAILURE_KEYS) or 1.0
         st.caption(

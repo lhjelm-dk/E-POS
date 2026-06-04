@@ -51,7 +51,7 @@ def _render_geox_pdfi_panel(dhi, calib, sd_mode, fluid_type) -> None:
     raw_res = v_res / _GEOX_PDFI_SCALE
     ratio_hc_res = (v_hc / v_res) if v_res > 0 else float("inf")
 
-    with st.expander("❓ What these values are, and why only their *relative* size matters", expanded=False):
+    with st.expander("What these values are, and why only their *relative* size matters", expanded=False):
         st.markdown(
             "**What the six cases mean in the geological risk model**  \n"
             "A \"case\" is one possible *ground truth* the prospect could turn out to be — a "
@@ -117,7 +117,7 @@ def _render_geox_pdfi_panel(dhi, calib, sd_mode, fluid_type) -> None:
         f"{' (placeholder)' if calib.is_placeholder else ''}\n"
         + "\n".join(f"  {lbl:<32} {val}" for lbl, val, _src in rows)
     )
-    with st.expander("📋 Copy / download these values", expanded=False):
+    with st.expander("Copy / download these values", expanded=False):
         st.code(txt, language="text")
         st.download_button(
             "📥 Download GeoX P(DFI|case) (.txt)", data=txt,

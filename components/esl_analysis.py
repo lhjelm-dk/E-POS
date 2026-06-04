@@ -348,7 +348,7 @@ def _render_esl_ratio_plot_and_validation(
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    with st.expander("🔍 Input Validation", expanded=False):
+    with st.expander("Input Validation", expanded=False):
         st.caption("Automated checks for logical consistency and unassessed defaults. Resolve errors before use in any investment decision.")
         validation_issues = run_input_validation(play, conditional, conditional_results, total_for, total_against)
         if not validation_issues:

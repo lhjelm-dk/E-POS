@@ -86,8 +86,8 @@ def _render_dfi_tab(ctx) -> None:
         _render_dfi_pillar_warning(ctx)
 
     sub_setup, sub_results = st.tabs([
-        "⚙️ DFI Setup",
-        "\U0001f4ca DFI Results",
+        "DFI Setup",
+        "DFI Results",
     ])
 
     with sub_setup:
