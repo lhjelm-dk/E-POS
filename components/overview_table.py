@@ -416,23 +416,31 @@ def _render_esl_table(data: dict) -> None:
             # posterior gets the *same* envelope representation as the prior.
             arrow = "↑" if dpp > 0.05 else ("↓" if dpp < -0.05 else "→")
             dc = "#16a34a" if dpp >= 0 else "#dc2626"
+            # Prior — muted (it's the "before"; the eye should land on the after).
             if prior_env and prior_env[0] is not None and prior_env[1] is not None:
-                prior_cell = (f"<td class='flag-cell' colspan='2'>"
-                              f"{_classic_range_flag(prior_env[0], prior, prior_env[1])}</td>")
+                prior_inner = _classic_range_flag(prior_env[0], prior, prior_env[1])
             else:
-                prior_cell = f"<td class='prob-cell' colspan='2'>{prior*100:.1f}%</td>"
-            if post_env and post_env[0] is not None and post_env[1] is not None:
-                post_cell = (f"<td class='flag-cell'>"
-                             f"{_classic_range_flag(post_env[0], post, post_env[1])}</td>")
-            else:
-                post_cell = f"<td class='prob-cell' style='font-weight:700;'>{post*100:.1f}%</td>"
+                prior_inner = f"<span style='color:#6b7280;'>{prior*100:.1f}%</span>"
+            prior_cell = (f"<td class='flag-cell' colspan='2' style='opacity:0.6;'>"
+                          f"{prior_inner}</td>")
+            # Posterior — PROMINENT: big bold value + flag, accent panel + left border.
+            post_flag = (_classic_range_flag(post_env[0], post, post_env[1])
+                         if post_env and post_env[0] is not None and post_env[1] is not None
+                         else "")
+            post_cell = (
+                "<td class='flag-cell' style='background:#eff6ff;"
+                "border-left:4px solid #2563eb;'>"
+                f"<div style='font-size:19px;font-weight:800;color:#0f172a;"
+                f"line-height:1.1;'>{post*100:.1f}%</div>"
+                f"{post_flag}</td>"
+            )
             return (
                 "<tr class='data-row'>"
                 f"<td class='pillar-name'>{emoji} {name}</td>"
                 + prior_cell
                 + "<td class='sep-col'></td>"
                 + post_cell
-                + f"<td class='prob-cell' style='color:{dc};font-weight:700;'>"
+                + f"<td class='prob-cell' style='color:{dc};font-weight:800;font-size:15px;'>"
                 f"{arrow} {dpp:+.1f} pp</td>"
                 "</tr>"
             )
@@ -456,27 +464,6 @@ def _render_esl_table(data: dict) -> None:
                        post_env=(dfi.get("esl_post_bel"), dfi.get("esl_post_pl")))
             + _dfi_row("📊", "P(G, Classic)", dfi.get("classic_prior", 0.0),
                        dfi.get("classic_post", 0.0), dfi.get("classic_delta_pp", 0.0))
-        )
-
-        # ── Headline: the DFI posterior rendered as prominently as P(G, ESL) ──
-        _epost = dfi.get("esl_post", 0.0)
-        _cpost = dfi.get("classic_post", 0.0)
-        _pbel, _ppl = dfi.get("esl_post_bel"), dfi.get("esl_post_pl")
-        _post_flag = (_classic_range_flag(_pbel, _epost, _ppl)
-                      if _pbel is not None and _ppl is not None else "")
-        dfi_rows_html += (
-            "<tr class='sep-row'><td colspan='6'></td></tr>"
-            "<tr class='summary-row'>"
-            "<td class='row-label'>DFI Posterior</td>"
-            "<td class='result-value' colspan='2'>"
-            "<span class='result-label-text'>P(G | DFI, ESL)</span>"
-            f"<span class='result-number'>{_epost*100:.0f}%</span>"
-            f"{_post_flag}</td>"
-            "<td class='sep-col'></td>"
-            "<td class='result-value' colspan='2'>"
-            "<span class='result-label-text'>P(G | DFI, Classic)</span>"
-            f"<span class='result-number'>{_cpost*100:.0f}%</span></td>"
-            "</tr>"
         )
 
     html = f"""<style>{_shared_table_styles()}</style>
@@ -540,7 +527,7 @@ def _render_esl_table(data: dict) -> None:
   </table>
 </div>"""
 
-    st.components.v1.html(html, height=(840 if dfi else 600), scrolling=False)
+    st.components.v1.html(html, height=(740 if dfi else 600), scrolling=False)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
