@@ -93,7 +93,7 @@ def render_summary_report(
 
     lines = [
         f"# E-POS Assessment: {prospect_title}",
-        "# Evidence-supported probability of success for geological prospects.",
+        "# Evidence-supported probability of success for oil and gas prospects.",
         "# By Lars Hjelm",
         f"Date: {datetime.date.today()}",
         "",

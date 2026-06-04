@@ -925,7 +925,7 @@ def _render_dfi_setup_custom(ctx) -> None:
     slider = st.slider(
         "**DHI strength** (your observed reading on the −100…+100 axis)",
         min_value=-100.0, max_value=100.0,
-        value=_f("dfi_custom_slider", 25.0), step=1.0, key="dfi_custom_slider",
+        value=_f("dfi_custom_slider", 7.0), step=1.0, key="dfi_custom_slider",
         help="Where on the DHI-strength axis your prospect sits. R is read off the "
              "bell curves at this point.",
     )

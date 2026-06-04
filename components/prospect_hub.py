@@ -543,7 +543,7 @@ def _build_full_export_csv(
     buf = io.StringIO()
     w = csv.writer(buf)
 
-    w.writerow(["## E-POS — Evidence supported probability of success for geological prospects."])
+    w.writerow(["## E-POS — Evidence supported probability of success for oil and gas prospects."])
     w.writerow(["Prospect", meta_title])
     w.writerow(["Analyst", meta_analyst])
     w.writerow(["Basin/Play", meta_basin])

@@ -739,7 +739,7 @@ st.markdown(
             <span style="width:33%;background:#d64545;height:100%;display:inline-block;"></span>
         </span>
         <span style="font-size:1.05rem; color:#374151; font-weight:500;">
-            Evidence supported probability of success for geological prospects.
+            Evidence supported probability of success for oil and gas prospects.
         </span>
         <br>
         <span style="font-size:0.72rem; color:#9CA3AF; font-style:italic; margin-left:44px;">

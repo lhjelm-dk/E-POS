@@ -209,7 +209,7 @@ CASE_WEIGHT_DEFAULTS: dict[str, float] = {
 }
 
 # Default DHI-strength slider reading (seeds the UI on first activation).
-DEFAULT_SLIDER: float = 25.0
+DEFAULT_SLIDER: float = 7.0
 
 
 @dataclass(frozen=True)
