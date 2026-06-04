@@ -250,6 +250,55 @@ P(G) = P(Play) × P(Cond)
 ```
 """)
 
+    with _tab_concepts.expander("Bayesian updating in 2 minutes — a non-geological primer", expanded=False):
+        st.markdown(r"""
+Before the DFI maths, the **one idea** behind every probability update in E-POS:
+
+> **A Bayesian update revises a prior belief in light of new evidence — it does
+> not replace it.** Strong evidence on top of a weak prior still gives a guarded
+> answer. Evidence acts as a *multiplier on the odds*, not a verdict.
+
+The cleanest form uses **odds** and a **likelihood ratio (LR)**:
+""")
+        st.latex(r"\underbrace{\text{posterior odds}}_{\text{after evidence}}"
+                 r"\;=\;\underbrace{\text{prior odds}}_{\text{before evidence}}"
+                 r"\;\times\;\underbrace{\text{LR}}_{\text{strength of evidence}}")
+        st.markdown(r"""
+**LR** = how much more likely the observation is if the hypothesis is true than if
+it is false. LR > 1 pushes the belief up; LR < 1 pushes it down; LR = 1 changes
+nothing.
+
+#### Worked example — a medical test (the classic base-rate lesson)
+A disease affects **1 %** of people (the *prior*). A test is **99 %** sensitive
+(detects true cases) and has a **5 %** false-positive rate. You test **positive** —
+what is the chance you actually have it?
+
+| Step | Value |
+|------|-------|
+| Prior odds | 0.01 / 0.99 ≈ **0.0101** |
+| Likelihood ratio | 0.99 / 0.05 ≈ **19.8** |
+| Posterior odds | 0.0101 × 19.8 ≈ **0.20** |
+| **Posterior probability** | 0.20 / 1.20 ≈ **17 %** |
+
+A *99 % accurate* test still leaves you **~17 %** likely to have the disease — because
+the **base rate was low**. The evidence multiplied the odds ~20×, but starting from a
+tiny prior. **The prior matters as much as the evidence.**
+
+#### How this maps to E-POS
+| Medical example | E-POS DFI update |
+|---|---|
+| Disease prevalence (prior) | Geological **P(G)** (ESL or Classic) |
+| Test result (evidence) | The **DHI / DFI** observation |
+| Likelihood ratio | **R** (= R_SAAM / R_char / custom R) |
+| Post-test probability | **P(G \| DFI)** posterior |
+
+This is *exactly* the engine behind the DFI update — only the likelihood ratio is
+computed from seismic amplitude statistics instead of a clinical trial.
+
+➡️ *For the full geological derivation (how R comes from the likelihoods), see the
+**The maths** tab.*
+""")
+
     with _tab_concepts.expander("Chance Adequacy Matrix (CAM) — interpretation guide", expanded=False):
         st.markdown(r"""
 ### What the CAM shows
