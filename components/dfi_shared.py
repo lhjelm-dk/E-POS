@@ -354,33 +354,45 @@ def render_volumetrics_recommendation(
         "trial weight. They are related but not the same number."
     )
 
-    # ── Headline recommendation ──
+    # ── Primary blend: linear V-mixture (Monigle use the DHI rating directly) ──
+    _w_dfi = rec.dhi_score          # blend weight on the DFI-defined volume = V / DHI score
     st.markdown(
         f"<div style='background:#ecfeff;border-left:5px solid #0891b2;border-radius:6px;"
         f"padding:10px 14px;margin:6px 0;'>"
-        f"<b style='color:#0e7490;'>Recommended blend (Monigle column-height):</b> "
-        f"{rec.headline}</div>",
+        f"<b style='color:#0e7490;'>Recommended blend (linear V-mixture):</b> weight the "
+        f"<b>DFI-defined</b> volume at <b>{_w_dfi*100:.0f}%</b> and the "
+        f"<b>geological/structural</b> volume at <b>{(1-_w_dfi)*100:.0f}%</b> — i.e. the "
+        f"combined HC–water-contact distribution = {_w_dfi*100:.0f}%·DFI + "
+        f"{(1-_w_dfi)*100:.0f}%·Geo. Enter the contact elevations below to see the mixture.</div>",
         unsafe_allow_html=True,
     )
 
-    # ── Monigle Fig. 8 weighting curve ──
-    xs = np.linspace(0.0, 1.0, 101)
-    ys = [column_height_weight(x) * 100 for x in xs]
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=[x*100 for x in xs], y=ys, mode="lines",
-                             line=dict(color="#0891b2", width=2.5), name="w_ch"))
-    fig.add_hline(y=HIGH_DHI_TRIAL_WEIGHT*100, line_dash="dot", line_color="#94a3b8",
-                  annotation_text="95% cap", annotation_position="right")
-    fig.add_vline(x=50, line_dash="dot", line_color="#94a3b8")
-    fig.add_trace(go.Scatter(
-        x=[rec.dhi_score*100], y=[rec.w_ch*100], mode="markers",
-        marker=dict(symbol="star", size=16, color="#0e7490",
-                    line=dict(color="white", width=1.5)),
-        name="this prospect", hoverinfo="skip", showlegend=False))
-    fig.update_xaxes(title_text="DHI score (%)", range=[0, 100])
-    fig.update_yaxes(title_text="HCWC-at-DFI-elevation trial weight (%)", range=[0, 100])
-    fig.update_layout(height=300, margin=dict(t=10, b=40, l=55, r=20), showlegend=False)
-    st.plotly_chart(fig, use_container_width=True, key=f"{key}_curve")
+    # ── Data-driven HCWC mixture figure (Geo × DFI → Combined) ──
+    _render_hcwc_mixture(_w_dfi, key=key)
+
+    # ── Monigle column-height weighting (secondary / alternative) ──
+    with st.expander("Alternative weighting — Monigle column-height (Fig. 8)", expanded=False):
+        st.markdown(
+            f"A more aggressive operational rule: honour the DFI contact in "
+            f"**{rec.w_ch*100:.0f}%** of trials (w = min(95%, 2 × score)). {rec.headline}"
+        )
+        xs = np.linspace(0.0, 1.0, 101)
+        ys = [column_height_weight(x) * 100 for x in xs]
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=[x*100 for x in xs], y=ys, mode="lines",
+                                 line=dict(color="#0891b2", width=2.5), name="w_ch"))
+        fig.add_hline(y=HIGH_DHI_TRIAL_WEIGHT*100, line_dash="dot", line_color="#94a3b8",
+                      annotation_text="95% cap", annotation_position="right")
+        fig.add_vline(x=50, line_dash="dot", line_color="#94a3b8")
+        fig.add_trace(go.Scatter(
+            x=[rec.dhi_score*100], y=[rec.w_ch*100], mode="markers",
+            marker=dict(symbol="star", size=16, color="#0e7490",
+                        line=dict(color="white", width=1.5)),
+            name="this prospect", hoverinfo="skip", showlegend=False))
+        fig.update_xaxes(title_text="DHI score (%)", range=[0, 100])
+        fig.update_yaxes(title_text="HCWC-at-DFI-elevation trial weight (%)", range=[0, 100])
+        fig.update_layout(height=300, margin=dict(t=10, b=40, l=55, r=20), showlegend=False)
+        st.plotly_chart(fig, use_container_width=True, key=f"{key}_curve")
 
     # ── Consistency gates ──
     st.markdown("**Volumetric consistency checks**")
@@ -390,4 +402,62 @@ def render_volumetrics_recommendation(
         "Source: Monigle et al. (2025), Figs. 8 & 10 and the porosity discussion. "
         "This is interpretive guidance for building the volumetric distribution, not a "
         "Monte-Carlo engine — enter the resulting ranges in your volumetrics tool."
+    )
+
+
+def _render_hcwc_mixture(dfi_weight: float, *, key: str) -> None:
+    """Data-driven HC–water-contact (HCWC) mixture figure: geological vs DFI-defined
+    contact distributions blended at ``dfi_weight`` (= DHI score / Volume Weight V).
+
+    Three vertical density panels over an elevation axis (apex at top, spill at base):
+    Geo-VOL (broad, structural), DFI-VOL (narrow, at the rated contact), and the
+    Combined linear V-mixture. Mirrors the Monigle 2025 HCWC schematic but driven by
+    the analyst's own contact elevations.
+    """
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+    from logic.dfi_volumetrics import hcwc_mixture
+
+    st.markdown("**HCWC distribution — geological × DFI-defined (linear V-mixture)**")
+    ca, cb, cc = st.columns(3)
+    apex   = ca.number_input("Apex elevation (m)",          value=-2000.0, step=10.0, key=f"{key}_apex")
+    spill  = ca.number_input("Spill elevation (m)",         value=-2500.0, step=10.0, key=f"{key}_spill")
+    geo_c  = cb.number_input("Geological best contact (m)", value=-2350.0, step=10.0, key=f"{key}_geoc")
+    geo_sd = cb.number_input("Geological spread (± m)",     value=90.0, min_value=1.0, step=5.0, key=f"{key}_geosd")
+    dfi_c  = cc.number_input("DFI-rated contact (m)",       value=-2300.0, step=10.0, key=f"{key}_dfic")
+    dfi_sd = cc.number_input("DFI spread (± m)",            value=25.0, min_value=1.0, step=5.0, key=f"{key}_dfisd")
+
+    xs, geo, dfi, comb = hcwc_mixture(apex, spill, geo_c, geo_sd, dfi_c, dfi_sd, dfi_weight)
+    w = max(0.0, min(1.0, float(dfi_weight)))
+
+    fig = make_subplots(
+        rows=1, cols=3, shared_yaxes=True, horizontal_spacing=0.04,
+        subplot_titles=(f"Geo-VOL ({(1-w)*100:.0f}%)", f"DFI-VOL ({w*100:.0f}%)", "Combined"),
+    )
+    _panels = [
+        (geo,  "#15803d", "rgba(34,197,94,0.30)", 1),
+        (dfi,  "#7e22ce", "rgba(216,180,254,0.45)", 2),
+        (comb, "#b45309", "rgba(245,158,11,0.35)", 3),
+    ]
+    for pdf, line, fill, col in _panels:
+        fig.add_trace(go.Scatter(x=pdf, y=xs, mode="lines", fill="tozerox",
+                                 line=dict(color=line, width=2), fillcolor=fill,
+                                 hoverinfo="skip", showlegend=False), row=1, col=col)
+        fig.add_hline(y=apex,  line_dash="dash", line_color="#94a3b8", line_width=1, row=1, col=col)
+        fig.add_hline(y=spill, line_dash="dash", line_color="#94a3b8", line_width=1, row=1, col=col)
+    # Apex/Spill labels on the left panel
+    fig.add_annotation(x=0, y=apex,  xref="x1", yref="y1", text="Apex", showarrow=False,
+                       xanchor="left", yanchor="bottom", font=dict(size=10, color="#64748b"))
+    fig.add_annotation(x=0, y=spill, xref="x1", yref="y1", text="Spill", showarrow=False,
+                       xanchor="left", yanchor="top", font=dict(size=10, color="#64748b"))
+    fig.update_yaxes(title_text="HCWC elevation (m)", row=1, col=1)
+    fig.update_xaxes(visible=False)
+    fig.update_layout(height=400, margin=dict(t=34, b=10, l=60, r=10), showlegend=False)
+    st.plotly_chart(fig, use_container_width=True, key=f"{key}_mix")
+    st.caption(
+        f"**Combined HCWC = {(1-w)*100:.0f}% · Geo-VOL + {w*100:.0f}% · DFI-VOL** "
+        f"(the DFI weight is the DHI score / Volume Weight V). A strong DHI pulls the "
+        "combined contact toward the narrow DFI-rated elevation; a weak DHI reverts to "
+        "the broad geological estimate bounded by apex and spill. Use the resulting "
+        "combined distribution for the column-height / HCWC input to your volumetrics."
     )

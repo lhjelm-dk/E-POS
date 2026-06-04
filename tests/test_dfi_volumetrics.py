@@ -4,9 +4,31 @@ from logic.dhi_characteristics import (
     cap_for_bucket, simm_bayes_posterior, DISCERNIBILITY_CAPS, R_FLOOR, R_HARD_CAP,
 )
 from logic.dfi_volumetrics import (
-    column_height_weight, volumetrics_recommendation,
+    column_height_weight, volumetrics_recommendation, hcwc_mixture,
     HIGH_DHI_TRIAL_WEIGHT, POROSITY_FLOOR,
 )
+
+
+def _area(xs, p):
+    return sum((p[i] + p[i + 1]) / 2 * (xs[i + 1] - xs[i]) for i in range(len(p) - 1))
+
+
+def test_hcwc_mixture_normalised_and_blended():
+    xs, geo, dfi, comb = hcwc_mixture(-2000, -2500, -2350, 90, -2300, 25, 0.68)
+    # each density integrates to ~1
+    for p in (geo, dfi, comb):
+        assert abs(_area(xs, p) - 1.0) < 1e-6
+    # combined peak is pulled toward the DFI contact (w=0.68 > 0.5)
+    peak = xs[max(range(len(comb)), key=lambda i: comb[i])]
+    assert -2320 < peak < -2290          # near the DFI contact (-2300)
+
+
+def test_hcwc_mixture_weight_extremes():
+    # w=0 -> combined == geo;  w=1 -> combined == dfi
+    xs, geo, dfi, comb0 = hcwc_mixture(-2000, -2500, -2350, 90, -2300, 25, 0.0)
+    _, _, _, comb1 = hcwc_mixture(-2000, -2500, -2350, 90, -2300, 25, 1.0)
+    assert max(abs(a - b) for a, b in zip(comb0, geo)) < 1e-9
+    assert max(abs(a - b) for a, b in zip(comb1, dfi)) < 1e-9
 
 
 # ── Discernibility-aware cap ────────────────────────────────────────────────

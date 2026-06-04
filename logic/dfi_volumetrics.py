@@ -53,6 +53,50 @@ def column_height_weight(dhi_score: float) -> float:
     return min(HIGH_DHI_TRIAL_WEIGHT, 2.0 * s)
 
 
+def hcwc_mixture(
+    apex: float, spill: float,
+    geo_contact: float, geo_sd: float,
+    dfi_contact: float, dfi_sd: float,
+    dfi_weight: float, n: int = 240,
+) -> tuple[list[float], list[float], list[float], list[float]]:
+    """Linear V-mixture of the geological and DFI-defined HC-water-contact (HCWC)
+    elevation distributions.
+
+    Returns ``(elevations, geo_pdf, dfi_pdf, combined_pdf)`` over an elevation grid
+    spanning [spill, apex]. Each density is a (truncated-by-grid) Gaussian normalised
+    to unit area; the combined density is the convex mixture
+
+        combined = (1 − w) · Geo  +  w · DFI
+
+    where ``w = dfi_weight`` is the weight on the DFI-defined volume — i.e. the DHI
+    score / SAAM DHI Volume Weight V (Monigle 2025 use the DHI rating directly as the
+    blend weight; this is the 68%/32% split in their HCWC figure). A higher V → the
+    combined contact follows the (narrow) DFI distribution; a lower V → it reverts to
+    the (broad) geological/structural estimate bounded by apex and spill.
+    """
+    import math
+
+    lo, hi = (spill, apex) if spill <= apex else (apex, spill)
+    if hi - lo < 1e-9:
+        hi = lo + 1.0
+    xs = [lo + (hi - lo) * i / (n - 1) for i in range(n)]
+
+    def _gauss(x: float, mu: float, sd: float) -> float:
+        sd = max(abs(sd), 1e-6)
+        z = (x - mu) / sd
+        return math.exp(-0.5 * z * z) / (sd * math.sqrt(2.0 * math.pi))
+
+    def _norm(p: list[float]) -> list[float]:
+        area = sum((p[i] + p[i + 1]) / 2.0 * (xs[i + 1] - xs[i]) for i in range(len(p) - 1))
+        return [v / area for v in p] if area > 0 else p
+
+    geo = _norm([_gauss(x, geo_contact, geo_sd) for x in xs])
+    dfi = _norm([_gauss(x, dfi_contact, dfi_sd) for x in xs])
+    w = max(0.0, min(1.0, float(dfi_weight)))
+    comb = _norm([(1.0 - w) * g + w * d for g, d in zip(geo, dfi)])
+    return xs, geo, dfi, comb
+
+
 @dataclass(frozen=True)
 class VolumetricsRecommendation:
     """Structured DHI→volumetrics blend recommendation for one prospect."""
