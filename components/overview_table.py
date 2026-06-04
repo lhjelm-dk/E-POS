@@ -415,32 +415,33 @@ def _render_esl_table(data: dict) -> None:
             # prior_env / post_env = (bel, pl) → render a Bel·POS·Pl range flag so the
             # posterior gets the *same* envelope representation as the prior.
             arrow = "↑" if dpp > 0.05 else ("↓" if dpp < -0.05 else "→")
-            dc = "#16a34a" if dpp >= 0 else "#dc2626"
+            dc = "#22c55e" if dpp >= 0 else "#f87171"   # brighter for the dark row
             # Prior — muted (it's the "before"; the eye should land on the after).
             if prior_env and prior_env[0] is not None and prior_env[1] is not None:
                 prior_inner = _classic_range_flag(prior_env[0], prior, prior_env[1])
             else:
-                prior_inner = f"<span style='color:#6b7280;'>{prior*100:.1f}%</span>"
-            prior_cell = (f"<td class='flag-cell' colspan='2' style='opacity:0.6;'>"
+                prior_inner = f"<span style='color:#9ca3af;'>{prior*100:.1f}%</span>"
+            prior_cell = (f"<td colspan='2' style='text-align:center;opacity:0.55;'>"
                           f"{prior_inner}</td>")
-            # Posterior — PROMINENT: big bold value + flag, accent panel + left border.
+            # Posterior — PROMINENT: big white value + flag on a navy accent panel.
             post_flag = (_classic_range_flag(post_env[0], post, post_env[1])
                          if post_env and post_env[0] is not None and post_env[1] is not None
                          else "")
             post_cell = (
-                "<td class='flag-cell' style='background:#eff6ff;"
-                "border-left:4px solid #2563eb;'>"
-                f"<div style='font-size:19px;font-weight:800;color:#0f172a;"
+                "<td style='text-align:center;background:#1e3a5f;"
+                "border-left:4px solid #3b82f6;'>"
+                f"<div style='font-size:20px;font-weight:800;color:#ffffff;"
                 f"line-height:1.1;'>{post*100:.1f}%</div>"
                 f"{post_flag}</td>"
             )
+            # Dark navy row, matching the RESULT / SUMMARY rows.
             return (
-                "<tr class='data-row'>"
-                f"<td class='pillar-name'>{emoji} {name}</td>"
+                "<tr class='result-row'>"
+                f"<td class='row-label'>{emoji} {name}</td>"
                 + prior_cell
                 + "<td class='sep-col'></td>"
                 + post_cell
-                + f"<td class='prob-cell' style='color:{dc};font-weight:800;font-size:15px;'>"
+                + f"<td style='text-align:center;color:{dc};font-weight:800;font-size:15px;'>"
                 f"{arrow} {dpp:+.1f} pp</td>"
                 "</tr>"
             )
@@ -527,7 +528,7 @@ def _render_esl_table(data: dict) -> None:
   </table>
 </div>"""
 
-    st.components.v1.html(html, height=(740 if dfi else 600), scrolling=False)
+    st.components.v1.html(html, height=(820 if dfi else 600), scrolling=False)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
