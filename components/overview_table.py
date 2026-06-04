@@ -458,6 +458,27 @@ def _render_esl_table(data: dict) -> None:
                        dfi.get("classic_post", 0.0), dfi.get("classic_delta_pp", 0.0))
         )
 
+        # ── Headline: the DFI posterior rendered as prominently as P(G, ESL) ──
+        _epost = dfi.get("esl_post", 0.0)
+        _cpost = dfi.get("classic_post", 0.0)
+        _pbel, _ppl = dfi.get("esl_post_bel"), dfi.get("esl_post_pl")
+        _post_flag = (_classic_range_flag(_pbel, _epost, _ppl)
+                      if _pbel is not None and _ppl is not None else "")
+        dfi_rows_html += (
+            "<tr class='sep-row'><td colspan='6'></td></tr>"
+            "<tr class='summary-row'>"
+            "<td class='row-label'>DFI Posterior</td>"
+            "<td class='result-value' colspan='2'>"
+            "<span class='result-label-text'>P(G | DFI, ESL)</span>"
+            f"<span class='result-number'>{_epost*100:.0f}%</span>"
+            f"{_post_flag}</td>"
+            "<td class='sep-col'></td>"
+            "<td class='result-value' colspan='2'>"
+            "<span class='result-label-text'>P(G | DFI, Classic)</span>"
+            f"<span class='result-number'>{_cpost*100:.0f}%</span></td>"
+            "</tr>"
+        )
+
     html = f"""<style>{_shared_table_styles()}</style>
 <div class="ov-wrap">
   <div class="ov-prospect-header">
@@ -519,7 +540,7 @@ def _render_esl_table(data: dict) -> None:
   </table>
 </div>"""
 
-    st.components.v1.html(html, height=(760 if dfi else 600), scrolling=False)
+    st.components.v1.html(html, height=(840 if dfi else 600), scrolling=False)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
