@@ -465,3 +465,93 @@ def _render_hcwc_mixture(dfi_weight: float, *, key: str) -> None:
         "the broad geological estimate bounded by apex and spill. Use the resulting "
         "combined distribution for the column-height / HCWC input to your volumetrics."
     )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PROTOTYPE — Dempster–Shafer DFI fusion (option B; experimental)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _ds_flag_bar(g: float, r: float, w: float, label: str) -> str:
+    """Inline green/white/red Italian-flag bar (HTML) for the Dempster prototype."""
+    gp, rp, wp = g * 100, r * 100, w * 100
+    return (
+        "<div style='margin:2px 0 8px;'>"
+        "<div style='display:flex;height:16px;width:230px;border:1px solid #94a3b8;"
+        "border-radius:3px;overflow:hidden;'>"
+        f"<div style='width:{gp:.1f}%;background:#2e9d5b;'></div>"
+        f"<div style='width:{wp:.1f}%;background:#f3f4f6;'></div>"
+        f"<div style='width:{rp:.1f}%;background:#d64545;'></div></div>"
+        f"<div style='font-size:11px;color:#64748b;'>{label} &nbsp;·&nbsp; "
+        f"G {gp:.0f}% W {wp:.0f}% R {rp:.0f}%</div></div>"
+    )
+
+
+def render_dempster_prototype(
+    ctx, dhi_score: float, *,
+    discernibility: float | None = None,
+    simm_posterior: float | None = None,
+    key: str = "ds",
+) -> None:
+    """Experimental: fuse the DFI into the ESL flag with Dempster's rule (option B).
+
+    Shows the ESL prior flag, the DFI-as-evidence flag (built from the DHI score and
+    discernibility, where discernibility = 1 − unknown mass), and the Dempster-fused
+    posterior flag — preserving green/white/red through the update instead of
+    collapsing to a point. Compares the fused point posterior to the main pathway's
+    Simm point posterior.
+    """
+    from logic.dfi_dempster import fuse_dfi_into_esl
+
+    with st.expander("Experimental — Dempster–Shafer DFI fusion (option B prototype)",
+                     expanded=False):
+        st.caption(
+            "A research alternative to the point-Bayes update: treat the DFI as **another "
+            "ESL evidence source** (green/white/red mass) and combine it with the prospect "
+            "flag using **Dempster's rule**. The DFI's **unknown (white) mass = 1 − "
+            "discernibility**, so a poorly-discernible DFI is automatically discounted, and "
+            "the posterior keeps its Italian-Flag structure rather than collapsing to a point."
+        )
+
+        _d_default = float(discernibility) if discernibility is not None else 1.0
+        d = st.slider(
+            "Discernibility d (unknown mass = 1 − d)", 0.0, 1.0, _d_default, 0.05,
+            key=f"{key}_disc",
+            help=("How much the DFI can be trusted. In the characteristic pathway this is "
+                  "Monigle's discernibility bucket; for SAAM/custom set it by hand."),
+        )
+        w_stance = float(getattr(ctx, "uncertainty_weight", 0.5))
+        esl, dfi, post, K = fuse_dfi_into_esl(
+            ctx.total_for, ctx.total_against, dhi_score, d,
+        )
+
+        st.markdown(
+            _ds_flag_bar(esl.g, esl.r, esl.w, "ESL prior")
+            + _ds_flag_bar(dfi.g, dfi.r, dfi.w, f"DFI evidence (score {dhi_score*100:.0f}%, d {d:.2f})")
+            + _ds_flag_bar(post.g, post.r, post.w, "Dempster posterior"),
+            unsafe_allow_html=True,
+        )
+
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Posterior Bel–Pl", f"{post.bel*100:.0f}–{post.pl*100:.0f}%",
+                  help="Belief = m(G); Plausibility = m(G) + white.")
+        c2.metric(f"Point P(G | DFI) @ w={w_stance:.2f}", f"{post.point(w_stance)*100:.1f}%",
+                  help="Bel + w·white — the same Policy-P collapse the ESL uses.")
+        if simm_posterior is not None:
+            c3.metric("vs Simm point", f"{simm_posterior*100:.1f}%",
+                      delta=f"{(post.point(w_stance)-simm_posterior)*100:+.1f} pp",
+                      help="The main pathway's point-Bayes posterior, for comparison.")
+        else:
+            c3.metric("Conflict K", f"{K:.2f}")
+
+        if K > 0.4:
+            st.warning(
+                f"⚠️ **High conflict (K = {K:.2f}).** The ESL and the DFI strongly "
+                "disagree. Dempster's rule normalises this away, which is its known weak "
+                "spot (Zadeh's counterexample) — treat the fused result with caution and "
+                "reconcile the geology vs the geophysics first."
+            )
+        st.caption(
+            "Prototype only — not wired into the headline POS. Conceptually this is the "
+            "'DFI as a line of evidence' view; the production pathway still uses the Simm "
+            "point update (+ the Bel/Pl envelope on the overview table)."
+        )

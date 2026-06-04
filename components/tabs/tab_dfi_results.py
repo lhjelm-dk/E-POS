@@ -179,6 +179,13 @@ def _render_dfi_results(ctx) -> None:
         key="dfi_vol_saam",
     )
 
+    st.divider()
+    from components.dfi_shared import render_dempster_prototype
+    render_dempster_prototype(
+        ctx, _dhi_score_from_r(post_esl.r_saam),
+        discernibility=None, simm_posterior=post_esl.posterior_pg, key="ds_saam",
+    )
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Helper renderers — pillar tables and trajectory
@@ -244,6 +251,14 @@ def _render_dfi_results_characteristic(ctx) -> None:
     from components.dfi_shared import render_volumetrics_recommendation
     render_volumetrics_recommendation(
         score / 100.0, v_weight=None, discernibility=bucket, key="dfi_vol_char",
+    )
+
+    st.divider()
+    from components.dfi_shared import render_dempster_prototype
+    _bucket_d = {"high": 1.0, "moderate": 0.6, "low": 0.3, "absent": 0.0}.get(bucket, 1.0)
+    render_dempster_prototype(
+        ctx, score / 100.0, discernibility=_bucket_d,
+        simm_posterior=post_esl_pg, key="ds_char",
     )
 
 
@@ -397,6 +412,13 @@ def _render_dfi_results_custom(ctx) -> None:
     from components.dfi_shared import render_volumetrics_recommendation
     render_volumetrics_recommendation(
         score / 100.0, v_weight=None, discernibility=None, key="dfi_vol_custom",
+    )
+
+    st.divider()
+    from components.dfi_shared import render_dempster_prototype
+    render_dempster_prototype(
+        ctx, score / 100.0, discernibility=None,
+        simm_posterior=post_esl_pg, key="ds_custom",
     )
 
 
