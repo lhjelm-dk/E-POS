@@ -37,3 +37,6 @@ data/saam_calibration.json
 chunk_*.txt
 .claude/launch.json
 .claude/settings.local.json
+
+# user-saved prospects (local data)
+data/prospects/*.csv

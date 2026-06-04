@@ -511,6 +511,10 @@ def _render_prospect_hub(models: dict) -> None:
 
     from data.prospect_schema import list_prospects, load_prospect, save_prospect, PROSPECTS_DIR, ProspectData
 
+    # Cap/anchoring convention stamp written into saved prospects. Bump when the
+    # DFI math policy changes so reloaded files can flag a possible value shift.
+    _DFI_POLICY = "2026.06-discernibility-cap+base-rate-anchoring"
+
     available_files = list_prospects(PROSPECTS_DIR)
     r2c1, r2c2, r2c3, r2c4, r2c5 = st.columns([3, 1, 1, 1, 1])
     with r2c1:
@@ -548,10 +552,37 @@ def _render_prospect_hub(models: dict) -> None:
                 st.session_state["classic_closure"] = data.classic_closure
                 st.session_state["classic_reservoir"] = data.classic_reservoir
                 st.session_state["classic_retention"] = data.classic_retention
+                # Restore the DFI Bayesian-update state (round-trips the assessment).
+                if data.dfi:
+                    _saved_policy = data.dfi.get("_dfi_policy")
+                    for _dk, _dv in data.dfi.items():
+                        if not _dk.startswith("_"):
+                            st.session_state[_dk] = _dv
+                    if _saved_policy and _saved_policy != _DFI_POLICY:
+                        st.session_state["_dfi_policy_warning"] = (
+                            f"This prospect was saved under DFI policy '{_saved_policy}', "
+                            f"but the current policy is '{_DFI_POLICY}'. The DFI posterior "
+                            "may differ from the saved value because the cap/anchoring "
+                            "convention changed."
+                        )
+                    else:
+                        st.session_state.pop("_dfi_policy_warning", None)
                 st.session_state["current_prospect_file"] = selected
                 st.rerun()
     with r2c3:
         if st.button("Save", key="hub_save"):
+            # Capture the full DFI Bayesian-update state (all dfi_*/dhi_char_*
+            # input keys) so the assessment round-trips, with a policy stamp for
+            # the cap/anchoring convention in force at save time.
+            _dfi_state = {
+                k: v for k, v in st.session_state.items()
+                if isinstance(k, str) and (k.startswith("dfi_") or k.startswith("dhi_char_"))
+                and not k.startswith("dhi_char_r")      # skip derived R_char/R_eff
+                and k not in ("dhi_char_score", "dhi_char_posterior", "dhi_char_prior")
+                and "summary_text" not in k             # skip the reportable-text blobs
+                and not k.endswith("_text_area")
+            }
+            _dfi_state["_dfi_policy"] = _DFI_POLICY
             pd_obj = ProspectData(
                 title=st.session_state.get("meta_title", ""),
                 analyst=st.session_state.get("meta_analyst", ""),
@@ -564,6 +595,7 @@ def _render_prospect_hub(models: dict) -> None:
                 classic_closure=st.session_state.get("classic_closure", 0.5),
                 classic_reservoir=st.session_state.get("classic_reservoir", 0.5),
                 classic_retention=st.session_state.get("classic_retention", 0.5),
+                dfi=_dfi_state,
             )
             path = save_prospect(pd_obj)
             st.success(f"Saved: {path.name}")

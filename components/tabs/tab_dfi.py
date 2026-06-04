@@ -80,6 +80,10 @@ def _render_dfi_tab(ctx) -> None:
         unsafe_allow_html=True,
     )
 
+    _policy_warn = st.session_state.get("_dfi_policy_warning")
+    if _policy_warn:
+        st.warning("⚠️ " + _policy_warn)
+
     dfi_on = bool(st.session_state.get("dfi_enabled", False))
 
     if dfi_on:

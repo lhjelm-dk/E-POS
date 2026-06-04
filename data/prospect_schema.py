@@ -27,6 +27,9 @@ class ProspectData:
     classic_closure: float = 0.5
     classic_reservoir: float = 0.5
     classic_retention: float = 0.5
+    # DFI Bayesian-update state — all dfi_*/dhi_char_* session keys plus a
+    # "_dfi_policy" stamp recording the cap/anchoring policy at save time.
+    dfi: dict[str, Any] = field(default_factory=dict)
     # BN: reserved
     bn_nodes: list[dict] = field(default_factory=list)
 
@@ -53,6 +56,7 @@ def save_prospect(data: ProspectData, filepath: Path | str | None = None) -> Pat
         w.writerow(["# ESL play", json.dumps(data.play, default=str)])
         w.writerow(["# ESL conditional", json.dumps(data.conditional, default=str)])
         w.writerow(["# Classic POS", data.classic_charge, data.classic_closure, data.classic_reservoir, data.classic_retention])
+        w.writerow(["# DFI state", json.dumps(data.dfi, default=str)])
         w.writerow(["model", "pillar", "sub_element", "success_criteria", "p_success", "support_against", "evidence_for", "evidence_against", "uncertainty_note"])
         for pillar, el in (data.play or {}).items():
             if isinstance(el, dict) and "support_for" in el:
@@ -115,6 +119,11 @@ def load_prospect(filepath: Path | str) -> ProspectData:
                     data.classic_reservoir = float(row[3])
                     data.classic_retention = float(row[4])
                 except (ValueError, IndexError):
+                    pass
+            elif row[0].startswith("# DFI state") and len(row) >= 2:
+                try:
+                    data.dfi = json.loads(row[1]) or {}
+                except (json.JSONDecodeError, IndexError):
                     pass
     return data
 
