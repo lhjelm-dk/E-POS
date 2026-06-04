@@ -106,7 +106,6 @@ from components.tabs.tab_conditional import _render_conditional_tab
 from components.tabs.tab_analysis import _render_analysis_tab
 from components.tabs.tab_dfi import _render_dfi_tab, _render_final_pos_tab
 from components.tabs.tab_theory import _render_theory_tab
-from components.tabs.tab_reference import _render_reference_tab
 
 st.markdown(
     """
@@ -697,7 +696,7 @@ def _render_tabs(models: dict) -> None:
     )
 
     (tab_dash, tab_play, tab_cond, tab_analysis, tab_dfi, tab_final,
-     tab_methods, tab_ref) = st.tabs([
+     tab_methods) = st.tabs([
         "Dashboard",
         "Play",
         "Conditional",
@@ -705,7 +704,6 @@ def _render_tabs(models: dict) -> None:
         "Bayesian DFI Update",
         "Final Prospect POS",
         "Theory & Guide",
-        "Reference Tables",
     ])
 
     with tab_dash:      _render_dashboard_tab(ctx)
@@ -715,7 +713,6 @@ def _render_tabs(models: dict) -> None:
     with tab_dfi:       _render_dfi_tab(ctx)
     with tab_final:     _render_final_pos_tab(ctx)
     with tab_methods:   _render_theory_tab(ctx)
-    with tab_ref:       _render_reference_tab(ctx)
 
 # ── TOP OF PAGE ─────────────────────────────────────────────────────────────────
 st.title("E-POS")

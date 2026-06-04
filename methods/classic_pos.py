@@ -44,7 +44,7 @@ def render_classic_pos(models: dict | None = None) -> None:
         "Pre-existing ROSE/GeoX estimate? Enter it on Dashboard → Classic POS source."
     )
 
-    with st.expander("📖 Coming from multiplicative risking? Read this first", expanded=False):
+    with st.expander("Coming from multiplicative risking? Read this first", expanded=False):
         st.markdown(
             "**Your P(G, Classic) number comes from the ESL assessment, not from separate sliders.**\n\n"
             "Policy P = S_for + w × White  \n"
@@ -371,7 +371,7 @@ def render_classic_pos(models: dict | None = None) -> None:
                 "Coloured lines = P(pillar) per pillar · black = P(G, Classic) = product of pillars · "
                 "red dashed = current stance."
             )
-            with st.expander("📖 Reading this plot", expanded=False):
+            with st.expander("Reading this plot", expanded=False):
                 st.markdown(
                     "**Coloured lines:** each pillar's P(pillar) = P(pillar, Play) × P(pillar, Cond) "
                     "as the stance w sweeps from 0 (Bel — pessimistic) to 1 (Pl — optimistic).  \n"
@@ -406,7 +406,7 @@ def render_classic_pos(models: dict | None = None) -> None:
                 f"<b>{_total_arr[_idx_cur]*100:.1f}%</b></td>"
                 f"<td style='padding:6px 12px;color:#14532d;'><b>{_total_arr[_idx1]*100:.1f}%</b></td></tr>"
             )
-            with st.expander("📊 Range readout — Bel / current / Pl per pillar", expanded=False):
+            with st.expander("Range readout — Bel / current / Pl per pillar", expanded=False):
                 st.markdown(
                     f"<table style='margin-top:6px;font-size:0.86rem;'>"
                     f"<thead><tr style='border-bottom:1px solid #d1d5db;'>"

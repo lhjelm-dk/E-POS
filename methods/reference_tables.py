@@ -998,7 +998,7 @@ def render_reference_tables() -> None:
     st.markdown(
         "<div style='background:linear-gradient(135deg,#1e3a2f,#2d5a3d);color:#fff;"
         "padding:16px 20px;border-radius:10px;margin-bottom:12px;'>"
-        "<b style='font-size:1.2rem;'>📋 Reference Probability Tables</b><br>"
+        "<b style='font-size:1.2rem;'>Reference Probability Tables</b><br>"
         "<span style='font-size:0.85rem;opacity:0.85;'>"
         "Milkov (2015) · Malvić (2009) · CCOP (2000) — for calibration and inspiration only. "
         "No calculations are performed on this page."

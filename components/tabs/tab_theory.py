@@ -1459,7 +1459,7 @@ ships with E-POS.*
 """)
 
     # ═══════════════════════════════════════════════════════════════════════
-    # 📖 UNIFIED GLOSSARY — ESL/Classic + DFI in one place
+    # UNIFIED GLOSSARY — ESL/Classic + DFI in one place
     # ═══════════════════════════════════════════════════════════════════════
     with _tab_ref.expander("Glossary & Abbreviations (ESL + DFI)", expanded=False):
         st.markdown(r"""
@@ -1544,3 +1544,11 @@ A single reference for every term in E-POS — the ESL/Classic core and the Baye
 - **L** — a *likelihood* (a density evaluated at the observed DHI, viewed as a function of the outcome class). Not a probability; only its ratios carry meaning.
 - **π** — a *categorical prior* over the 8 outcomes. Kept visually distinct from P(·) and from pillar Pgs (p_res, p_nonres, …).
 """)
+
+    # ── Reference probability tables (folded in from the former top-level tab) ──
+    # Rendered directly (not inside an expander) because render_reference_tables()
+    # contains its own expanders — Streamlit forbids expander-in-expander.
+    with _tab_ref:
+        st.divider()
+        from methods.reference_tables import render_reference_tables
+        render_reference_tables()
