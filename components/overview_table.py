@@ -416,20 +416,22 @@ def _render_esl_table(data: dict) -> None:
             # posterior gets the *same* envelope representation as the prior.
             arrow = "↑" if dpp > 0.05 else ("↓" if dpp < -0.05 else "→")
             dc = "#22c55e" if dpp >= 0 else "#f87171"   # brighter for the dark row
-            # Prior — muted (it's the "before"; the eye should land on the after).
+            # Prior — the "before"; muted via lighter-grey text only (NO opacity,
+            # so the cell keeps the same dark navy as the rest of the row).
             if prior_env and prior_env[0] is not None and prior_env[1] is not None:
                 prior_inner = _classic_range_flag(prior_env[0], prior, prior_env[1])
             else:
-                prior_inner = f"<span style='color:#9ca3af;'>{prior*100:.1f}%</span>"
-            prior_cell = (f"<td colspan='2' style='text-align:center;opacity:0.55;'>"
+                prior_inner = (f"<span style='color:#9ca3af;font-size:18px;"
+                               f"font-weight:700;'>{prior*100:.1f}%</span>")
+            prior_cell = (f"<td colspan='2' style='text-align:center;'>"
                           f"{prior_inner}</td>")
-            # Posterior — PROMINENT: big white value + flag on a navy accent panel.
+            # Posterior — PROMINENT through a big white number only; SAME navy
+            # background as the rest of the row (no second blue, no accent panel).
             post_flag = (_classic_range_flag(post_env[0], post, post_env[1])
                          if post_env and post_env[0] is not None and post_env[1] is not None
                          else "")
             post_cell = (
-                "<td style='text-align:center;background:#1e3a5f;"
-                "border-left:4px solid #3b82f6;'>"
+                "<td style='text-align:center;'>"
                 f"<div style='font-size:20px;font-weight:800;color:#ffffff;"
                 f"line-height:1.1;'>{post*100:.1f}%</div>"
                 f"{post_flag}</td>"
