@@ -301,7 +301,7 @@ def _render_dfi_setup_characteristic(ctx) -> None:
         load_characteristic_stats, compute_r_char, compute_r_char_inferred,
         apply_discernibility, simm_bayes_posterior, dhi_score_from_r,
         inferred_success_curve, inferred_success_rate_at, inferred_lr_at,
-        SIMM_RULE_OF_THUMB, R_HARD_CAP, R_FLOOR,
+        SIMM_RULE_OF_THUMB, cap_for_bucket,
     )
 
     try:
@@ -488,20 +488,24 @@ def _render_dfi_setup_characteristic(ctx) -> None:
                    f"— {bucket.description}")
 
         st.markdown("---")
+        _cap_lo, _cap_hi = cap_for_bucket(bucket_name, enabled=True)
         apply_cap = st.checkbox(
-            f"Apply Simm 2016 cap on R  [{R_FLOOR:.2f}, {R_HARD_CAP:.1f}]",
+            f"Apply discernibility-aware cap on R  "
+            f"[{_cap_lo:.2f}, {_cap_hi:.1f}] at **{bucket_name}** discernibility",
             value=bool(st.session_state.get("dhi_char_apply_cap", True)),
             key="dhi_char_apply_cap",
             help=(
-                "Simm (2016) found empirically that SAAM-style R rarely exceeds ~3 "
-                "(or falls below ~1/3) for real prospects. Enabling this clamps the "
-                "naive-product R into that band as a guard against implausible values.\n\n"
-                "**Default ON.** The per-attribute LRs are multiplied under a naive "
-                "conditional-independence assumption, but the DHI attributes are strongly "
-                "correlated (the reason Monigle 2025 moved to ML). The uncapped product "
-                "therefore over-counts evidence — it can run to R≈270+ or collapse to 0 "
-                "from a single DHI. The cap is the defensible default; turn it OFF only "
-                "to inspect the raw, unconstrained product."
+                "Clamps the naive-product R into a defensible band. **The band now widens "
+                "with discernibility** — Simm's [1/3, 3] is calibrated to a *single* DFI "
+                "line, but R_char is a *composite* of five attributes, so a single-line cap "
+                "is too tight when the geophysics is genuinely discernible:\n\n"
+                "• high → [1/10, 10]  • moderate → [1/6, 6]  • low/absent → [1/3, 3]\n\n"
+                "This lets a high-discernibility, expected-but-absent DHI produce the strong "
+                "downgrade that Monigle 2025 demonstrate (e.g. their Prospect B, GCOS 46% → "
+                "iCOS 8%) — which the flat Simm cap cannot express — while keeping low "
+                "discernibility conservative.\n\n"
+                "**Default ON.** Turn OFF only to inspect the raw, unconstrained product "
+                "(the naive independence assumption over-counts correlated attributes)."
             ),
         )
         if not apply_cap:
@@ -541,8 +545,8 @@ def _render_dfi_setup_characteristic(ctx) -> None:
 
     # ── Compute ──
     rel_middle = bool(st.session_state.get("dhi_char_rel_middle", False))
-    cap_kw = (dict(hard_cap=R_HARD_CAP, floor=R_FLOOR) if apply_cap
-              else dict(hard_cap=float("inf"), floor=0.0))
+    _floor, _hardcap = cap_for_bucket(bucket_name, enabled=apply_cap)
+    cap_kw = dict(hard_cap=_hardcap, floor=_floor)
     if inferred:
         r_res = compute_r_char_inferred(cstats, positions, mode_key=mode_key,
                                         relative_to_middle=rel_middle, **cap_kw)
@@ -579,9 +583,10 @@ def _render_dfi_setup_characteristic(ctx) -> None:
         with m1:
             _rlabel = "R_char (capped)" if apply_cap else "R_char"
             _rhelp = (f"Naive-independence product of the LRs (raw = {r_raw:.2f}). "
-                      + (f"Hard-capped to [{R_FLOOR:.2f}, {R_HARD_CAP:.1f}] per Simm 2016."
+                      + (f"Discernibility-aware cap [{_floor:.2f}, {_hardcap:.1f}] "
+                         f"at {bucket_name} discernibility."
                          if apply_cap else
-                         "Capping is OFF — shown unconstrained. Enable the Simm cap "
+                         "Capping is OFF — shown unconstrained. Enable the cap "
                          "below the sliders for a bounded value."))
             st.metric(_rlabel, f"{r_char:.2f}", help=_rhelp)
             st.metric("R_effective", f"{r_eff:.2f}",

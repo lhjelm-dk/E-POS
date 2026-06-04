@@ -37,6 +37,33 @@ R_HARD_CAP: float = 3.0          # Simm's empirical SAAM maximum (10–90% SR ra
 R_FLOOR:    float = 1.0 / 3.0    # Symmetric lower bound (strong negative DHI)
 LAPLACE_ADD: float = 0.5         # Smoothing prior — avoids zero-cell LR
 
+# Discernibility-aware caps on R_char (log-symmetric).  Rationale: Simm's [1/3, 3]
+# is calibrated to a *single* DFI line of evidence, but R_char is a *composite* of
+# five attributes — effectively several lines — so a single-line cap is too tight
+# when the geophysics is genuinely discernible. Monigle 2025's signature result is
+# the strong downgrade for an expected-but-absent DHI (e.g. their Prospect B,
+# GCOS 46% → iCOS 8%), which the flat [1/3, 3] cap cannot express. We widen the cap
+# as discernibility rises and keep it tight (Simm) when discernibility is low, so
+# the DHI can only move the prior hard when the data genuinely supports it.
+DISCERNIBILITY_CAPS: dict[str, tuple[float, float]] = {
+    "high":     (1.0 / 10.0, 10.0),   # composite, trustworthy geophysics → wide
+    "moderate": (1.0 /  6.0,  6.0),
+    "low":      (1.0 /  3.0,  3.0),   # Simm single-DFI bound
+    "absent":   (1.0 /  3.0,  3.0),   # moot — d = 0 squashes R_eff to 1 anyway
+}
+
+
+def cap_for_bucket(bucket_name: str, *, enabled: bool = True) -> tuple[float, float]:
+    """Return ``(floor, hard_cap)`` for R_char given the discernibility bucket.
+
+    ``enabled=False`` removes the cap entirely (``(0, inf)``) — the raw, unconstrained
+    naive product, for diagnostics only.
+    """
+    if not enabled:
+        return (0.0, float("inf"))
+    return DISCERNIBILITY_CAPS.get(bucket_name, (R_FLOOR, R_HARD_CAP))
+
+
 _STATS_PATH = "data/dhi_characteristic_stats.json"
 
 

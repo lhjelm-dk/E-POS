@@ -164,6 +164,17 @@ def _render_dfi_results(ctx) -> None:
     st.markdown("##### Prior → Posterior map — iso-DHI Index curves")
     _render_iso_dhi_plot(ctx, dhi, calib, fw, sd_mode, fluid_type)
 
+    # ── DHI → volumetrics integration recommendation (Monigle 2025) ──
+    st.divider()
+    from components.dfi_shared import render_volumetrics_recommendation
+    from logic.dhi_characteristics import dhi_score_from_r as _dhi_score_from_r
+    render_volumetrics_recommendation(
+        _dhi_score_from_r(post_esl.r_saam),
+        v_weight=post_esl.dhi_volume_weight,
+        discernibility=None,
+        key="dfi_vol_saam",
+    )
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Helper renderers — pillar tables and trajectory
@@ -223,6 +234,13 @@ def _render_dfi_results_characteristic(ctx) -> None:
 
     # ── Sensitivity sweep over the 5/10 DHI attributes ──
     _render_characteristic_sensitivity(ctx, esl_prior_pg, w_cur)
+
+    # ── DHI → volumetrics integration recommendation (Monigle 2025) ──
+    st.divider()
+    from components.dfi_shared import render_volumetrics_recommendation
+    render_volumetrics_recommendation(
+        score / 100.0, v_weight=None, discernibility=bucket, key="dfi_vol_char",
+    )
 
 
 def _render_dfi_results_custom(ctx) -> None:
@@ -370,6 +388,13 @@ def _render_dfi_results_custom(ctx) -> None:
         "(R replaces the DHI Index as the family parameter)."
     )
 
+    # ── DHI → volumetrics integration recommendation (Monigle 2025) ──
+    st.divider()
+    from components.dfi_shared import render_volumetrics_recommendation
+    render_volumetrics_recommendation(
+        score / 100.0, v_weight=None, discernibility=None, key="dfi_vol_custom",
+    )
+
 
 def _render_characteristic_sensitivity(ctx, prior_pg: float, w_cur: float) -> None:
     """How does the posterior move as each DHI attribute is swept across its
@@ -379,19 +404,20 @@ def _render_characteristic_sensitivity(ctx, prior_pg: float, w_cur: float) -> No
     from components.colors import cos_color
     from logic.dhi_characteristics import (
         load_characteristic_stats, compute_r_char, compute_r_char_inferred,
-        apply_discernibility, simm_bayes_posterior, R_HARD_CAP, R_FLOOR,
+        apply_discernibility, simm_bayes_posterior, cap_for_bucket,
     )
 
     cstats   = load_characteristic_stats()
     mode_key = str(st.session_state.get("dhi_char_mode", "5_current"))
-    bucket   = cstats.buckets[str(st.session_state.get("dhi_char_bucket", "high"))]
+    _bucket_name = str(st.session_state.get("dhi_char_bucket", "high"))
+    bucket   = cstats.buckets[_bucket_name]
     sel_cur  = dict(st.session_state.get("dhi_char_selections", {}))
     pos_cur  = dict(st.session_state.get("dhi_char_positions", {}))
     inferred = bool(st.session_state.get("dhi_char_inferred", False))
     apply_cap = bool(st.session_state.get("dhi_char_apply_cap", True))
     rel_middle = bool(st.session_state.get("dhi_char_rel_middle", False))
-    cap_kw = (dict(hard_cap=R_HARD_CAP, floor=R_FLOOR) if apply_cap
-              else dict(hard_cap=float("inf"), floor=0.0))
+    _floor, _hardcap = cap_for_bucket(_bucket_name, enabled=apply_cap)
+    cap_kw = dict(hard_cap=_hardcap, floor=_floor)
 
     # only attributes that actually move R (display-only confidence excluded)
     r_attrs = cstats.attributes_in_r_for_mode(mode_key)

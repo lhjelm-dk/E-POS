@@ -87,12 +87,12 @@
     },
 
     "anomaly_consistency": {
-      "display_name": "Anomaly consistency",
-      "role": "transitional",
+      "display_name": "Anomaly consistency (dropped by Monigle 2021)",
+      "role": "deprecated",
       "active_modes": [],
       "in_r_calc": false,
       "placeholder": false,
-      "comment": "Transitional attribute (added 2020, removed 2021 — Monigle: least predictive). Retained in JSON for documentation; not active in the current mode.",
+      "comment": "DEPRECATED. Transitional attribute (added 2020, removed 2021): Monigle et al. 2025 found it the least predictive of the DHI attributes and dropped it (it only existed to give the legacy risk matrix an even attribute count). Retained in JSON for documentation only; not active in any mode and never enters R.",
       "mode_stats": {
         "5_current": {
           "categories": ["Very low", "Low", "Moderate", "High", "Very high"],

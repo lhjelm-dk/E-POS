@@ -279,3 +279,119 @@ def render_simm_trajectory(ctx, r: float, *, key: str | None = None) -> None:
         "multiplicative shift in log-odds — its effect is largest where the prior is "
         "near 50 % and smallest at the extremes."
     )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DHI → volumetrics integration recommendation (Monigle 2025)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def render_volumetrics_recommendation(
+    dhi_score: float,
+    *,
+    v_weight: float | None = None,
+    discernibility: str | None = None,
+    key: str = "dfi_vol",
+) -> None:
+    """Recommend how to join geological vs DFI-defined volumes (Monigle 2025).
+
+    Shows the two "trust" measures side by side — E-POS's SAAM **DHI Volume Weight
+    V** (when available) and Monigle's **column-height trial weight** — then a
+    concrete blend recommendation, the Fig. 8 weighting curve, and the paper's
+    volumetric consistency gates (discernibility, FCR→NTG, porosity floor).
+
+    ``dhi_score`` is the 0–1 DHI score (all pathways). ``v_weight`` is the SAAM
+    DHI Volume Weight (DHI-Index pathway only). ``discernibility`` ∈
+    {high, moderate, low, absent}.
+    """
+    import numpy as np
+    import plotly.graph_objects as go
+    from logic.dfi_volumetrics import (
+        volumetrics_recommendation, column_height_weight, HIGH_DHI_TRIAL_WEIGHT,
+    )
+
+    st.markdown("##### Volumetrics integration — joining geological & DFI-defined volumes")
+    st.caption(
+        "Risk is only half the story: a DHI should also constrain the **volume** "
+        "distribution. Below are two measures of *how much to trust the DFI for volumes*, "
+        "and a recommended blend (Monigle 2025, Figs. 8 & 10)."
+    )
+
+    # FCR present/absent refines the NTG note.
+    fcr_choice = st.radio(
+        "Fluid contact reflection (FCR) observed?",
+        options=["Unknown", "Present", "Absent"], horizontal=True,
+        key=f"{key}_fcr",
+        help="FCR presence constrains net-to-gross (Monigle Fig. 10).",
+    )
+    fcr_present = {"Present": True, "Absent": False, "Unknown": None}[fcr_choice]
+
+    rec = volumetrics_recommendation(
+        dhi_score, discernibility=discernibility, v_weight=v_weight,
+        fcr_present=fcr_present,
+    )
+
+    # ── Two methods, side by side ──
+    c1, c2, c3 = st.columns(3)
+    c1.metric("DHI score", f"{rec.dhi_score*100:.0f}%",
+              help="0–1 DHI score driving the column-height weighting.")
+    c2.metric("Column-height trial weight",
+              f"{rec.w_ch*100:.0f}%",
+              help="Monigle 2025 (Fig. 8): w = min(95%, 2 × DHI score). Fraction of "
+                   "volumetric trials placing the HCWC at the DFI-rated elevation.")
+    if v_weight is not None:
+        c3.metric("DHI Volume Weight V (SAAM)", f"{v_weight*100:.0f}%",
+                  help="E-POS SAAM byproduct: L_success / (L_success + E[L|failure]) — "
+                       "calibrated confidence the anomaly is a true HC response. "
+                       "An independent cross-check on the column-height weight.")
+    else:
+        c3.metric("DHI Volume Weight V (SAAM)", "—",
+                  help="Only available in the DHI-Index (SAAM) pathway.")
+
+    # ── Headline recommendation ──
+    st.markdown(
+        f"<div style='background:#ecfeff;border-left:5px solid #0891b2;border-radius:6px;"
+        f"padding:10px 14px;margin:6px 0;'>"
+        f"<b style='color:#0e7490;'>Recommended blend:</b> {rec.headline}</div>",
+        unsafe_allow_html=True,
+    )
+    if v_weight is not None:
+        # Cross-check the two independent *strength* readouts (both 0–1): SAAM's
+        # calibrated V and the R-derived DHI score. (The column-height weight is a
+        # transform of the score, so it is not an independent estimate.)
+        _spread = abs(v_weight - rec.dhi_score)
+        _msg = ("the SAAM-calibrated confidence and the R-derived score agree closely — "
+                "high confidence in the volume blend."
+                if _spread < 0.15 else
+                "they diverge — the SAAM likelihoods and the DHI score disagree on anomaly "
+                "strength; reconcile before committing the volume distribution.")
+        st.caption(f"DHI Volume Weight V = {v_weight*100:.0f}% vs DHI score "
+                   f"{rec.dhi_score*100:.0f}% → {_msg}")
+
+    # ── Monigle Fig. 8 weighting curve ──
+    xs = np.linspace(0.0, 1.0, 101)
+    ys = [column_height_weight(x) * 100 for x in xs]
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=[x*100 for x in xs], y=ys, mode="lines",
+                             line=dict(color="#0891b2", width=2.5), name="w_ch"))
+    fig.add_hline(y=HIGH_DHI_TRIAL_WEIGHT*100, line_dash="dot", line_color="#94a3b8",
+                  annotation_text="95% cap", annotation_position="right")
+    fig.add_vline(x=50, line_dash="dot", line_color="#94a3b8")
+    fig.add_trace(go.Scatter(
+        x=[rec.dhi_score*100], y=[rec.w_ch*100], mode="markers",
+        marker=dict(symbol="star", size=16, color="#0e7490",
+                    line=dict(color="white", width=1.5)),
+        name="this prospect", hoverinfo="skip", showlegend=False))
+    fig.update_xaxes(title_text="DHI score (%)", range=[0, 100])
+    fig.update_yaxes(title_text="HCWC-at-DFI-elevation trial weight (%)", range=[0, 100])
+    fig.update_layout(height=300, margin=dict(t=10, b=40, l=55, r=20), showlegend=False)
+    st.plotly_chart(fig, use_container_width=True, key=f"{key}_curve")
+
+    # ── Consistency gates ──
+    st.markdown("**Volumetric consistency checks**")
+    for note in rec.consistency_notes:
+        st.markdown(f"- {note}")
+    st.caption(
+        "Source: Monigle et al. (2025), Figs. 8 & 10 and the porosity discussion. "
+        "This is interpretive guidance for building the volumetric distribution, not a "
+        "Monte-Carlo engine — enter the resulting ranges in your volumetrics tool."
+    )

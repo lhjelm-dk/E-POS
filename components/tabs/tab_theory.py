@@ -962,9 +962,27 @@ For **ESL attribution** there are two modes:
             "a prospect with a strong anomaly tends also to show good amplitude terminations. "
             "Treating them as independent over-counts the evidence and can push R far above what "
             "the joint data support. Monigle 2025 moved to a Supervised Machine Learning model "
-            "precisely to capture these correlations. As a defensible analyst-grade simplification, "
-            "E-POS uses the naive product with a **hard cap at R = 3** (Simm 2016's empirical "
-            "SAAM maximum) and a symmetric floor at R = 1/3."
+            "precisely to capture these correlations. **E-POS cannot replicate their proprietary "
+            "ML** (185-prospect training set); the naive product is a transparent, fully-auditable "
+            "analyst-grade proxy — accuracy traded for reproducibility. To guard the over-count it "
+            "uses a **discernibility-aware cap**:"
+        )
+        st.markdown(
+            "| Discernibility | R_char cap | Rationale |\n"
+            "|---|---|---|\n"
+            "| high | [1/10, 10] | composite of 5 attributes, trustworthy geophysics — wide |\n"
+            "| moderate | [1/6, 6] | intermediate |\n"
+            "| low / absent | [1/3, 3] | Simm 2016 single-DFI bound |\n"
+        )
+        st.markdown(
+            "Simm's [1/3, 3] is calibrated to a *single* DFI line of evidence, but R_char is a "
+            "*composite* of five attributes — effectively several lines — so a flat single-line "
+            "cap is too tight when the data is genuinely discernible. Widening it with "
+            "discernibility lets an expected-but-absent DHI produce the strong downgrade that is "
+            "Monigle 2025's signature result (their **Prospect B: GCOS 46% → iCOS 8%**), which the "
+            "flat cap cannot express — while keeping low-discernibility prospects conservative. "
+            "*(Caveat: the low-DHI region is poorly constrained — Monigle drilled <10 weak-DHI "
+            "successes — so treat strong downgrades as directional.)*"
         )
         st.markdown("---")
         st.markdown("#### Step C5 — Discernibility (Monigle weighting)")
@@ -1312,6 +1330,49 @@ In these cases the audit trail must state: *"Posterior shown for completeness; r
 | Decision recommendation | manual |
 
 The Final Prospect POS Summary's **download (.txt)** button produces this audit trail in a copy-paste-ready format.
+""")
+
+    with _tab_practice.expander("🔵 📐 DHI → volumetrics: joining geological & DFI-defined volumes",
+                                expanded=False):
+        st.markdown(r"""
+A DHI doesn't only change **risk** — Monigle 2025 stress it should also constrain the
+**volume** distribution. The geophysically-defined volume (contact, edges, NTG) must be
+joined with the geologically/structurally-defined volume **in proportion to how much the
+DHI can be trusted**. E-POS surfaces *two* trust measures, then recommends a blend on the
+**DFI Results** tab (this is interpretive guidance, not a Monte-Carlo engine).
+
+### Two measures of "how much to trust the DFI for volumes"
+
+| | What it is | Input | Availability |
+|---|---|---|---|
+| **DHI Volume Weight (V)** | SAAM byproduct $V = L_\text{success} / (L_\text{success} + E[L\mid\text{failure}])$ — the calibrated probability the anomaly is a *true HC response* | SAAM likelihoods | DHI-Index pathway only |
+| **Column-height weight ($w_{ch}$)** | Monigle 2025, Fig. 8 — fraction of volumetric trials placing the HCWC at the DFI-rated elevation | 0–1 DHI score | every pathway |
+
+Both answer the same operational question from different inputs, so the app shows them
+side by side. When both are available, a large divergence is a flag to reconcile the SAAM
+likelihoods against the DHI score before committing the volume distribution.
+
+### The column-height weighting rule (Monigle Fig. 8)
+""")
+        st.latex(r"w_{ch} \;=\; \min\!\big(0.95,\; 2 \cdot \text{DHI score}\big)")
+        st.markdown(r"""
+- **DHI score > ~0.50** → place the HCWC at the DFI-rated elevation in **95%** of trials
+  (never 100% — the weak-DHI database is thin, <10 drilled successes).
+- **DHI score < 0.50** → honour the DFI contact in proportion to **twice** the score; the
+  remaining trials follow the deeper geological/structural spill estimate.
+
+### Consistency gates (Monigle Figs. 6, 10; porosity discussion)
+- **Discernibility gates the whole blend:** *high/moderate* → volumetric ranges must be
+  fully consistent with the geophysics; *low* → only the most-likely parameters need be
+  permissible; *none* → no geophysical tie required (but don't violate the no-discernibility
+  root cause).
+- **Fluid contact reflection (FCR) → NTG:** an FCR present implies **NTG > ~50%** (observed
+  40–85%) and precludes *low* NTG; FCR absent does not preclude moderate NTG.
+- **Porosity floor:** a DHI implies porosity above **~14%** (DHIs are essentially never
+  observed below this).
+
+*Source: Monigle et al. (2025), Figures 8 & 10. See the **DFI Results** tab for the live
+recommendation on the current prospect.*
 """)
 
     with _tab_practice.expander("🔵 📏 Calibration guidance", expanded=False):
