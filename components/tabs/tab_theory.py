@@ -3,6 +3,17 @@ from __future__ import annotations
 
 import streamlit as st
 
+# Header-style Italian-flag chip (HTML, Windows-safe — country-flag emoji render as
+# bare letters like "IT" on Windows). Matches the flag beside the app subtitle.
+_ITALIAN_FLAG_HTML = (
+    "<span style='display:inline-flex;align-items:center;height:13px;width:33px;"
+    "border:1px solid #6B7280;border-radius:2px;overflow:hidden;vertical-align:middle;"
+    "margin-right:8px;'>"
+    "<span style='width:33%;background:#2e9d5b;height:100%;display:inline-block;'></span>"
+    "<span style='width:34%;background:#f5f5f5;height:100%;display:inline-block;'></span>"
+    "<span style='width:33%;background:#d64545;height:100%;display:inline-block;'></span></span>"
+)
+
 
 def _render_theory_tab(ctx) -> None:
     """Render the Theory tab.  Called by _render_tabs."""
@@ -165,7 +176,12 @@ independent when they share one kitchen **under-represents** the common-cause ri
   **once**.
 """)
 
-    with _tab_concepts.expander("🟩⬜🟥 Evidence Support Logic (ESL) — fundamentals", expanded=False):
+    with _tab_concepts.expander("Evidence Support Logic (ESL) — fundamentals", expanded=False):
+        st.markdown(
+            f"<div style='font-size:1.15rem;font-weight:600;margin-bottom:4px;'>"
+            f"{_ITALIAN_FLAG_HTML}Evidence Support Logic (ESL)</div>",
+            unsafe_allow_html=True,
+        )
         st.markdown(r"""
 ### The Italian Flag
 
