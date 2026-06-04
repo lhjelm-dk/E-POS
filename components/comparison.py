@@ -131,7 +131,7 @@ def render_comparison_dfi(
         if dhi_strength is not None:
             dhi_strip += f" &nbsp;·&nbsp; R_SAAM = <b>{dhi_strength:.2f}</b>"
         if dhi_volume is not None:
-            dhi_strip += f" &nbsp;·&nbsp; Volume Weight = <b>{dhi_volume:.2f}</b>"
+            dhi_strip += f" &nbsp;·&nbsp; DHI Volume Weight V = <b>{dhi_volume:.2f}</b>"
         dhi_strip += "</div>"
     elif dhi_strength is not None:
         # Characteristic-scoring pathway — show R_eff and DHI Score

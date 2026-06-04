@@ -112,7 +112,7 @@ def _render_dashboard_tab(ctx) -> None:
 **③ Set your stance (w)** *(this panel, below)*
 → Controls how uncommitted (white) evidence maps to POS. Default = 0.5 (neutral).
 
-**④ Review results** *(Analysis tab)*
+**④ Review results** *(Geological POS tab)*
 → P(G, ESL), P(G, Classic), sensitivity tornado, and the Chance Adequacy Matrix.
 
 **⑤ Sign off** *(this panel, bottom)*

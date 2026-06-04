@@ -121,7 +121,7 @@ def _render_dfi_summary(ctx) -> None:
         f"</span></div>"
         f"<div style='display:flex;gap:18px;margin-top:8px;font-size:0.86rem;color:#1e3a8a;'>"
         f"<div><b>R_SAAM</b> = {post_esl.r_saam:.2f}</div>"
-        f"<div><b>DHI Volume Weight</b> = {post_esl.dhi_volume_weight:.2f}</div>"
+        f"<div><b>DHI Volume Weight V</b> = {post_esl.dhi_volume_weight:.2f}</div>"
         f"<div style='flex:1;text-align:right;color:#374151;font-style:italic;'>{interp_txt}</div>"
         f"</div></div>",
         unsafe_allow_html=True,

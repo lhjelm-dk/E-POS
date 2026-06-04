@@ -500,9 +500,9 @@ def _render_prospect_hub(models: dict) -> None:
     with c_title:
         st.text_input("Prospect title", value="New Prospect", key="meta_title")
     with c_analyst:
-        st.text_input("Analyst", value="", key="meta_analyst")
+        st.text_input("Analyst", value="Lars Hjelm", key="meta_analyst")
     with c_basin:
-        st.text_input("Basin / Play", value="", key="meta_basin")
+        st.text_input("Basin / Play", value="North Sea", key="meta_basin")
     with c_date:
         st.text_input("Date", value=datetime.date.today().strftime("%d. %m. %Y"), key="meta_date")
     with c_ver:
@@ -701,7 +701,7 @@ def _render_tabs(models: dict) -> None:
         "\U0001f4ca Dashboard",
         "\U0001f30d Play",
         "\U0001f50d Conditional",
-        "\U0001f4c8 Analysis (P(G))",
+        "Geological POS",
         "\U0001f30a Bayesian DFI Update",
         "\U0001f4dd Final Prospect POS",
         "\U0001f4da Theory & Guide",

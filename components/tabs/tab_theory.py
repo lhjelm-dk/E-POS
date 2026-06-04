@@ -78,7 +78,7 @@ The Italian Flag makes that quality visible. You enter evidence once, and three 
 > Same inputs, but now for prospect-specific sub-elements within each pillar.
 > Set combination operators (ESL-ALL / ESL-ANY / ESL-IPT) per pillar group.
 
-**Step 4 — Review results (Analysis tab)**
+**Step 4 — Review results (Geological POS tab)**
 > P(G, ESL), Uncertainty Index, CAM scatter, and the P(G, Classic) derived view
 > all update here — no extra work required.
 
@@ -289,7 +289,7 @@ levels lie. Use these to read off the implied Pg for any (POS, C) position.
 | ☆ Outline star | Conditional pillar aggregate (combined ESL) |
 | ★ Filled star | P(G, ESL) (the prospect result) |
 """)
-        st.info("Open the **Analysis tab → Chance Adequacy Matrix** to interact with the live plot.")
+        st.info("Open the **Geological POS tab → Chance Adequacy Matrix** to interact with the live plot.")
 
     with _tab_concepts.expander("🔵 🔢 P(G, Classic) — the multiplicative method", expanded=False):
         st.markdown(r"""
@@ -322,7 +322,7 @@ This means:
 P(G, Classic) is the standard language of the industry (AAPG/Rose). Present it alongside
 P(G, ESL) so decision-makers familiar with either method can read the assessment.
 
-See results in **Analysis tab → Derived Methods → P(G, Classic)**.
+See results in **Geological POS tab → Derived Methods → P(G, Classic)**.
 """)
 
     with _tab_concepts.expander("🔵 ⚖️ Why P(G, ESL) ≠ P(G, Classic) — the four structural reasons", expanded=False):
@@ -1317,8 +1317,8 @@ In these cases the audit trail must state: *"Posterior shown for completeness; r
 | Review date | manual |
 | Basin | manual |
 | Stance w | from dashboard |
-| ESL prior, Bel, Pl | from Analysis tab |
-| Classic prior | from Analysis tab |
+| ESL prior, Bel, Pl | from Geological POS tab |
+| Classic prior | from Geological POS tab |
 | DHI Index, scorer, scoring date | manual + SAAM sheet |
 | SAAM calibration version | from app (e.g. v.16a) |
 | SD mode | from app |

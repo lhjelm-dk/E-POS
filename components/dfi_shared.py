@@ -330,42 +330,38 @@ def render_volumetrics_recommendation(
         fcr_present=fcr_present,
     )
 
-    # ── Two methods, side by side ──
-    c1, c2, c3 = st.columns(3)
-    c1.metric("DHI score", f"{rec.dhi_score*100:.0f}%",
-              help="0–1 DHI score driving the column-height weighting.")
-    c2.metric("Column-height trial weight",
-              f"{rec.w_ch*100:.0f}%",
-              help="Monigle 2025 (Fig. 8): w = min(95%, 2 × DHI score). Fraction of "
-                   "volumetric trials placing the HCWC at the DFI-rated elevation.")
-    if v_weight is not None:
-        c3.metric("DHI Volume Weight V (SAAM)", f"{v_weight*100:.0f}%",
-                  help="E-POS SAAM byproduct: L_success / (L_success + E[L|failure]) — "
-                       "calibrated confidence the anomaly is a true HC response. "
-                       "An independent cross-check on the column-height weight.")
-    else:
-        c3.metric("DHI Volume Weight V (SAAM)", "—",
-                  help="Only available in the DHI-Index (SAAM) pathway.")
+    # ── Strength vs operational weight (two *different* quantities) ──
+    _is_saam = v_weight is not None
+    c1, c2 = st.columns(2)
+    _strength_label = "DHI score  (= Volume Weight V, SAAM)" if _is_saam else "DHI score"
+    c1.metric(_strength_label, f"{rec.dhi_score*100:.0f}%",
+              help=("DHI-Index pathway: the DHI score and the SAAM **DHI Volume Weight V** "
+                    "are the *same number* — both equal R/(R+1) = "
+                    "L_success / (L_success + E[L|failure]). It measures the 0–1 *strength* "
+                    "of the DHI." if _is_saam else
+                    "0–1 DHI score = R / (R + 1) — the *strength* of the DHI."))
+    c2.metric("Column-height trial weight (Monigle)", f"{rec.w_ch*100:.0f}%",
+              help="Monigle 2025 (Fig. 8): w = min(95%, 2 × DHI score). The *operational* "
+                   "fraction of volumetric trials placing the HCWC at the DFI-rated "
+                   "elevation — a transform of the DHI score, NOT a second strength measure.")
+
+    st.caption(
+        "⚠️ **These are two different things.** The **DHI score"
+        + (" / Volume Weight V**" if _is_saam else "**")
+        + " (left) is *how strong the DHI is* (0–1). The **column-height trial weight** "
+        "(right) is *how to use that strength in the volume Monte-Carlo* (Monigle's "
+        f"transform) — so a {rec.dhi_score*100:.0f}% score maps to a {rec.w_ch*100:.0f}% "
+        "trial weight. They are related but not the same number."
+    )
 
     # ── Headline recommendation ──
     st.markdown(
         f"<div style='background:#ecfeff;border-left:5px solid #0891b2;border-radius:6px;"
         f"padding:10px 14px;margin:6px 0;'>"
-        f"<b style='color:#0e7490;'>Recommended blend:</b> {rec.headline}</div>",
+        f"<b style='color:#0e7490;'>Recommended blend (Monigle column-height):</b> "
+        f"{rec.headline}</div>",
         unsafe_allow_html=True,
     )
-    if v_weight is not None:
-        # Cross-check the two independent *strength* readouts (both 0–1): SAAM's
-        # calibrated V and the R-derived DHI score. (The column-height weight is a
-        # transform of the score, so it is not an independent estimate.)
-        _spread = abs(v_weight - rec.dhi_score)
-        _msg = ("the SAAM-calibrated confidence and the R-derived score agree closely — "
-                "high confidence in the volume blend."
-                if _spread < 0.15 else
-                "they diverge — the SAAM likelihoods and the DHI score disagree on anomaly "
-                "strength; reconcile before committing the volume distribution.")
-        st.caption(f"DHI Volume Weight V = {v_weight*100:.0f}% vs DHI score "
-                   f"{rec.dhi_score*100:.0f}% → {_msg}")
 
     # ── Monigle Fig. 8 weighting curve ──
     xs = np.linspace(0.0, 1.0, 101)

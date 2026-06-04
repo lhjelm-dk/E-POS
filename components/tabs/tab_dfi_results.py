@@ -90,11 +90,15 @@ def _render_dfi_results(ctx) -> None:
         st.metric("R_SAAM (ESL)",      f"{post_esl.r_saam:.2f}",
                   help="L_success / E[L | failure] using ESL prior.")
     with d2:
-        st.metric("DHI Volume Weight (ESL)",   f"{post_esl.dhi_volume_weight:.2f}")
+        st.metric("DHI Volume Weight V (ESL)",   f"{post_esl.dhi_volume_weight:.2f}",
+                  help="V = L_success / (L_success + E[L|failure]). For the DHI-Index method "
+                       "this equals the DHI score, R_SAAM/(R_SAAM+1).")
     with d3:
         st.metric("R_SAAM (Classic)",  f"{post_classic.r_saam:.2f}")
     with d4:
-        st.metric("DHI Volume Weight (Classic)", f"{post_classic.dhi_volume_weight:.2f}")
+        st.metric("DHI Volume Weight V (Classic)", f"{post_classic.dhi_volume_weight:.2f}",
+                  help="V = L_success / (L_success + E[L|failure]). For the DHI-Index method "
+                       "this equals the DHI score, R_SAAM/(R_SAAM+1).")
 
     st.divider()
 
