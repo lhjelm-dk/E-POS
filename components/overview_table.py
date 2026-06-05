@@ -198,6 +198,10 @@ def _shared_table_styles() -> str:
   .ov-table .summary-row .sep-col {
     background: #111827;
   }
+  /* Match the 2px header underline so there is no 1px notch at the divider. */
+  .ov-table thead .sep-col {
+    border-bottom: 2px solid #374151;
+  }
   .ov-table .data-row .sep-col {
     background: #ffffff;
   }
@@ -424,8 +428,14 @@ def _render_esl_table(data: dict) -> None:
             # Prior — the "before"; muted via lighter-grey text only (NO opacity,
             # so the cell keeps the same dark navy as the rest of the row).
             if has_env:
-                prior_inner = _classic_range_flag(prior_env[0], prior, prior_env[1],
-                                                  decimals=1)
+                # Big muted-grey POS number above the flag, mirroring the
+                # posterior layout (white number above its flag).
+                flag_html = _classic_range_flag(prior_env[0], prior, prior_env[1],
+                                                decimals=1)
+                prior_inner = (
+                    f"<div style='font-size:20px;font-weight:700;color:#9ca3af;"
+                    f"line-height:1.1;'>{prior*100:.1f}%</div>{flag_html}"
+                )
             else:
                 prior_inner = (f"<span style='color:#9ca3af;font-size:18px;"
                                f"font-weight:700;'>{prior*100:.1f}%</span>")
