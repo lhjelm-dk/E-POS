@@ -40,6 +40,32 @@ def _reportable_pos_callout(value_pct: float, *, after_dfi: bool) -> None:
     )
 
 
+def _classic_bar_legend() -> None:
+    """One-line colour key for the 4-segment Classic range bar used in the table.
+
+    Full explanation lives in the Theory & Guide tab ("Reading the 4-segment
+    Classic range bar"); this is the at-a-glance reminder next to the bars.
+    """
+    def _chip(color: str, text: str) -> str:
+        return (f"<span style='display:inline-flex;align-items:center;gap:5px;"
+                f"margin-right:14px;white-space:nowrap;'>"
+                f"<span style='width:11px;height:11px;border-radius:2px;"
+                f"background:{color};display:inline-block;"
+                f"border:1px solid #d1d5db;'></span>{text}</span>")
+    st.markdown(
+        "<div style='font-size:11px;color:#6b7280;margin:2px 0 10px;'>"
+        "<b>Flag bar:</b> "
+        + _chip("#15803d", "Bel — committed success")
+        + _chip("#86efac", "stance lift (w×white)")
+        + _chip("#f3f4f6", "undecided white")
+        + _chip("#b3261e", "committed failure")
+        + "<span style='color:#9ca3af;'>· Bel + stance = POS · "
+          "+ white = Pl &nbsp;(see Theory &amp; Guide)</span>"
+        + "</div>",
+        unsafe_allow_html=True,
+    )
+
+
 def _render_dfi_summary(ctx) -> None:
     """Final Prospect POS Summary — reportable one-page view.
 
@@ -130,6 +156,7 @@ def _render_dfi_summary(ctx) -> None:
                            f"(independent-pillars reference)",
         }
         render_overview_table("esl", _ov_data)
+        _classic_bar_legend()
         _reportable_pos_callout(_ov_data["dfi"]["esl_post"] * 100, after_dfi=True)
 
     # ── DFI Diagnostic Strip (inputs + R + V in one consolidated block) ──
@@ -323,6 +350,7 @@ def _render_dfi_summary_characteristic(ctx) -> None:
                            f"(independent-pillars reference)",
         }
         render_overview_table("esl", _ov_data)
+        _classic_bar_legend()
         _reportable_pos_callout(_ov_data["dfi"]["esl_post"] * 100, after_dfi=True)
 
     # ── Diagnostic strip ──
@@ -492,6 +520,7 @@ def _render_dfi_summary_custom(ctx) -> None:
                            f"(independent-pillars reference)",
         }
         render_overview_table("esl", _ov_data)
+        _classic_bar_legend()
         _reportable_pos_callout(_ov_data["dfi"]["esl_post"] * 100, after_dfi=True)
 
     st.markdown(

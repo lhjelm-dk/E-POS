@@ -339,6 +339,24 @@ Enable *Bel / Pl interval* to show the defensible range as a horizontal bar:
 
 Wide bars = uncertain element (much white evidence). Narrow bars = committed assessment.
 
+### Reading the 4-segment Classic range bar
+
+The **Final Prospect POS** table draws each ESL probability as a 4-segment horizontal
+bar that decomposes the `[Bel, Pl]` envelope. Left → right:
+
+| Segment | Colour | Width | Meaning |
+|---|---|---|---|
+| 1 | **dark green** | `Bel = S_for` | **committed success** — the floor, regardless of stance |
+| 2 | **light green** | `Policy P − Bel` | **stance contribution** — white evidence credited to success at the current `w` |
+| 3 | **light grey** | `Pl − Policy P` | **undecided white** still available if `w → 1` |
+| 4 | **dark red** | `1 − Pl = S_against` | **committed failure** — lost even at the most optimistic stance |
+
+- dark green **+** light green **= Policy P** (the point estimate shown above the bar)
+- dark green **+** light green **+** light grey **= Pl** (plausibility / optimistic ceiling)
+- A larger light-green + grey block means more of the result rests on **stance and unknowns**,
+  not on hard evidence. The same colour key appears as a one-line legend beneath the
+  Final POS table.
+
 ### Iso-Pg lines
 
 Dashed iso-probability lines at 10/30/50/70/90 % Pg show where in the CAM different probability
