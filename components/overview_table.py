@@ -70,7 +70,7 @@ def _classic_flag(probability: float, dark: bool = False) -> str:
 
 
 def _classic_range_flag(bel: float, point: float, pl: float, dark: bool = False,
-                        decimals: int = 0) -> str:
+                        decimals: int = 0, show_point: bool = True) -> str:
     """4-segment bar showing the ESL-derived Classic POS confidence range.
 
     Segments (left to right):
@@ -92,8 +92,13 @@ def _classic_range_flag(bel: float, point: float, pl: float, dark: bool = False,
     lbl_class = "flag-lbl-dark" if dark else "flag-lbl"
     # Labels can carry decimals (e.g. the DFI prior/posterior envelopes use 1 dp
     # to match the posterior headline number); the bar widths stay integer.
-    label = (f"Bel {bel*100:.{decimals}f}% · POS {point*100:.{decimals}f}% "
-             f"· Pl {pl*100:.{decimals}f}%")
+    # show_point=False drops the POS term when the point value is already shown
+    # as the big number above the flag (the DFI before/after rows).
+    if show_point:
+        label = (f"Bel {bel*100:.{decimals}f}% · POS {point*100:.{decimals}f}% "
+                 f"· Pl {pl*100:.{decimals}f}%")
+    else:
+        label = f"Bel {bel*100:.{decimals}f}% · Pl {pl*100:.{decimals}f}%"
     return (
         "<div class='flag-cell-wrap'>"
         "<div class='flag-bar'>"
@@ -431,9 +436,9 @@ def _render_esl_table(data: dict) -> None:
                 # Big muted-grey POS number above the flag, mirroring the
                 # posterior layout (white number above its flag).
                 flag_html = _classic_range_flag(prior_env[0], prior, prior_env[1],
-                                                decimals=1)
+                                                decimals=1, show_point=False)
                 prior_inner = (
-                    f"<div style='font-size:20px;font-weight:700;color:#9ca3af;"
+                    f"<div style='font-size:20px;font-weight:700;color:#ffffff;"
                     f"line-height:1.1;'>{prior*100:.1f}%</div>{flag_html}"
                 )
             else:
@@ -446,7 +451,7 @@ def _render_esl_table(data: dict) -> None:
             # secondary read-out, so it matches the prior's muted grey.
             if post_env and post_env[0] is not None and post_env[1] is not None:
                 post_flag = _classic_range_flag(post_env[0], post, post_env[1],
-                                                decimals=1)
+                                                decimals=1, show_point=False)
                 post_color = "#ffffff"
             else:
                 post_flag = ""
