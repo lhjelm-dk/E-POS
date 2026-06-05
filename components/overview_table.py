@@ -130,7 +130,7 @@ def _shared_table_styles() -> str:
     font-family: "Segoe UI", Tahoma, Arial, sans-serif;
     border-radius: 8px;
     overflow: hidden;
-    border: 1px solid #1f2937;
+    border: 1px solid #111827;
   }
   .ov-prospect-header {
     background: #111827;
@@ -172,9 +172,10 @@ def _shared_table_styles() -> str:
     font-size: 11px;
     letter-spacing: 0.05em;
     color: #9ca3af;
+    border-bottom: 2px solid #374151;
   }
   .ov-table .hdr-sub th {
-    background: #1f2937;
+    background: #111827;
     color: #d1d5db;
     font-size: 11px;
     font-weight: 600;
@@ -414,29 +415,34 @@ def _render_esl_table(data: dict) -> None:
                      dpp: float, prior_env=None, post_env=None) -> str:
             # prior_env / post_env = (bel, pl) → render a Bel·POS·Pl range flag so the
             # posterior gets the *same* envelope representation as the prior.
-            arrow = "↑" if dpp > 0.05 else ("↓" if dpp < -0.05 else "→")
             dc = "#22c55e" if dpp >= 0 else "#f87171"   # brighter for the dark row
+            has_env = bool(prior_env and prior_env[0] is not None and prior_env[1] is not None)
             # Prior — the "before"; muted via lighter-grey text only (NO opacity,
             # so the cell keeps the same dark navy as the rest of the row).
-            if prior_env and prior_env[0] is not None and prior_env[1] is not None:
+            if has_env:
                 prior_inner = _classic_range_flag(prior_env[0], prior, prior_env[1])
             else:
                 prior_inner = (f"<span style='color:#9ca3af;font-size:18px;"
                                f"font-weight:700;'>{prior*100:.1f}%</span>")
             prior_cell = (f"<td colspan='2' style='text-align:center;'>"
                           f"{prior_inner}</td>")
-            # Posterior — PROMINENT through a big white number only; SAME navy
-            # background as the rest of the row (no second blue, no accent panel).
-            post_flag = (_classic_range_flag(post_env[0], post, post_env[1])
-                         if post_env and post_env[0] is not None and post_env[1] is not None
-                         else "")
+            # Posterior — for the flag-bearing P(G, ESL) row it is the headline
+            # (large WHITE number). For the point-only P(G, Classic) row it is a
+            # secondary read-out, so it matches the prior's muted grey.
+            if post_env and post_env[0] is not None and post_env[1] is not None:
+                post_flag = _classic_range_flag(post_env[0], post, post_env[1])
+                post_color = "#ffffff"
+            else:
+                post_flag = ""
+                post_color = "#9ca3af"
             post_cell = (
                 "<td style='text-align:center;'>"
-                f"<div style='font-size:20px;font-weight:800;color:#ffffff;"
+                f"<div style='font-size:20px;font-weight:800;color:{post_color};"
                 f"line-height:1.1;'>{post*100:.1f}%</div>"
                 f"{post_flag}</td>"
             )
-            # Dark navy row, matching the RESULT / SUMMARY rows.
+            # Dark navy row, matching the RESULT / SUMMARY rows. The Δ uses only a
+            # signed +/- value (the sign already carries direction — no arrow).
             return (
                 "<tr class='result-row'>"
                 f"<td class='row-label'>{emoji} {name}</td>"
@@ -444,7 +450,7 @@ def _render_esl_table(data: dict) -> None:
                 + "<td class='sep-col'></td>"
                 + post_cell
                 + f"<td style='text-align:center;color:{dc};font-weight:800;font-size:15px;'>"
-                f"{arrow} {dpp:+.1f} pp</td>"
+                f"{dpp:+.1f} pp</td>"
                 "</tr>"
             )
 
@@ -490,9 +496,9 @@ def _render_esl_table(data: dict) -> None:
       </tr>
       <tr class="hdr-sub">
         <th>Probability</th>
-        <th>Flag</th>
+        <th>ESL flag</th>
         <th>Probability</th>
-        <th>Flag</th>
+        <th>ESL flag</th>
       </tr>
     </thead>
     <tbody>
