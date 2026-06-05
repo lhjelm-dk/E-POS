@@ -48,7 +48,7 @@ def _flag_html(segs: dict, label: str, dark_label: bool = False) -> str:
         f"<div style='width:{segs['g']}%;background:#2e9d5b;height:100%;'></div>"
         f"<div style='width:{segs['w']}%;background:#f3f4f6;height:100%;'></div>"
         f"<div style='width:{segs['y']}%;background:#f6c343;height:100%;'></div>"
-        f"<div style='width:{segs['r']}%;background:#d64545;height:100%;'></div>"
+        f"<div style='width:{segs['r']}%;background:#b3261e;height:100%;'></div>"
         "</div>"
         f"<div class='{lbl_class}'>{label}</div>"
         "</div>"
@@ -69,7 +69,8 @@ def _classic_flag(probability: float, dark: bool = False) -> str:
     return _flag_html(segs, label, dark)
 
 
-def _classic_range_flag(bel: float, point: float, pl: float, dark: bool = False) -> str:
+def _classic_range_flag(bel: float, point: float, pl: float, dark: bool = False,
+                        decimals: int = 0) -> str:
     """4-segment bar showing the ESL-derived Classic POS confidence range.
 
     Segments (left to right):
@@ -89,14 +90,17 @@ def _classic_range_flag(bel: float, point: float, pl: float, dark: bool = False)
     if total != 100:
         seg1 = max(0, seg1 + (100 - total))  # absorb rounding into floor
     lbl_class = "flag-lbl-dark" if dark else "flag-lbl"
-    label = f"Bel {bel_pct}% · POS {point_pct}% · Pl {pl_pct}%"
+    # Labels can carry decimals (e.g. the DFI prior/posterior envelopes use 1 dp
+    # to match the posterior headline number); the bar widths stay integer.
+    label = (f"Bel {bel*100:.{decimals}f}% · POS {point*100:.{decimals}f}% "
+             f"· Pl {pl*100:.{decimals}f}%")
     return (
         "<div class='flag-cell-wrap'>"
         "<div class='flag-bar'>"
         f"<div style='width:{seg1}%;background:#15803d;height:100%;'></div>"
         f"<div style='width:{seg2}%;background:#86efac;height:100%;'></div>"
         f"<div style='width:{seg3}%;background:#f3f4f6;height:100%;'></div>"
-        f"<div style='width:{seg4}%;background:#d64545;height:100%;'></div>"
+        f"<div style='width:{seg4}%;background:#b3261e;height:100%;'></div>"
         "</div>"
         f"<div class='{lbl_class}'>{label}</div>"
         "</div>"
@@ -420,7 +424,8 @@ def _render_esl_table(data: dict) -> None:
             # Prior — the "before"; muted via lighter-grey text only (NO opacity,
             # so the cell keeps the same dark navy as the rest of the row).
             if has_env:
-                prior_inner = _classic_range_flag(prior_env[0], prior, prior_env[1])
+                prior_inner = _classic_range_flag(prior_env[0], prior, prior_env[1],
+                                                  decimals=1)
             else:
                 prior_inner = (f"<span style='color:#9ca3af;font-size:18px;"
                                f"font-weight:700;'>{prior*100:.1f}%</span>")
@@ -430,7 +435,8 @@ def _render_esl_table(data: dict) -> None:
             # (large WHITE number). For the point-only P(G, Classic) row it is a
             # secondary read-out, so it matches the prior's muted grey.
             if post_env and post_env[0] is not None and post_env[1] is not None:
-                post_flag = _classic_range_flag(post_env[0], post, post_env[1])
+                post_flag = _classic_range_flag(post_env[0], post, post_env[1],
+                                                decimals=1)
                 post_color = "#ffffff"
             else:
                 post_flag = ""
@@ -450,7 +456,7 @@ def _render_esl_table(data: dict) -> None:
                 + "<td class='sep-col'></td>"
                 + post_cell
                 + f"<td style='text-align:center;color:{dc};font-weight:800;font-size:15px;'>"
-                f"{dpp:+.1f} pp</td>"
+                f"{dpp:+.1f}</td>"
                 "</tr>"
             )
 
@@ -465,7 +471,7 @@ def _render_esl_table(data: dict) -> None:
             "<th colspan='2'>Prior P(G) · before DFI</th>"
             "<th class='sep-col'></th>"
             "<th>Posterior P(G | DFI) · after</th>"
-            "<th>Δ</th>"
+            "<th>Δ (pp)</th>"
             "</tr>"
             + _dfi_row("🟢", "P(G, ESL)", dfi.get("esl_prior", 0.0),
                        dfi.get("esl_post", 0.0), dfi.get("esl_delta_pp", 0.0),
@@ -508,13 +514,13 @@ def _render_esl_table(data: dict) -> None:
         <td class="result-value" colspan="2">
           <span class="result-label-text">Play Chance</span>
           <span class="result-number">{play_pos_pct:.0f}%</span>
-          {play_flag_result if play_flag_result else f'<div class="flag-cell-wrap"><div class="flag-bar"><div style="width:{g_pc}%;background:#2e9d5b;height:100%;"></div><div style="width:{w_pc}%;background:#f3f4f6;height:100%;"></div><div style="width:0%;background:#f6c343;height:100%;"></div><div style="width:{r_pc}%;background:#d64545;height:100%;"></div></div><div class="flag-lbl-dark">G {g_pc}% W {w_pc}% R {r_pc}%</div></div>'}
+          {play_flag_result if play_flag_result else f'<div class="flag-cell-wrap"><div class="flag-bar"><div style="width:{g_pc}%;background:#2e9d5b;height:100%;"></div><div style="width:{w_pc}%;background:#f3f4f6;height:100%;"></div><div style="width:0%;background:#f6c343;height:100%;"></div><div style="width:{r_pc}%;background:#b3261e;height:100%;"></div></div><div class="flag-lbl-dark">G {g_pc}% W {w_pc}% R {r_pc}%</div></div>'}
         </td>
         <td class="sep-col"></td>
         <td class="result-value" colspan="2">
           <span class="result-label-text">Conditional Prospect</span>
           <span class="result-number">{cond_pos_pct:.0f}%</span>
-          {cond_flag_result if cond_flag_result else f'<div class="flag-cell-wrap"><div class="flag-bar"><div style="width:{g_cp}%;background:#2e9d5b;height:100%;"></div><div style="width:{w_cp}%;background:#f3f4f6;height:100%;"></div><div style="width:0%;background:#f6c343;height:100%;"></div><div style="width:{r_cp}%;background:#d64545;height:100%;"></div></div><div class="flag-lbl-dark">G {g_cp}% W {w_cp}% R {r_cp}%</div></div>'}
+          {cond_flag_result if cond_flag_result else f'<div class="flag-cell-wrap"><div class="flag-bar"><div style="width:{g_cp}%;background:#2e9d5b;height:100%;"></div><div style="width:{w_cp}%;background:#f3f4f6;height:100%;"></div><div style="width:0%;background:#f6c343;height:100%;"></div><div style="width:{r_cp}%;background:#b3261e;height:100%;"></div></div><div class="flag-lbl-dark">G {g_cp}% W {w_cp}% R {r_cp}%</div></div>'}
         </td>
       </tr>
       <tr class="sep-row"><td colspan="6"></td></tr>
@@ -523,11 +529,11 @@ def _render_esl_table(data: dict) -> None:
         <td class="result-value" colspan="2">
           <span class="result-label-text">P(G, ESL)</span>
           <span class="result-number">{total_pos_pct:.0f}%</span>
-          {total_flag_result if total_flag_result else f'<div class="flag-cell-wrap"><div class="flag-bar"><div style="width:{g_tot}%;background:#2e9d5b;height:100%;"></div><div style="width:{w_tot}%;background:#f3f4f6;height:100%;"></div><div style="width:0%;background:#f6c343;height:100%;"></div><div style="width:{r_tot}%;background:#d64545;height:100%;"></div></div><div class="flag-lbl-dark">G {g_tot}% W {w_tot}% R {r_tot}%</div></div>'}
+          {total_flag_result if total_flag_result else f'<div class="flag-cell-wrap"><div class="flag-bar"><div style="width:{g_tot}%;background:#2e9d5b;height:100%;"></div><div style="width:{w_tot}%;background:#f3f4f6;height:100%;"></div><div style="width:0%;background:#f6c343;height:100%;"></div><div style="width:{r_tot}%;background:#b3261e;height:100%;"></div></div><div class="flag-lbl-dark">G {g_tot}% W {w_tot}% R {r_tot}%</div></div>'}
         </td>
         <td class="sep-col"></td>
         <td class="result-value" colspan="2">
-          <span class="result-label-text">Pg Interval</span>
+          <span class="result-label-text">Pg Interval (Bel–Pl)</span>
           <span class="result-number">{interval_txt}</span>
         </td>
       </tr>
@@ -536,7 +542,9 @@ def _render_esl_table(data: dict) -> None:
   </table>
 </div>"""
 
-    st.components.v1.html(html, height=(820 if dfi else 600), scrolling=False)
+    # scrolling=True is a safety net: if a narrow viewport makes the table taller
+    # than the fixed iframe height, the user gets a scrollbar instead of a clip.
+    st.components.v1.html(html, height=(820 if dfi else 600), scrolling=True)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

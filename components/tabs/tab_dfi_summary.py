@@ -20,6 +20,26 @@ from logic.dfi_orchestration import (
 )
 
 
+def _reportable_pos_callout(value_pct: float, *, after_dfi: bool) -> None:
+    """Single headline read-out of the one reportable number for this prospect.
+
+    Rendered right under the overview table so a reader gets the answer without
+    parsing the grid. ``value_pct`` is P(G, ESL) in percent (0–100).
+    """
+    label = "Reportable POS (after DFI)" if after_dfi else "Reportable POS (geological)"
+    st.markdown(
+        "<div style='background:#111827;border-radius:8px;padding:12px 20px;"
+        "margin:6px 0 2px;display:flex;justify-content:space-between;"
+        "align-items:center;'>"
+        f"<span style='color:#9ca3af;font-size:13px;font-weight:600;"
+        f"text-transform:uppercase;letter-spacing:0.08em;'>{label}</span>"
+        f"<span style='color:#ffffff;font-size:28px;font-weight:800;"
+        f"line-height:1;'>{value_pct:.0f}%</span>"
+        "</div>",
+        unsafe_allow_html=True,
+    )
+
+
 def _render_dfi_summary(ctx) -> None:
     """Final Prospect POS Summary — reportable one-page view.
 
@@ -106,9 +126,11 @@ def _render_dfi_summary(ctx) -> None:
             "esl_post_bel": _post_bel, "esl_post_pl": _post_pl,
             "diagnostics": f"DHI Index={dhi:+.0f} · R_SAAM={post_esl.r_saam:.2f} · "
                            f"V={post_esl.dhi_volume_weight:.2f} · "
-                           f"∏-pillars Init Pg={prior_esl.prior_pg*100:.1f}%",
+                           f"∏-pillars Init Pg={prior_esl.prior_pg*100:.1f}% "
+                           f"(independent-pillars reference)",
         }
         render_overview_table("esl", _ov_data)
+        _reportable_pos_callout(_ov_data["dfi"]["esl_post"] * 100, after_dfi=True)
 
     # ── DFI Diagnostic Strip (inputs + R + V in one consolidated block) ──
     interp_txt     = _dhi_strength_interpretation(post_esl.r_saam,
@@ -297,9 +319,11 @@ def _render_dfi_summary_characteristic(ctx) -> None:
             "esl_post_pl": simm_bayes_posterior(_pl, r_eff),
             "diagnostics": f"R_char={r_char:.2f} · R_eff={r_eff:.2f} · "
                            f"DHI Score={score:.0f}% · {bucket} · "
-                           f"∏-pillars Init Pg={prior_esl.prior_pg*100:.1f}%",
+                           f"∏-pillars Init Pg={prior_esl.prior_pg*100:.1f}% "
+                           f"(independent-pillars reference)",
         }
         render_overview_table("esl", _ov_data)
+        _reportable_pos_callout(_ov_data["dfi"]["esl_post"] * 100, after_dfi=True)
 
     # ── Diagnostic strip ──
     direction = "uplift" if delta_esl > 0.005 else ("downgrade" if delta_esl < -0.005 else "no change")
@@ -464,9 +488,11 @@ def _render_dfi_summary_custom(ctx) -> None:
             "esl_post_pl": simm_bayes_posterior(_pl, r_val),
             "diagnostics": f"R={r_val:.2f} · DHI Score={score:.0f}% · "
                            f"slider={slider:+.0f} · "
-                           f"∏-pillars Init Pg={prior_esl.prior_pg*100:.1f}%",
+                           f"∏-pillars Init Pg={prior_esl.prior_pg*100:.1f}% "
+                           f"(independent-pillars reference)",
         }
         render_overview_table("esl", _ov_data)
+        _reportable_pos_callout(_ov_data["dfi"]["esl_post"] * 100, after_dfi=True)
 
     st.markdown(
         f"<div style='background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;"
