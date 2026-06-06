@@ -205,49 +205,79 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
             st.caption(_dash_w_label2(uncertainty_weight))
 
     # ── DFI / DHI prospect toggle (Phase 3) — separate section ──────────────
+    # Scoped CSS: enlarge *this* toggle (and its label) only. The marker span
+    # sits in the element-container immediately before the toggle's container,
+    # so the sibling :has() selector targets just this widget, not other toggles.
+    _dfi_on_now = bool(st.session_state.get("dfi_enabled", False))
+    _accent = "#16a34a" if _dfi_on_now else "#2563eb"
+    st.markdown(
+        """
+        <style>
+        /* Enlarge ONLY the DFI toggle: the .dfi-anchor marker sits in the
+           element-container immediately before the toggle, so this adjacent
+           sibling selector targets just this widget. */
+        [data-testid="element-container"]:has(.dfi-anchor)
+          + [data-testid="element-container"] [data-baseweb="checkbox"] {
+            transform: scale(1.45); transform-origin: left center;
+            margin: 8px 0 8px 8px; }
+        [data-testid="element-container"]:has(.dfi-anchor)
+          + [data-testid="element-container"] [data-baseweb="checkbox"] div[class] {
+            font-weight: 600; }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
     with st.container(border=True):
-        col_dfi_toggle, col_dfi_info = st.columns([3, 1])
-        with col_dfi_toggle:
-            _dfi_prev = bool(st.session_state.get("dfi_enabled", False))
-            _dfi_new = st.toggle(
-                "**DFI-capable prospect?** — apply the Bayesian DFI update to the geological prior",
-                value=_dfi_prev,
-                key="dfi_enabled",
-                help=(
-                    "Turn ON whenever the subsurface is **capable of showing a DFI** — i.e. the "
-                    "reservoir/fluid contrast and seismic quality are such that a direct fluid "
-                    "indicator *would* be visible if hydrocarbons were present. This is not just "
-                    "for prospects where a DFI is seen: a **DFI that is absent when one was "
-                    "expected is itself evidence**, and the update will then *lower* P(G).\n\n"
-                    "The update is a true Bayesian conditioning — it can raise **or** lower the "
-                    "prior. A strong, conformant DFI lifts P(G); a weak/absent DFI on a "
-                    "DFI-capable prospect downgrades it.\n\n"
-                    "When ON, the Bayesian DFI Update tab becomes active. You supply a DHI "
-                    "Index (-23 to +50) and fluid-failure weights; the app computes posterior "
-                    "P(G | DFI, ESL) and P(G | DFI, Classic) against the SAAM calibration. "
-                    "Defaults on first activation: DHI=19, water=0.80, LSG=0.20, other=0.00."
-                ),
+        st.markdown(
+            f"<div style='display:flex;align-items:center;gap:10px;"
+            f"margin:-2px 0 4px;'>"
+            f"<span style='font-size:24px;line-height:1;'>🛰️</span>"
+            f"<span style='font-size:21px;font-weight:800;color:#0f172a;'>"
+            f"Direct Fluid Indicator (DFI)</span>"
+            f"<span style='font-size:13px;font-weight:700;color:{_accent};"
+            f"border:1.5px solid {_accent};border-radius:10px;padding:1px 9px;'>"
+            f"{'ON' if _dfi_on_now else 'OFF'}</span>"
+            f"<span style='font-size:13px;color:#64748b;'>— the most decisive "
+            f"evidence switch in the workflow</span>"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+        st.markdown("<span class='dfi-anchor'></span>", unsafe_allow_html=True)
+        _dfi_prev = bool(st.session_state.get("dfi_enabled", False))
+        _dfi_new = st.toggle(
+            "**DFI-capable prospect?** — apply the Bayesian DFI update",
+            value=_dfi_prev,
+            key="dfi_enabled",
+            help=(
+                "Turn ON whenever the subsurface is **capable of showing a DFI** — i.e. the "
+                "reservoir/fluid contrast and seismic quality are such that a direct fluid "
+                "indicator *would* be visible if hydrocarbons were present. This is not just "
+                "for prospects where a DFI is seen: a **DFI that is absent when one was "
+                "expected is itself evidence**, and the update will then *lower* P(G).\n\n"
+                "The update is a true Bayesian conditioning — it can raise **or** lower the "
+                "prior. A strong, conformant DFI lifts P(G); a weak/absent DFI on a "
+                "DFI-capable prospect downgrades it.\n\n"
+                "When ON, the Bayesian DFI Update tab becomes active. You supply a DHI "
+                "Index (-23 to +50) and fluid-failure weights; the app computes posterior "
+                "P(G | DFI, ESL) and P(G | DFI, Classic) against the SAAM calibration. "
+                "Defaults on first activation: DHI=19, water=0.80, LSG=0.20, other=0.00."
+            ),
+        )
+        # First-time activation: seed the DFI session-state defaults.
+        if _dfi_new and not _dfi_prev:
+            from components.tabs.tab_dfi import initialise_dfi_session_defaults
+            initialise_dfi_session_defaults()
+        if _dfi_new:
+            st.caption(
+                f"DFI active — DHI index = **{st.session_state.get('dfi_index', 19):.0f}**, "
+                f"water/LSG/other = "
+                f"{st.session_state.get('dfi_fluid_water', 0.8):.0%}/"
+                f"{st.session_state.get('dfi_fluid_lsg',   0.2):.0%}/"
+                f"{st.session_state.get('dfi_fluid_other', 0.0):.0%}. "
+                "Edit on the Bayesian DFI Update tab."
             )
-            # First-time activation: seed the DFI session-state defaults.
-            if _dfi_new and not _dfi_prev:
-                from components.tabs.tab_dfi import initialise_dfi_session_defaults
-                initialise_dfi_session_defaults()
-            if _dfi_new:
-                st.caption(
-                    f"DFI active — DHI index = **{st.session_state.get('dfi_index', 19):.0f}**, "
-                    f"water/LSG/other = "
-                    f"{st.session_state.get('dfi_fluid_water', 0.8):.0%}/"
-                    f"{st.session_state.get('dfi_fluid_lsg',   0.2):.0%}/"
-                    f"{st.session_state.get('dfi_fluid_other', 0.0):.0%}. "
-                    "Edit on the Bayesian DFI Update tab."
-                )
-            else:
-                st.caption("DFI not in use — comparison table will show priors only.")
-        with col_dfi_info:
-            if _dfi_new:
-                st.metric("DFI", "ON", delta="active")
-            else:
-                st.metric("DFI", "OFF")
+        else:
+            st.caption("DFI not in use — comparison table will show priors only.")
 
     st.divider()
 
