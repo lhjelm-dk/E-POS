@@ -231,14 +231,11 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
         st.markdown(
             f"<div style='display:flex;align-items:center;gap:10px;"
             f"margin:-2px 0 4px;'>"
-            f"<span style='font-size:24px;line-height:1;'>🛰️</span>"
             f"<span style='font-size:21px;font-weight:800;color:#0f172a;'>"
             f"Direct Fluid Indicator (DFI)</span>"
             f"<span style='font-size:13px;font-weight:700;color:{_accent};"
             f"border:1.5px solid {_accent};border-radius:10px;padding:1px 9px;'>"
             f"{'ON' if _dfi_on_now else 'OFF'}</span>"
-            f"<span style='font-size:13px;color:#64748b;'>— the most decisive "
-            f"evidence switch in the workflow</span>"
             f"</div>",
             unsafe_allow_html=True,
         )
@@ -249,6 +246,7 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
             value=_dfi_prev,
             key="dfi_enabled",
             help=(
+                "**The most decisive evidence switch in the workflow.**\n\n"
                 "Turn ON whenever the subsurface is **capable of showing a DFI** — i.e. the "
                 "reservoir/fluid contrast and seismic quality are such that a direct fluid "
                 "indicator *would* be visible if hydrocarbons were present. This is not just "
@@ -256,11 +254,7 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
                 "expected is itself evidence**, and the update will then *lower* P(G).\n\n"
                 "The update is a true Bayesian conditioning — it can raise **or** lower the "
                 "prior. A strong, conformant DFI lifts P(G); a weak/absent DFI on a "
-                "DFI-capable prospect downgrades it.\n\n"
-                "When ON, the Bayesian DFI Update tab becomes active. You supply a DHI "
-                "Index (-23 to +50) and fluid-failure weights; the app computes posterior "
-                "P(G | DFI, ESL) and P(G | DFI, Classic) against the SAAM calibration. "
-                "Defaults on first activation: DHI=19, water=0.80, LSG=0.20, other=0.00."
+                "DFI-capable prospect downgrades it."
             ),
         )
         # First-time activation: seed the DFI session-state defaults.
