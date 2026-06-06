@@ -442,6 +442,7 @@ def _render_characteristic_sensitivity(ctx, prior_pg: float, w_cur: float) -> No
     inferred = bool(st.session_state.get("dhi_char_inferred", False))
     apply_cap = bool(st.session_state.get("dhi_char_apply_cap", True))
     rel_middle = bool(st.session_state.get("dhi_char_rel_middle", False))
+    corr_rho = float(st.session_state.get("dhi_char_corr_rho", 0.0))
     _floor, _hardcap = cap_for_bucket(_bucket_name, enabled=apply_cap)
     cap_kw = dict(hard_cap=_hardcap, floor=_floor)
 
@@ -452,13 +453,15 @@ def _render_characteristic_sensitivity(ctx, prior_pg: float, w_cur: float) -> No
 
     def _posterior_for(selections: dict) -> float:
         r = compute_r_char(cstats, selections, mode_key=mode_key,
-                           relative_to_middle=rel_middle, **cap_kw)["r_char"]
+                           relative_to_middle=rel_middle, corr_rho=corr_rho,
+                           **cap_kw)["r_char"]
         r_eff = apply_discernibility(r, bucket)
         return simm_bayes_posterior(prior_pg, r_eff) * 100.0
 
     def _posterior_for_pos(positions: dict) -> float:
         r = compute_r_char_inferred(cstats, positions, mode_key=mode_key,
-                                    relative_to_middle=rel_middle, **cap_kw)["r_char"]
+                                    relative_to_middle=rel_middle, corr_rho=corr_rho,
+                                    **cap_kw)["r_char"]
         r_eff = apply_discernibility(r, bucket)
         return simm_bayes_posterior(prior_pg, r_eff) * 100.0
 

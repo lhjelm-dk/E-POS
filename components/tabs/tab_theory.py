@@ -1067,6 +1067,33 @@ For **ESL attribution** there are two modes:
             "successes — so treat strong downgrades as directional.)*"
         )
         st.markdown("---")
+        st.markdown("#### Step C4b — Independence discount ρ (a principled alternative to the cap)")
+        st.markdown(
+            "The cap is a *blunt* guard: it lets the naive product run unchecked until it hits a "
+            "hard wall. A more principled correction discounts the evidence **continuously** by an "
+            "assumed average pairwise correlation ρ between the attributes, using the classic "
+            "**design-effect / effective-sample-size** argument. For *k* attributes with average "
+            "correlation ρ, the effective number of *independent* attributes is"
+        )
+        st.latex(r"k_\text{eff} \;=\; \frac{k}{1 + (k-1)\,\rho}")
+        st.markdown(
+            "so the log-evidence is scaled by the **effective-evidence exponent** "
+            "f = k_eff / k, giving a discounted ratio:"
+        )
+        st.latex(r"f \;=\; \frac{1}{1 + (k-1)\,\rho}, \qquad "
+                 r"R_\text{disc} \;=\; \exp\!\big(f \textstyle\sum_k \ln \text{LR}_k\big) \;=\; R_\text{raw}^{\,f}")
+        st.markdown(
+            "**ρ = 0 → f = 1** → independent attributes, naive product unchanged (the default, so "
+            "behaviour is identical unless you opt in). **ρ → 1 → f → 1/k** → fully redundant, the "
+            "*k* attributes count as a single line of evidence. ρ ≈ 0.3–0.5 is a reasonable default "
+            "for correlated seismic-amplitude attributes. Note this is an exponent on R, exactly "
+            "like the discernibility squash below — the two compose as "
+            "$R_\\text{eff} = R_\\text{raw}^{\\,f \\cdot d}$ before the cap. The discount is exposed "
+            "as the **Assumed attribute correlation ρ** slider in the DFI Setup advanced controls; "
+            "with ρ > 0 the cap rarely binds, because the statistics — not a hard wall — are doing "
+            "the work."
+        )
+        st.markdown("---")
         st.markdown("#### Step C5 — Discernibility (Monigle weighting)")
         st.markdown(
             "Discernibility asks *how much should the DFI evidence be allowed to move the prior, "
@@ -1084,6 +1111,21 @@ For **ESL attribution** there are two modes:
             "**d = 1** (high discernibility) → R unchanged; **d = 0** (absent) → R = 1, posterior = prior. "
             "Intermediate values exponentially squash R toward 1 in log-space, gracefully reducing "
             "the DFI's influence as discernibility falls."
+        )
+        st.info(
+            "**Note — discernibility acts twice, and that is deliberate.** The bucket sets *both* "
+            "the cap width (Step C4) *and* the exponent d here. Composed, they give a smooth, "
+            "monotone ceiling on how far the DFI can ever move the prior — the *effective* maximum "
+            "R_eff per bucket is **cap^d**:\n\n"
+            "| Discernibility | cap | d | effective max R_eff |\n"
+            "|---|---|---|---|\n"
+            "| high | 10 | 1.0 | 10 |\n"
+            "| moderate | 6 | 0.6 | 6^0.6 ≈ **2.9** |\n"
+            "| low | 3 | 0.3 | 3^0.3 ≈ **1.4** |\n"
+            "| absent | 3 | 0.0 | **1.0** (no effect) |\n\n"
+            "So the headline strength a DFI can ever reach is governed by this single ladder; "
+            "the cap and the squash are two facets of one discernibility control, not two "
+            "independent assumptions."
         )
         st.markdown("---")
         st.markdown("#### Step C6 — DHI Characteristic Score (Monigle's 0–100 % readout)")

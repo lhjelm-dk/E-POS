@@ -64,6 +64,34 @@ CHARACTERISTIC_DEFAULT_SELECTIONS: dict[str, str] = {
 }
 
 
+def correlation_discount_exponent(k: int, rho: float) -> float:
+    """Effective-evidence exponent for ``k`` correlated attributes.
+
+    The naive-Bayes composite ``R = ∏ LRᵢ`` assumes the attributes are
+    *conditionally independent given class*. The five Monigle attributes are
+    physically correlated (a bright anomaly tends to come with strong lateral
+    contrast and a good structural fit), so the product double-counts shared
+    signal and overstates the evidence.
+
+    We discount it with the classic **design-effect / effective-sample-size**
+    correction. For ``k`` observations with average pairwise correlation ``ρ``
+    the effective independent count is ``k_eff = k / (1 + (k−1)·ρ)``, so the
+    log-evidence should be scaled by ``f = k_eff / k = 1 / (1 + (k−1)·ρ)``::
+
+        R_corr = exp( f · Σ log LRᵢ ) = R_naive ** f
+
+    Limits: ``ρ = 0`` → ``f = 1`` (independent; naive Bayes unchanged);
+    ``ρ → 1`` → ``f → 1/k`` (fully redundant; the k attributes count as one).
+    This composes naturally with the discernibility squash ``R**d`` — both are
+    exponents on R.
+    """
+    rho = max(0.0, min(0.99, float(rho)))
+    k = max(1, int(k))
+    if k == 1 or rho <= 0.0:
+        return 1.0
+    return 1.0 / (1.0 + (k - 1) * rho)
+
+
 def cap_for_bucket(bucket_name: str, *, enabled: bool = True) -> tuple[float, float]:
     """Return ``(floor, hard_cap)`` for R_char given the discernibility bucket.
 
@@ -246,13 +274,50 @@ def _middle_category(attr: AttributeStats, mode_key: str) -> str:
     return cats[len(cats) // 2]
 
 
+def _assemble_r_result(per_attribute: dict, log_product: float, n_in_r: int,
+                       hard_cap: float, floor: float, relative_to_middle: bool,
+                       mode_key: str, corr_rho: float, *, inferred: bool = False) -> dict:
+    """Shared tail for both R pathways: naive product → correlation discount → cap.
+
+    ``raw_r`` is the naive-independence product ``exp(Σ log LR)``. When
+    ``corr_rho > 0`` the log-evidence is scaled by the effective-evidence
+    exponent ``f = 1/(1+(k−1)ρ)`` (see :func:`correlation_discount_exponent`),
+    giving ``discounted_r = raw_r ** f``. The cap is then applied to the
+    discounted value, so ``r_char`` is what drives the Bayesian update.
+    """
+    import math
+    raw_r = math.exp(log_product)
+    f = correlation_discount_exponent(n_in_r, corr_rho)
+    discounted_r = math.exp(log_product * f)            # == raw_r ** f
+    capped_r = max(floor, min(hard_cap, discounted_r))
+    capped = abs(discounted_r - capped_r) > 1e-9
+    out = {
+        "per_attribute_lr":   per_attribute,
+        "raw_r":              raw_r,
+        "discounted_r":       discounted_r,
+        "corr_rho":           max(0.0, min(0.99, float(corr_rho))),
+        "corr_exponent":      f,
+        "r_char":             capped_r,
+        "was_capped":         capped,
+        "hard_cap":           hard_cap,
+        "floor":              floor,
+        "relative_to_middle": relative_to_middle,
+        "mode_key":           mode_key,
+        "n_attributes_in_r":  n_in_r,
+    }
+    if inferred:
+        out["inferred"] = True
+    return out
+
+
 def compute_r_char(stats: CharacteristicStats,
                    selections: dict[str, str],
                    *,
                    mode_key: str = "5_current",
                    hard_cap: float = R_HARD_CAP,
                    floor: float = R_FLOOR,
-                   relative_to_middle: bool = False) -> dict:
+                   relative_to_middle: bool = False,
+                   corr_rho: float = 0.0) -> dict:
     """Combine per-attribute LRs into a prospect-level R (naive-independence product).
 
     Only attributes that (a) are active in the chosen ``mode_key`` AND (b) have
@@ -276,6 +341,7 @@ def compute_r_char(stats: CharacteristicStats,
     import math
     per_attribute: dict[str, float] = {}
     log_product = 0.0
+    n_in_r = 0
     active_in_mode = stats.attributes_for_mode(mode_key)
     for key, attr in active_in_mode.items():
         cat = selections.get(key)
@@ -290,21 +356,9 @@ def compute_r_char(stats: CharacteristicStats,
         # Confidence/display-only attributes don't contribute to R, even if scored
         if attr.in_r_calc:
             log_product += math.log(max(lr, 1e-12))
-    raw_r = math.exp(log_product)
-    capped_r = max(floor, min(hard_cap, raw_r))
-    capped = abs(raw_r - capped_r) > 1e-9
-    return {
-        "per_attribute_lr":  per_attribute,
-        "raw_r":             raw_r,
-        "r_char":            capped_r,
-        "was_capped":        capped,
-        "hard_cap":          hard_cap,
-        "floor":             floor,
-        "relative_to_middle": relative_to_middle,
-        "mode_key":          mode_key,
-        "n_attributes_in_r": sum(1 for k in per_attribute
-                                  if active_in_mode[k].in_r_calc),
-    }
+            n_in_r += 1
+    return _assemble_r_result(per_attribute, log_product, n_in_r, hard_cap, floor,
+                              relative_to_middle, mode_key, corr_rho)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -427,7 +481,8 @@ def compute_r_char_inferred(stats: CharacteristicStats,
                             mode_key: str = "5_current",
                             hard_cap: float = R_HARD_CAP,
                             floor: float = R_FLOOR,
-                            relative_to_middle: bool = False) -> dict:
+                            relative_to_middle: bool = False,
+                            corr_rho: float = 0.0) -> dict:
     """Inferred-pathway counterpart of :func:`compute_r_char`.
 
     ``positions``: ``{attribute_key: x}`` with x∈[0,1] (continuous slider). The
@@ -438,6 +493,7 @@ def compute_r_char_inferred(stats: CharacteristicStats,
     import math
     per_attribute: dict[str, float] = {}
     log_product = 0.0
+    n_in_r = 0
     active_in_mode = stats.attributes_for_mode(mode_key)
     for key, attr in active_in_mode.items():
         x = positions.get(key)
@@ -449,22 +505,9 @@ def compute_r_char_inferred(stats: CharacteristicStats,
         per_attribute[key] = lr
         if attr.in_r_calc:
             log_product += math.log(max(lr, 1e-12))
-    raw_r = math.exp(log_product)
-    capped_r = max(floor, min(hard_cap, raw_r))
-    capped = abs(raw_r - capped_r) > 1e-9
-    return {
-        "per_attribute_lr":   per_attribute,
-        "raw_r":              raw_r,
-        "r_char":             capped_r,
-        "was_capped":         capped,
-        "hard_cap":           hard_cap,
-        "floor":              floor,
-        "relative_to_middle": relative_to_middle,
-        "mode_key":           mode_key,
-        "inferred":           True,
-        "n_attributes_in_r":  sum(1 for k in per_attribute
-                                  if active_in_mode[k].in_r_calc),
-    }
+            n_in_r += 1
+    return _assemble_r_result(per_attribute, log_product, n_in_r, hard_cap, floor,
+                              relative_to_middle, mode_key, corr_rho, inferred=True)
 
 
 def apply_discernibility(r: float, bucket: DiscernibilityBucket) -> float:

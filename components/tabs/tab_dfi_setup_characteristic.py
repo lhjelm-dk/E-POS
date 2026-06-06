@@ -267,18 +267,47 @@ def _render_dfi_setup_characteristic(ctx) -> None:
                 "Fair is the middle. Turn this OFF for the base-rate-relative Bayesian LR."
             )
 
+        st.markdown("---")
+        corr_rho = st.slider(
+            "Assumed attribute correlation ρ (independence discount)",
+            min_value=0.0, max_value=0.8, step=0.05,
+            value=float(st.session_state.get("dhi_char_corr_rho", 0.0)),
+            key="dhi_char_corr_rho",
+            help=(
+                "**Corrects the naive-Bayes independence assumption.** R = ∏ LRᵢ "
+                "treats the attributes as conditionally independent given class, but "
+                "they physically co-vary, so the product double-counts shared signal.\n\n"
+                "With average pairwise correlation ρ, the *effective* number of "
+                "independent attributes is k_eff = k / (1 + (k−1)·ρ), so the evidence "
+                "is discounted as **R_disc = R_raw^f** with **f = 1/(1 + (k−1)·ρ)**.\n\n"
+                "ρ = 0 → independent (naive product, unchanged). ρ → 1 → fully "
+                "redundant (the k attributes count as one). ρ ≈ 0.3–0.5 is a "
+                "reasonable default for seismic amplitude attributes. This is a "
+                "*principled* alternative to letting the hard cap do all the work."
+            ),
+        )
+        if corr_rho > 0:
+            st.caption(
+                f"Independence discount active (ρ = {corr_rho:.2f}). The naive product "
+                "is down-weighted before the cap is applied."
+            )
+
     # ── Compute ──
     rel_middle = bool(st.session_state.get("dhi_char_rel_middle", False))
+    corr_rho = float(st.session_state.get("dhi_char_corr_rho", 0.0))
     _floor, _hardcap = cap_for_bucket(bucket_name, enabled=apply_cap)
     cap_kw = dict(hard_cap=_hardcap, floor=_floor)
     if inferred:
         r_res = compute_r_char_inferred(cstats, positions, mode_key=mode_key,
-                                        relative_to_middle=rel_middle, **cap_kw)
+                                        relative_to_middle=rel_middle,
+                                        corr_rho=corr_rho, **cap_kw)
     else:
         r_res = compute_r_char(cstats, selections, mode_key=mode_key,
-                               relative_to_middle=rel_middle, **cap_kw)
-    r_char  = r_res["r_char"]                  # capped, before discernibility
+                               relative_to_middle=rel_middle,
+                               corr_rho=corr_rho, **cap_kw)
+    r_char  = r_res["r_char"]                  # capped, after independence discount
     r_raw   = r_res["raw_r"]
+    r_disc  = r_res["discounted_r"]
     r_eff   = apply_discernibility(r_char, bucket)
     score   = dhi_score_from_r(r_eff) * 100.0
     # Use the prospect's headline ESL prior (mass-rollup P(G, ESL) at current stance)
@@ -306,7 +335,10 @@ def _render_dfi_setup_characteristic(ctx) -> None:
         m1, m2 = st.columns(2)
         with m1:
             _rlabel = "R_char (capped)" if apply_cap else "R_char"
-            _rhelp = (f"Naive-independence product of the LRs (raw = {r_raw:.2f}). "
+            _disc_txt = (f" → independence-discounted (ρ={corr_rho:.2f}, "
+                         f"f={r_res['corr_exponent']:.2f}) = {r_disc:.2f}"
+                         if corr_rho > 0 else "")
+            _rhelp = (f"Naive-independence product of the LRs (raw = {r_raw:.2f}){_disc_txt}. "
                       + (f"Discernibility-aware cap [{_floor:.2f}, {_hardcap:.1f}] "
                          f"at {bucket_name} discernibility."
                          if apply_cap else

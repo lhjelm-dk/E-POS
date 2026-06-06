@@ -12,6 +12,7 @@ from logic.dhi_characteristics import (
     load_characteristic_stats, compute_r_char, compute_r_char_inferred,
     inferred_lr_at, inferred_success_rate_at, apply_discernibility,
     simm_bayes_posterior, dhi_score_from_r, cap_for_bucket,
+    correlation_discount_exponent,
     DISCERNIBILITY_CAPS, CHARACTERISTIC_DEFAULT_SELECTIONS,
     R_FLOOR, R_HARD_CAP,
 )
@@ -71,6 +72,40 @@ def test_missing_selection_contributes_lr_one(stats):
     # No selections → product over LR=1 → R=1.
     r = compute_r_char(stats, {}, mode_key=MK, hard_cap=float("inf"), floor=0.0)["r_char"]
     assert abs(r - 1.0) < 1e-9
+
+
+def test_correlation_discount_exponent_limits():
+    # rho=0 -> independent (f=1); k=1 -> f=1; rho->1 -> f -> 1/k
+    assert correlation_discount_exponent(5, 0.0) == 1.0
+    assert correlation_discount_exponent(1, 0.7) == 1.0
+    assert abs(correlation_discount_exponent(5, 0.5) - 1.0 / (1 + 4 * 0.5)) < 1e-12
+    assert abs(correlation_discount_exponent(4, 0.99) - 1.0 / (1 + 3 * 0.99)) < 1e-12
+
+
+def test_corr_rho_discounts_evidence_toward_one(stats):
+    # A strong all-positive selection: rho>0 must pull R_disc strictly toward 1
+    # (below the naive product) but stay on the same side (>1).
+    sel = {"fluid_contact_reflection": "Excellent", "anomaly_strength": "Very strong",
+           "lateral_amplitude_contrast": "High"}
+    base = compute_r_char(stats, sel, mode_key=MK, hard_cap=float("inf"), floor=0.0,
+                          corr_rho=0.0)
+    disc = compute_r_char(stats, sel, mode_key=MK, hard_cap=float("inf"), floor=0.0,
+                          corr_rho=0.5)
+    assert disc["corr_rho"] == 0.5
+    assert base["raw_r"] > 1.0
+    # discounted is raw_r ** f, with f<1 -> closer to 1 but still > 1
+    assert 1.0 < disc["r_char"] < base["r_char"]
+    k = base["n_attributes_in_r"]
+    f = correlation_discount_exponent(k, 0.5)
+    assert abs(disc["r_char"] - base["raw_r"] ** f) < 1e-9
+
+
+def test_corr_rho_default_is_naive_product(stats):
+    # Default corr_rho=0 leaves the result identical to the naive product.
+    sel = {"anomaly_strength": "Very strong"}
+    a = compute_r_char(stats, sel, mode_key=MK, hard_cap=float("inf"), floor=0.0)
+    assert abs(a["discounted_r"] - a["raw_r"]) < 1e-12
+    assert a["corr_exponent"] == 1.0
 
 
 def test_product_is_sum_in_logs(stats):
