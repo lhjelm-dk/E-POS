@@ -13,6 +13,7 @@ from logic.dhi_characteristics import (
     inferred_lr_at, inferred_success_rate_at, apply_discernibility,
     simm_bayes_posterior, dhi_score_from_r, cap_for_bucket,
     correlation_discount_exponent,
+    score_class_logr_moments, score_class_gaussians,
     DISCERNIBILITY_CAPS, CHARACTERISTIC_DEFAULT_SELECTIONS,
     R_FLOOR, R_HARD_CAP,
 )
@@ -106,6 +107,33 @@ def test_corr_rho_default_is_naive_product(stats):
     a = compute_r_char(stats, sel, mode_key=MK, hard_cap=float("inf"), floor=0.0)
     assert abs(a["discounted_r"] - a["raw_r"]) < 1e-12
     assert a["corr_exponent"] == 1.0
+
+
+def test_score_class_gaussians_success_above_failure(stats):
+    # The success population must sit at a higher composite log-LR than failure,
+    # with positive spreads — both for raw and inferred LRs.
+    for inf in (False, True):
+        g = score_class_gaussians(stats, mode_key=MK, inferred=inf)
+        mu_s, sd_s = g["succ"]
+        mu_f, sd_f = g["fail"]
+        assert mu_s > mu_f                 # successes look more success-like
+        assert sd_s > 0 and sd_f > 0
+        assert g["k"] == 5
+
+
+def test_score_class_gaussians_corr_shrinks_spread(stats):
+    # The independence discount f<1 scales mu and sd toward 0 (R=1 / score 50%).
+    g0 = score_class_gaussians(stats, mode_key=MK, corr_rho=0.0)
+    g1 = score_class_gaussians(stats, mode_key=MK, corr_rho=0.5)
+    f = correlation_discount_exponent(g0["k"], 0.5)
+    assert abs(g1["corr_exponent"] - f) < 1e-12
+    assert abs(g1["succ"][0] - g0["succ"][0] * f) < 1e-9     # mu scales by f
+    assert abs(g1["succ"][1] - g0["succ"][1] * f) < 1e-9     # sd scales by f
+
+
+def test_score_class_logr_moments_variance_nonneg(stats):
+    m = score_class_logr_moments(stats, mode_key=MK)
+    assert m["succ"][1] >= 0 and m["fail"][1] >= 0
 
 
 def test_product_is_sum_in_logs(stats):

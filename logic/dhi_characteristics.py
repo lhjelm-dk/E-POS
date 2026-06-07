@@ -510,6 +510,87 @@ def compute_r_char_inferred(stats: CharacteristicStats,
                               relative_to_middle, mode_key, corr_rho, inferred=True)
 
 
+def score_class_logr_moments(stats: CharacteristicStats, mode_key: str = "5_current",
+                             *, inferred: bool = False,
+                             relative_to_middle: bool = False) -> dict:
+    """Per-class mean & variance of the composite log-LR ``L = Σ log LRᵢ`` over the
+    Monigle drilled population, under **success** and under **failure**.
+
+    Under the naive-independence model each attribute's category is drawn from
+    ``P(c|class)`` (Laplace-smoothed, exactly as the LRs are built), so:
+
+        E_class[L]   = Σᵢ Σ_c P(c|class) · log LRᵢ(c)
+        Var_class[L] = Σᵢ ( Σ_c P(c|class) · log LRᵢ(c)²  −  E_i² )   (independence)
+
+    Returns ``{"succ": (μ, var), "fail": (μ, var), "k": n_in_r}`` in log-R space.
+    These moments are population properties (they do *not* depend on the current
+    prospect's slider selections); the prospect is a read-off point at its own L.
+    """
+    import math
+    attrs = stats.attributes_in_r_for_mode(mode_key)   # only R-contributing attrs
+    mu = {"succ": 0.0, "fail": 0.0}
+    var = {"succ": 0.0, "fail": 0.0}
+    k = 0
+    for key, attr in attrs.items():
+        ms = attr.stats_for(mode_key)
+        cats = ms.categories
+        K = len(cats)
+        if K == 0:
+            continue
+        # Per-category log-LR (raw discrete, or inferred-monotone at the anchors)
+        loglrs: list[float] = []
+        if inferred:
+            for i in range(K):
+                x = i / (K - 1) if K > 1 else 0.5
+                lr = inferred_lr_at(attr, mode_key, x, relative_to_middle=relative_to_middle)
+                loglrs.append(math.log(max(lr, 1e-12)))
+        else:
+            mid_lr = (attr.category_lr(_middle_category(attr, mode_key), mode_key)
+                      if relative_to_middle else 1.0)
+            for c in cats:
+                lr = attr.category_lr(c, mode_key)
+                if relative_to_middle and mid_lr > 0:
+                    lr = lr / mid_lr
+                loglrs.append(math.log(max(lr, 1e-12)))
+        # Class-conditional category probabilities (Laplace-smoothed)
+        ns = ms.n_success + LAPLACE_ADD * K
+        nf = ms.n_failure + LAPLACE_ADD * K
+        for cls, ntot, counts in (("succ", ns, ms.success), ("fail", nf, ms.failure)):
+            e = e2 = 0.0
+            for i in range(K):
+                p = (counts[i] + LAPLACE_ADD) / ntot if ntot > 0 else 1.0 / K
+                e += p * loglrs[i]
+                e2 += p * loglrs[i] * loglrs[i]
+            mu[cls] += e
+            var[cls] += max(0.0, e2 - e * e)
+        k += 1
+    return {"succ": (mu["succ"], var["succ"]), "fail": (mu["fail"], var["fail"]), "k": k}
+
+
+def score_class_gaussians(stats: CharacteristicStats, mode_key: str = "5_current",
+                          *, inferred: bool = False, relative_to_middle: bool = False,
+                          corr_rho: float = 0.0) -> dict:
+    """Gaussian (μ, σ) in log-R space for the success and failure populations.
+
+    Wraps :func:`score_class_logr_moments` and folds in the correlation-independence
+    discount ``f`` (so the curves live on the *same* discounted log-R axis as the
+    prospect's R_disc read-off). With k independent attributes the CLT makes L
+    approximately Gaussian under each class — the two bells mirror the Custom-tool
+    P(DFI|HC) / P(DFI|No-HC) curves, but here on the DHI-score axis.
+
+    Returns ``{"succ": (μ, σ), "fail": (μ, σ), "k": k, "corr_exponent": f}``.
+    """
+    import math
+    m = score_class_logr_moments(stats, mode_key, inferred=inferred,
+                                 relative_to_middle=relative_to_middle)
+    f = correlation_discount_exponent(m["k"], corr_rho)
+    out: dict = {"k": m["k"], "corr_exponent": f}
+    for cls in ("succ", "fail"):
+        mu, vr = m[cls]
+        out[cls] = (mu * f, max(math.sqrt(max(vr, 1e-12)) * f, 1e-6))
+    return out
+
+
 def apply_discernibility(r: float, bucket: DiscernibilityBucket) -> float:
     """Squash R toward 1 by the discernibility weight ``d`` (Monigle 2025).
 
