@@ -40,3 +40,13 @@ chunk_*.txt
 
 # user-saved prospects (local data)
 data/prospects/*.csv
+
+# Reference papers, proprietary spreadsheets, presentations, patents — IP, never
+# track. These are local dev resources only and must not ship in the repo.
+*.pdf
+*.xlsx
+*.xls
+*.pptx
+*.docx
+*.ppt
+*.doc
