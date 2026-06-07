@@ -131,7 +131,11 @@ DEFAULT_NOHC = CustomCase(
 # curve and every failure case shares one curve — so multi-case reduces exactly
 # to the simple HC vs No-HC two-state until the user unlinks a case.
 SUCCESS_KEYS: tuple[str, ...] = ("oil", "gas", "oil_gas")
-FAILURE_KEYS: tuple[str, ...] = ("water", "lsg", "non_reservoir")
+# Failure side mirrors the DHI-Index decomposition: three *fluid* failure modes
+# (evaluable reservoir, wrong fluid) weighted by P(fluid | failure) — Water / LSG /
+# Other — plus a separate Non-reservoir (reservoir-failure) case.
+FLUID_FAILURE_KEYS: tuple[str, ...] = ("water", "lsg", "other")
+FAILURE_KEYS: tuple[str, ...] = ("water", "lsg", "other", "non_reservoir")
 
 CASE_LABELS: dict[str, str] = {
     "oil":           "Oil",
@@ -139,6 +143,7 @@ CASE_LABELS: dict[str, str] = {
     "oil_gas":       "Oil + Gas",
     "water":         "Water (brine)",
     "lsg":           "Low-sat gas (fizz)",
+    "other":         "Other fluid",
     "non_reservoir": "Non-reservoir",
 }
 
@@ -146,9 +151,10 @@ CASE_GEO_LINK: dict[str, str] = {
     "oil":           "Oil leg in an evaluable reservoir → success (drives P(G) up).",
     "gas":           "Gas leg in an evaluable reservoir → success (drives P(G) up).",
     "oil_gas":       "Oil + gas column → success (drives P(G) up).",
-    "water":         "Brine-filled reservoir → charge/seal failure.",
-    "lsg":           "Low-saturation / residual (fizz) gas → charge-quality failure.",
-    "non_reservoir": "No effective reservoir → reservoir-presence failure.",
+    "water":         "Brine-filled evaluable reservoir → fluid failure.",
+    "lsg":           "Low-saturation / residual (fizz) gas → fluid failure.",
+    "other":         "Other non-producible fluid (e.g. CO₂) in an evaluable reservoir → fluid failure.",
+    "non_reservoir": "No effective / non-evaluable reservoir → reservoir-presence failure (geology, not fluid).",
 }
 
 
@@ -196,6 +202,7 @@ CASE_DEFAULTS: dict[str, tuple[float, float]] = {
     "oil_gas":       (-40.0,  90.0),
     "water":         (-100.0, 50.0),
     "lsg":           (-80.0,  80.0),
+    "other":         (-80.0,  80.0),   # shares the LSG-type curve (as DHI shares LSG class)
     "non_reservoir": (-70.0,  50.0),
 }
 
@@ -204,10 +211,13 @@ CASE_WEIGHT_DEFAULTS: dict[str, float] = {
     "oil":           0.33,
     "gas":           0.33,
     "oil_gas":       0.33,
-    # Failure mix: water-dominated (water 80% · LSG 20% · non-reservoir 0%),
-    # matching the DHI-Index default fluid-failure weights.
+    # Fluid-failure mix P(fluid | failure) — Water 80% · LSG 20% · Other 0%
+    # (sums to 1), matching the DHI-Index default fluid-failure weights.
     "water":         0.80,
     "lsg":           0.20,
+    "other":         0.00,
+    # Reservoir failure is geology's job (already in the prior), so it sits at 0
+    # by default — a separate, available-but-off case, exactly like DHI.
     "non_reservoir": 0.00,
 }
 

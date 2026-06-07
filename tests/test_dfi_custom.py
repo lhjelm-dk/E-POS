@@ -48,11 +48,23 @@ def test_case_weight_defaults_match_spec():
     assert CASE_DEFAULTS["oil_gas"] == (-40.0, 90.0)
     assert CASE_DEFAULTS["water"] == (-100.0, 50.0)
     assert CASE_DEFAULTS["lsg"] == (-80.0, 80.0)
+    assert CASE_DEFAULTS["other"] == (-80.0, 80.0)
     assert CASE_DEFAULTS["non_reservoir"] == (-70.0, 50.0)
     assert CASE_WEIGHT_DEFAULTS == {
         "oil": 0.33, "gas": 0.33, "oil_gas": 0.33,
-        "water": 0.80, "lsg": 0.20, "non_reservoir": 0.00,
+        "water": 0.80, "lsg": 0.20, "other": 0.00, "non_reservoir": 0.00,
     }
+
+
+def test_failure_keys_dhi_structure():
+    from logic.dfi_custom import FAILURE_KEYS, FLUID_FAILURE_KEYS
+    # Fluid failures (P(fluid|failure)) are Water / LSG / Other; Non-reservoir is separate.
+    assert FLUID_FAILURE_KEYS == ("water", "lsg", "other")
+    assert FAILURE_KEYS == ("water", "lsg", "other", "non_reservoir")
+    # Default fluid-failure weights sum to 1 (a proper P(fluid | failure)).
+    from logic.dfi_custom import CASE_WEIGHT_DEFAULTS
+    assert abs(sum(CASE_WEIGHT_DEFAULTS[k] for k in FLUID_FAILURE_KEYS) - 1.0) < 1e-9
+    assert CASE_WEIGHT_DEFAULTS["non_reservoir"] == 0.0
 
 
 def test_simm_rule_of_thumb_bands():

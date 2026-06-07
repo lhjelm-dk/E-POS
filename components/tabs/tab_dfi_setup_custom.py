@@ -19,7 +19,7 @@ def _render_dfi_setup_custom(ctx) -> None:
     import pandas as pd
     from logic.dfi_custom import (
         CustomCase, custom_r, grouped_r, dhi_score_from_r,
-        SUCCESS_KEYS, FAILURE_KEYS, CASE_LABELS, CASE_GEO_LINK,
+        SUCCESS_KEYS, FAILURE_KEYS, FLUID_FAILURE_KEYS, CASE_LABELS, CASE_GEO_LINK,
         CASE_DEFAULTS, CASE_WEIGHT_DEFAULTS, SIMM_R_BANDS,
     )
     from components.dfi_shared import (
@@ -105,7 +105,8 @@ def _render_dfi_setup_custom(ctx) -> None:
                   help="R / (R + 1) — Monigle-style 0–100 score.")
     else:
         green = {"oil": "#15803d", "gas": "#22c55e", "oil_gas": "#4ade80"}
-        red   = {"water": "#dc2626", "lsg": "#f59e0b", "non_reservoir": "#7f1d1d"}
+        red   = {"water": "#dc2626", "lsg": "#f59e0b", "other": "#b45309",
+                 "non_reservoir": "#7f1d1d"}
 
         def _case_inputs(keys, color_map, group):
             for k in keys:
@@ -130,12 +131,11 @@ def _render_dfi_setup_custom(ctx) -> None:
 
         st.info(
             "**Weights = a prior probability mix, exactly like the DHI-Index method.**  \n"
-            "Within each group the weights are **normalised to sum to 100 %**:  \n"
-            "• Success: P(oil) + P(gas) + P(oil+gas) = 100 % *(given the prospect succeeds)*  \n"
-            "• Failure: P(water) + P(LSG) + P(non-reservoir) = 100 % *(given it fails)*  \n"
-            "This mirrors the DHI-Index fluid-failure weights (water + LSG + other = 1). "
-            "You can type any positive numbers — they are converted to percentages internally, "
-            "so only their *ratios* matter. The normalised mix is shown below each group."
+            "Each weight is a mode's **share of its group**, given that outcome (they are "
+            "normalised to sum to 100 %). The failure side mirrors DHI: a **fluid-failure mix "
+            "P(fluid | failure)** over Water / LSG / Other (sums to 1), plus a separate "
+            "**Non-reservoir** (reservoir-failure) case — off by default because reservoir-"
+            "presence risk lives in the geological prior, not the DFI."
         )
         st.markdown("##### Success cases (hydrocarbons present)")
         _case_inputs(SUCCESS_KEYS, green, "Success")
@@ -146,10 +146,23 @@ def _render_dfi_setup_custom(ctx) -> None:
             + f"  *(entered weights sum to {sum(weights[k] for k in SUCCESS_KEYS):.2f})*"
         )
         st.markdown("##### Failure cases (no producible HC)")
-        _case_inputs(FAILURE_KEYS, red, "Failure")
+        st.markdown("**Fluid failure — P(fluid | failure)** *(evaluable reservoir, wrong fluid)*")
+        _case_inputs(FLUID_FAILURE_KEYS, red, "Failure")
+        _fluid_entered = sum(weights[k] for k in FLUID_FAILURE_KEYS)
+        _fluid_sum = sum(max(weights[k], 0.0) for k in FLUID_FAILURE_KEYS) or 1.0
+        _sum_ok = abs(_fluid_entered - 1.0) < 0.01
+        st.caption(
+            "P(fluid | failure) → "
+            + " · ".join(f"{CASE_LABELS[k]} **{weights[k]/_fluid_sum:.0%}**"
+                         for k in FLUID_FAILURE_KEYS)
+            + f"  —  **Sum = {_fluid_entered:.2f}** "
+            + ("✓" if _sum_ok else "⚠️ (they are renormalised internally)")
+        )
+        st.markdown("**Reservoir failure** *(no / non-evaluable reservoir — a separate case)*")
+        _case_inputs(("non_reservoir",), red, "Failure")
         _fail_sum = sum(max(weights[k], 0.0) for k in FAILURE_KEYS) or 1.0
         st.caption(
-            "Normalised failure mix → "
+            "Overall normalised failure mix (all four cases) → "
             + ", ".join(f"{CASE_LABELS[k]} **{weights[k]/_fail_sum:.0%}**" for k in FAILURE_KEYS)
             + f"  *(entered weights sum to {sum(weights[k] for k in FAILURE_KEYS):.2f})*"
         )
@@ -196,11 +209,17 @@ def _render_dfi_setup_custom(ctx) -> None:
     )
 
     # ── GeoX hand-off — the six P(DFI | case) inputs (parity with the DHI-Index method) ──
+    # GeoX has a single "LSG/other" failure cell, so blend the LSG and Other cases
+    # by their weights (mirrors SAAM, where Other shares the LSG_failure class).
+    _w_lsg, _w_oth = weights.get("lsg", 0.0), weights.get("other", 0.0)
+    _lsg_pdf, _oth_pdf = cases["lsg"].pdf(slider), cases["other"].pdf(slider)
+    _lsg_cell = ((_w_lsg * _lsg_pdf + _w_oth * _oth_pdf) / (_w_lsg + _w_oth)
+                 if (_w_lsg + _w_oth) > 0 else _lsg_pdf)
     from components.dfi_shared import render_geox_pdfi_handoff
     render_geox_pdfi_handoff(
         success   = cases["oil"].pdf(slider),
         water     = cases["water"].pdf(slider),
-        lsg       = cases["lsg"].pdf(slider),
+        lsg       = _lsg_cell,
         reservoir = cases["non_reservoir"].pdf(slider),
         method_label=("Custom R tool — multi-case" if multicase
                       else "Custom R tool — 2-state (single HC / No-HC curve)"),
