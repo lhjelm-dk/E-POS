@@ -200,12 +200,15 @@ CASE_DEFAULTS: dict[str, tuple[float, float]] = {
 }
 
 CASE_WEIGHT_DEFAULTS: dict[str, float] = {
-    "oil":           0.50,
-    "gas":           0.50,
-    "oil_gas":       0.40,
+    # Success mix: equal 1/3 across oil / gas / oil+gas (normalised → 33% each).
+    "oil":           0.33,
+    "gas":           0.33,
+    "oil_gas":       0.33,
+    # Failure mix: water-dominated (water 80% · LSG 20% · non-reservoir 0%),
+    # matching the DHI-Index default fluid-failure weights.
     "water":         0.80,
-    "lsg":           1.00,
-    "non_reservoir": 1.00,
+    "lsg":           0.20,
+    "non_reservoir": 0.00,
 }
 
 # Default DHI-strength slider reading (seeds the UI on first activation).

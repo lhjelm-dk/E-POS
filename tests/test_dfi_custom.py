@@ -50,8 +50,8 @@ def test_case_weight_defaults_match_spec():
     assert CASE_DEFAULTS["lsg"] == (-80.0, 80.0)
     assert CASE_DEFAULTS["non_reservoir"] == (-70.0, 50.0)
     assert CASE_WEIGHT_DEFAULTS == {
-        "oil": 0.50, "gas": 0.50, "oil_gas": 0.40,
-        "water": 0.80, "lsg": 1.00, "non_reservoir": 1.00,
+        "oil": 0.33, "gas": 0.33, "oil_gas": 0.33,
+        "water": 0.80, "lsg": 0.20, "non_reservoir": 0.00,
     }
 
 
