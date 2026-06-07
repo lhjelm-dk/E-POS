@@ -761,7 +761,9 @@ $$
 - **R_SAAM ≫ 1** (e.g. 5+) → strong evidence; large uplift even with weak priors
 
 > **Two different R's — don't conflate them.** `R_SAAM` here is the likelihood ratio from the
-> **SAAM DHI-Index** Gaussian calibration (this pathway, the method of record). The
+> **Modified DHI Index (SAAM)** Gaussian calibration — a conceptual model reverse-engineered
+> from public SAAM presentation material; it expects a *pure DFI-strength* input, not a raw
+> SAAM score (see the warning on that Setup page). The
 > **characteristic-scoring** pathway computes a *different* ratio, `R_char` = ∏ LRᵢ, as a naive
 > product of per-attribute likelihood ratios (Monigle 2025). Both feed the same Simm 2-state
 > Bayes update, but they are computed on different scales and are **not** interchangeable.
@@ -1173,12 +1175,13 @@ For **ESL attribution** there are two modes:
             "synthetic split. A larger filled polygon = a stronger DHI profile."
         )
         st.markdown("---")
-        st.markdown("#### When to use this path vs DHI Index (SAAM)")
+        st.markdown("#### When to use this path vs Modified DHI Index (SAAM)")
         st.markdown(
             "| Use case | Choose | Why |\n"
             "|---|---|---|\n"
-            "| You have a SAAM DHI Index from an external scoring sheet | **DHI Index (SAAM)** | "
-            "8-outcome decomposition gives per-pillar attribution + fluid-class diagnostics. |\n"
+            "| You have a **pure DFI-strength index** (geology neutralised) | **Modified DHI "
+            "Index (SAAM)** | 8-outcome decomposition gives per-pillar attribution + fluid-class "
+            "diagnostics. *Do not feed a raw SAAM DHI Index — see the warning on that page.* |\n"
             "| You don't have SAAM access or want a stand-alone assessment | **Characteristic scoring** | "
             "Six verbal sliders + public Monigle 2025 calibration; no external tool required. |\n"
             "| You want a sanity check on a SAAM-derived R | Run both; compare | The two R values "
@@ -1579,9 +1582,10 @@ as PDFs with this project for direct consultation.
 
 ---
 
-*The SAAM DHI-Index calibration used by the first DFI pathway is a proprietary
+*The SAAM calibration behind the **Modified DHI Index (SAAM)** pathway is a proprietary
 internal database and is **not** a public reference; only a synthetic placeholder
-ships with E-POS.*
+ships with E-POS. The shipped pathway is a conceptual model reverse-engineered from
+public presentation material and expects a pure DFI-strength input, not a raw SAAM score.*
 """)
 
     # ═══════════════════════════════════════════════════════════════════════

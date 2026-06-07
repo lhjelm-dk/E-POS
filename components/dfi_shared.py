@@ -4,9 +4,9 @@ The DFI Update tab hosts three evidence sources that arrive at the same endpoint
 — a likelihood ratio **R** that updates the geological prior via Simm's two-state
 Bayes:
 
-  • DHI Index (SAAM)            — calibrated 8-outcome model
-  • Characteristic (Monigle 2025) — uncalibrated naive-independence product
-  • Custom R tool               — uncalibrated user-defined Gaussians
+  • Custom R tool                  — uncalibrated user-defined Gaussians
+  • Characteristic (Monigle 2025)  — uncalibrated naive-independence product
+  • Modified DHI Index (SAAM)      — SAAM-derived conceptual 8-outcome model
 
 This module holds the **method-agnostic** render blocks so all three present R,
 its Simm verdict, the prior→posterior move, and the stance trajectory the same

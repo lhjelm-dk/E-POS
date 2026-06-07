@@ -143,7 +143,7 @@ def _render_dfi_summary(ctx) -> None:
         _post_pl = compute_dfi_posterior(prior_esl, dhi, calib, fw, sd_mode, fluid_type,
                                          prior_pg_override=_pl).posterior_pg
         _ov_data["dfi"] = {
-            "method_label": "SAAM DHI-Index · 8-outcome Bayes",
+            "method_label": "Modified DHI Index (SAAM) · 8-outcome Bayes",
             "esl_prior": esl_prior_pg, "esl_post": post_esl.posterior_pg,
             "esl_delta_pp": delta_esl * 100,
             "classic_prior": prior_classic.prior_pg, "classic_post": post_classic.posterior_pg,

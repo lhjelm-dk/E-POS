@@ -50,25 +50,34 @@ def _render_dfi_setup(ctx) -> None:
     )
     with st.container(border=True):
         st.markdown("### DFI evidence source")
+        _src_options = ["Custom R tool", "Characteristic scoring (Monigle 2025)",
+                        "Modified DHI Index (SAAM)"]
+        # Migrate any persisted selection (old labels / order) onto the new option
+        # list so st.radio never sees a stored value that isn't in `options`.
+        _src_map = {"custom": _src_options[0], "characteristic": _src_options[1],
+                    "dhi_index": _src_options[2]}
+        if st.session_state.get("dfi_source_radio") not in _src_options:
+            st.session_state["dfi_source_radio"] = _src_map.get(
+                st.session_state.get("dfi_source"), _src_options[0])
         source = st.radio(
             "Choose how the DHI strength R is derived:",
-            options=["DHI Index (SAAM)", "Characteristic scoring (Monigle 2025)",
-                     "Custom R tool"],
+            options=_src_options,
             horizontal=True,
             key="dfi_source_radio",
             label_visibility="visible",
             help=(
                 "Three mutually-exclusive ways to derive the DHI strength R:\n\n"
-                "• **DHI Index (SAAM)** — enter the composite DHI Index from an external "
-                "SAAM/SaRA scoring sheet; the app computes R via Gaussian likelihoods over "
-                "the SAAM calibration classes (8-outcome Bayes, per-pillar attribution available).\n\n"
+                "• **Custom R tool** — define your own two bell curves for P(DFI | HC) and "
+                "P(DFI | No-HC) by their min/max (P1/P99), read R off a DHI-strength slider. "
+                "Fully transparent, no external calibration. Two-state Bayes.\n\n"
                 "• **Characteristic scoring (Monigle 2025)** — score the prospect on five DHI "
                 "attributes using a 5-step verbal scale; R is the product of per-attribute "
                 "likelihood ratios from the Monigle 2025 drilled-prospect database. Simpler "
                 "two-state Bayes; no per-pillar attribution. Stand-alone — no SAAM needed.\n\n"
-                "• **Custom R tool** — define your own two bell curves for P(DFI | HC) and "
-                "P(DFI | No-HC) by their min/max (P1/P99), read R off a DHI-strength slider. "
-                "Fully transparent, no external calibration. Two-state Bayes."
+                "• **Modified DHI Index (SAAM)** — a *conceptual* DFI-strength model reverse-"
+                "engineered from public SAAM presentation material (not the proprietary SAAM "
+                "score). Enter a **pure DFI-strength index**, not a raw SAAM DHI Index — see the "
+                "warning on that page. 8-outcome Bayes, per-pillar attribution available."
             ),
         )
     # Persist for downstream pages
@@ -86,6 +95,22 @@ def _render_dfi_setup(ctx) -> None:
     if st.session_state["dfi_source"] == "custom":
         _render_dfi_setup_custom(ctx)
         return
+
+    # ── Modified-method warning: this is NOT the raw SAAM DHI Index ──
+    st.markdown("### Modified DHI Index (SAAM)")
+    st.error(
+        "⚠️ **Modified method — do not enter a raw SAAM DHI Index here.**\n\n"
+        "This pathway is a **conceptual representation**, reverse-engineered from "
+        "publicly available SAAM presentation material — it is **not** the proprietary "
+        "SAAM model. The DHI Index booked in the original SAAM database **cannot be used "
+        "directly** in this Bayesian update: that index bundles the *geological* chance "
+        "together with the seismic signal, and all non-DHI (geology) contributions must be "
+        "**neutralised** in SAAM before the number is valid here — otherwise the geology is "
+        "double-counted against the ESL prior, which already carries it.\n\n"
+        "The input below must therefore be a **pure DFI-strength indicator** (seismic "
+        "amplitude evidence only). Treat it as an *illustrative* DFI strength, not a booked "
+        "SAAM score. **Entering a raw SAAM DHI Index here will give the wrong posterior.**"
+    )
 
     # ── Header strip: calibration source + override status ──
     src_text = f"**Calibration:** v.{calib.version}"

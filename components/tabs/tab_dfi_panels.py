@@ -186,7 +186,7 @@ def _render_posterior_class_panel(post, fluid_weights) -> None:
                  delta=f"{(post.posterior_pg - post.prior_outcomes.oil_eval_success)*100:+.2f}%")
     col_c.metric("R_SAAM", f"{post.r_saam:.2f}",
                  help="R_SAAM (DHI-Index strength) = L_success / E[L | failure] — the "
-                      "likelihood ratio from the SAAM DHI-Index calibration. How much the "
+                      "likelihood ratio from the Modified DHI Index (SAAM) calibration. How much the "
                       "DFI evidence shifts the odds. Distinct from R_char on the "
                       "characteristic-scoring pathway.")
 

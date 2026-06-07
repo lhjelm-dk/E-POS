@@ -66,7 +66,7 @@ def _render_dfi_setup_custom(ctx) -> None:
         "is read against the equally **uncalibrated** Success and Failure P(DFI | case) "
         "distributions you define below. Only the *shape and separation* of the two curves "
         "matters (R is scale-invariant), so the −100…100 numbers are arbitrary — unlike the "
-        "SAAM DHI-Index pathway, which is calibrated to a drilled-prospect database."
+        "Modified DHI Index (SAAM) pathway, which reads against a SAAM-derived calibration."
     )
 
     # ── Build the case set ──
