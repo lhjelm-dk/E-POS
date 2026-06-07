@@ -20,8 +20,32 @@ from logic.session_keys import SK
 
 
 def _render_analysis_tab(ctx) -> None:
-    """Render the Analysis tab.  Called by _render_tabs."""
+    """Geological POS tab — Result / Diagnostics / Detail sub-tabs."""
+    # Tab-level scope note: this tab analyses the GEOLOGICAL chance P(G) / gPOS.
+    st.markdown(
+        "<div style='background:#f0f9ff;border-left:4px solid #0ea5e9;"
+        "padding:8px 14px;border-radius:6px;margin-bottom:10px;'>"
+        "<b>Geological chance analysis — P(G)</b> "
+        "<span style='font-size:0.85rem;color:#475569;'>(a.k.a. <i>Pg</i> / geological POS, gPOS). "
+        "Everything on this tab characterises the <b>geological prior</b> probability "
+        "of success and its uncertainty <i>before</i> any DFI/seismic update. "
+        "ESL values appear as <b>P(G, ESL)</b>; the Classic product as <b>P(G, Classic)</b>. "
+        "The DFI-conditioned posterior P(G | DFI) lives on the <b>Bayesian DFI Update</b> "
+        "tab; the reportable result is on the <b>Final Prospect POS</b> tab.</span>"
+        "</div>",
+        unsafe_allow_html=True,
+    )
+    _t_res, _t_diag, _t_det = st.tabs(["Result", "Diagnostics", "Detail"])
+    with _t_res:
+        _render_geo_result(ctx)
+    with _t_diag:
+        _render_geo_diagnostics(ctx)
+    with _t_det:
+        _render_geo_detail(ctx)
 
+
+def _render_geo_result(ctx) -> None:
+    """Headline geological prior — the Risk Overview table."""
     models = ctx.models
     play = ctx.play
     conditional = ctx.conditional
@@ -41,22 +65,6 @@ def _render_analysis_tab(ctx) -> None:
     _pillar_colors = ctx.pillar_colors
     _pillar_display = ctx.pillar_display
     ESL_OPTIONS = MODE_OPTIONS = ctx.esl_options
-
-    # Tab-level scope note: this tab analyses the GEOLOGICAL chance P(G) / gPOS.
-    st.markdown(
-        "<div style='background:#f0f9ff;border-left:4px solid #0ea5e9;"
-        "padding:8px 14px;border-radius:6px;margin-bottom:10px;'>"
-        "<b>Geological chance analysis — P(G)</b> "
-        "<span style='font-size:0.85rem;color:#475569;'>(a.k.a. <i>Pg</i> / geological POS, gPOS). "
-        "Everything on this tab characterises the <b>geological prior</b> probability "
-        "of success and its uncertainty <i>before</i> any DFI/seismic update. "
-        "ESL values appear as <b>P(G, ESL)</b>; the Classic product as <b>P(G, Classic)</b>. "
-        "The DFI-conditioned posterior P(G | DFI) lives on the <b>Bayesian DFI Update</b> "
-        "tab; the reportable result is on the <b>Final Prospect POS</b> tab.</span>"
-        "</div>",
-        unsafe_allow_html=True,
-    )
-
     # Risk Overview
     _ov = _get_esl_overview_data(models)
     if _ov:
@@ -64,6 +72,29 @@ def _render_analysis_tab(ctx) -> None:
         st.subheader("Risk Overview — geological prior P(G, ESL)")
         render_overview_table("esl", _ov)
         st.divider()
+
+
+def _render_geo_diagnostics(ctx) -> None:
+    """Uncertainty Index, pillar fan, ESL ratio plot, Chance Adequacy Matrix."""
+    models = ctx.models
+    play = ctx.play
+    conditional = ctx.conditional
+    r = ctx.rollup
+    total_for = ctx.total_for
+    total_against = ctx.total_against
+    play_for = ctx.play_for
+    play_against = ctx.play_against
+    conditional_for = ctx.conditional_for
+    conditional_against = ctx.conditional_against
+    conditional_results = ctx.conditional_results
+    uncertainty_weight = ctx.uncertainty_weight
+    prospect_title = ctx.prospect_title
+    get_mode = ctx.get_mode
+    get_dependency = ctx.get_dependency
+    _active_model_ref = ctx.active_model
+    _pillar_colors = ctx.pillar_colors
+    _pillar_display = ctx.pillar_display
+    ESL_OPTIONS = MODE_OPTIONS = ctx.esl_options
 
     # ── Uncertainty Index as an ESL-derived range ────────────────────────────
     # For each pillar compute three P(pillar) values:
@@ -342,6 +373,121 @@ def _render_analysis_tab(ctx) -> None:
 
     st.divider()
     render_top5_weakest(conditional, uncertainty_weight, pillar_display=_pillar_display)
+    st.divider()
+
+    # ESL Ratio Plot
+    st.subheader("Evidence Support Logic Ratio Plot")
+    st.caption("Ratio = max(For,0.01) / max(Against,0.01); X = residual uncertainty (%). "
+               "▸ ESL masses & the Italian Flag: **Theory & Guide → \"Evidence Support "
+               "Logic (ESL) — fundamentals\"**.")
+
+    def _local_validation(_play_d, _conditional_d, _cond_results, _tf, _ta):
+        _issues = []
+        for _cat, _el in _play_d.items():
+            if not (isinstance(_el, dict) and "support_for" in _el):
+                continue
+            _f, _a = float(_el["support_for"]), float(_el["support_against"])
+            if _f + _a > 1.0:
+                _issues.append({"level": "warning", "message": f"Play {_cat}: overcommitted ({_f:.2f}+{_a:.2f}={_f+_a:.2f})."})
+            if _f == 0.0 and _a == 0.0:
+                _issues.append({"level": "error", "message": f"Play {_cat}: not assessed (both 0.0)."})
+        for _cat, _elements in _conditional_d.items():
+            for _elem in _elements:
+                _f, _a = float(_elem["support_for"]), float(_elem["support_against"])
+                _n = f"{_cat}/{_elem.get('label', '?')}"
+                if _f + _a > 1.0:
+                    _issues.append({"level": "warning", "message": f"Conditional {_n}: overcommitted."})
+                if _f == 0.0 and _a == 0.0:
+                    _issues.append({"level": "error", "message": f"Conditional {_n}: not assessed."})
+        if _tf + _ta > 1.0:
+            _issues.append({"level": "warning", "message": f"Total overcommitted (For={_tf:.3f}, Against={_ta:.3f})."})
+        if _tf < 0.01:
+            _issues.append({"level": "error", "message": f"P(G, ESL) lower bound near zero ({_tf*100:.1f}%)."})
+        _cpl = min(_v["for"] for _v in _cond_results.values()) if _cond_results else 0.0
+        if _cpl < 0.05:
+            _issues.append({"level": "warning", "message": f"Conditional min lower bound = {_cpl*100:.1f}%."})
+        return _issues
+
+    _all_play_eids = [f"play|{c}" for c in play if isinstance(play[c], dict) and "support_for" in play[c]]
+    _all_cond_eids = [f"cond|{cat}|{i}" for cat, elems in conditional.items() for i, _ in enumerate(elems)]
+    _all_eids = _all_play_eids + _all_cond_eids
+
+    def _eid_label(_eid: str) -> str:
+        parts = _eid.split("|")
+        if parts[0] == "play":
+            _cat = parts[1]
+            return f"★ {_pillar_display.get(_cat, _cat)} (Play)"
+        _cat, _idx = parts[1], int(parts[2])
+        _disp = _pillar_display.get(_cat, _cat)
+        _elems = conditional.get(_cat, [])
+        if _idx < len(_elems):
+            _sc = (_elems[_idx].get("success_criteria", "") or _elems[_idx].get("label", ""))[:45]
+            return f"{_disp} / {_sc}"
+        return f"{_disp} / elem {_idx}"
+
+    _all_eid_labels = [_eid_label(e) for e in _all_eids]
+    _lbl_to_eid = dict(zip(_all_eid_labels, _all_eids))
+
+    with st.expander("Element filter (applies to both plots below)", expanded=False):
+        _sel_labels = st.multiselect(
+            "Show elements",
+            options=_all_eid_labels,
+            default=_all_eid_labels,
+            key="analysis_leaf_filter",
+            help="Select / deselect individual risk elements. Changes apply to both the Ratio Plot and the CAM scatter.",
+        )
+    _sel_eids = {_lbl_to_eid[lb] for lb in _sel_labels} if len(_sel_labels) < len(_all_eids) else None
+
+    _render_esl_ratio_plot_and_validation(
+        play, conditional, conditional_results, total_for, total_against,
+        uncertainty_weight, _local_validation, prospect_title,
+        get_mode, get_dependency, combine_with_mode,
+        leaf_filter=_sel_eids,
+        pillar_display=_pillar_display,
+        pillar_colors=_pillar_colors,
+    )
+
+    # Chance Adequacy Matrix
+    st.divider()
+    st.subheader("Chance Adequacy Matrix — All Elements")
+    st.caption(
+        "Each risk element plotted in POS × Commitment / ECI space. "
+        "Green / red boundaries are auto-set from the element POS distribution. "
+        "Use the Element filter above to show/hide individual elements. "
+        "▸ How to read the CAM: **Theory & Guide → \"Chance Adequacy Matrix (CAM) — "
+        "interpretation guide\"**."
+    )
+    _cam_show_labels = st.checkbox("Show labels", value=True, key="cam_all_show_labels")
+    _render_cam_scatter_plot(
+        play, conditional, conditional_results,
+        total_for, total_against, uncertainty_weight,
+        _pillar_colors, _pillar_display,
+        leaf_filter=_sel_eids,
+        show_labels=_cam_show_labels,
+    )
+
+
+def _render_geo_detail(ctx) -> None:
+    """Risk-element hierarchy, detail tables, agreement, Classic POS detail."""
+    models = ctx.models
+    play = ctx.play
+    conditional = ctx.conditional
+    r = ctx.rollup
+    total_for = ctx.total_for
+    total_against = ctx.total_against
+    play_for = ctx.play_for
+    play_against = ctx.play_against
+    conditional_for = ctx.conditional_for
+    conditional_against = ctx.conditional_against
+    conditional_results = ctx.conditional_results
+    uncertainty_weight = ctx.uncertainty_weight
+    prospect_title = ctx.prospect_title
+    get_mode = ctx.get_mode
+    get_dependency = ctx.get_dependency
+    _active_model_ref = ctx.active_model
+    _pillar_colors = ctx.pillar_colors
+    _pillar_display = ctx.pillar_display
+    ESL_OPTIONS = MODE_OPTIONS = ctx.esl_options
 
     st.divider()
 
@@ -696,98 +842,6 @@ def _render_analysis_tab(ctx) -> None:
             )
             st.caption("\\* Est. POS marked with * uses model default (element not yet assessed).")
 
-    st.divider()
-
-    # ESL Ratio Plot
-    st.subheader("Evidence Support Logic Ratio Plot")
-    st.caption("Ratio = max(For,0.01) / max(Against,0.01); X = residual uncertainty (%). "
-               "▸ ESL masses & the Italian Flag: **Theory & Guide → \"Evidence Support "
-               "Logic (ESL) — fundamentals\"**.")
-
-    def _local_validation(_play_d, _conditional_d, _cond_results, _tf, _ta):
-        _issues = []
-        for _cat, _el in _play_d.items():
-            if not (isinstance(_el, dict) and "support_for" in _el):
-                continue
-            _f, _a = float(_el["support_for"]), float(_el["support_against"])
-            if _f + _a > 1.0:
-                _issues.append({"level": "warning", "message": f"Play {_cat}: overcommitted ({_f:.2f}+{_a:.2f}={_f+_a:.2f})."})
-            if _f == 0.0 and _a == 0.0:
-                _issues.append({"level": "error", "message": f"Play {_cat}: not assessed (both 0.0)."})
-        for _cat, _elements in _conditional_d.items():
-            for _elem in _elements:
-                _f, _a = float(_elem["support_for"]), float(_elem["support_against"])
-                _n = f"{_cat}/{_elem.get('label', '?')}"
-                if _f + _a > 1.0:
-                    _issues.append({"level": "warning", "message": f"Conditional {_n}: overcommitted."})
-                if _f == 0.0 and _a == 0.0:
-                    _issues.append({"level": "error", "message": f"Conditional {_n}: not assessed."})
-        if _tf + _ta > 1.0:
-            _issues.append({"level": "warning", "message": f"Total overcommitted (For={_tf:.3f}, Against={_ta:.3f})."})
-        if _tf < 0.01:
-            _issues.append({"level": "error", "message": f"P(G, ESL) lower bound near zero ({_tf*100:.1f}%)."})
-        _cpl = min(_v["for"] for _v in _cond_results.values()) if _cond_results else 0.0
-        if _cpl < 0.05:
-            _issues.append({"level": "warning", "message": f"Conditional min lower bound = {_cpl*100:.1f}%."})
-        return _issues
-
-    _all_play_eids = [f"play|{c}" for c in play if isinstance(play[c], dict) and "support_for" in play[c]]
-    _all_cond_eids = [f"cond|{cat}|{i}" for cat, elems in conditional.items() for i, _ in enumerate(elems)]
-    _all_eids = _all_play_eids + _all_cond_eids
-
-    def _eid_label(_eid: str) -> str:
-        parts = _eid.split("|")
-        if parts[0] == "play":
-            _cat = parts[1]
-            return f"★ {_pillar_display.get(_cat, _cat)} (Play)"
-        _cat, _idx = parts[1], int(parts[2])
-        _disp = _pillar_display.get(_cat, _cat)
-        _elems = conditional.get(_cat, [])
-        if _idx < len(_elems):
-            _sc = (_elems[_idx].get("success_criteria", "") or _elems[_idx].get("label", ""))[:45]
-            return f"{_disp} / {_sc}"
-        return f"{_disp} / elem {_idx}"
-
-    _all_eid_labels = [_eid_label(e) for e in _all_eids]
-    _lbl_to_eid = dict(zip(_all_eid_labels, _all_eids))
-
-    with st.expander("Element filter (applies to both plots below)", expanded=False):
-        _sel_labels = st.multiselect(
-            "Show elements",
-            options=_all_eid_labels,
-            default=_all_eid_labels,
-            key="analysis_leaf_filter",
-            help="Select / deselect individual risk elements. Changes apply to both the Ratio Plot and the CAM scatter.",
-        )
-    _sel_eids = {_lbl_to_eid[lb] for lb in _sel_labels} if len(_sel_labels) < len(_all_eids) else None
-
-    _render_esl_ratio_plot_and_validation(
-        play, conditional, conditional_results, total_for, total_against,
-        uncertainty_weight, _local_validation, prospect_title,
-        get_mode, get_dependency, combine_with_mode,
-        leaf_filter=_sel_eids,
-        pillar_display=_pillar_display,
-        pillar_colors=_pillar_colors,
-    )
-
-    # Chance Adequacy Matrix
-    st.divider()
-    st.subheader("Chance Adequacy Matrix — All Elements")
-    st.caption(
-        "Each risk element plotted in POS × Commitment / ECI space. "
-        "Green / red boundaries are auto-set from the element POS distribution. "
-        "Use the Element filter above to show/hide individual elements. "
-        "▸ How to read the CAM: **Theory & Guide → \"Chance Adequacy Matrix (CAM) — "
-        "interpretation guide\"**."
-    )
-    _cam_show_labels = st.checkbox("Show labels", value=True, key="cam_all_show_labels")
-    _render_cam_scatter_plot(
-        play, conditional, conditional_results,
-        total_for, total_against, uncertainty_weight,
-        _pillar_colors, _pillar_display,
-        leaf_filter=_sel_eids,
-        show_labels=_cam_show_labels,
-    )
 
     st.divider()
 
