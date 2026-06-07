@@ -92,6 +92,35 @@ SIMM_RULE_OF_THUMB: tuple[tuple[float, str], ...] = (
 )
 
 
+def geox_pdfi_cases(success: float, water: float, lsg: float,
+                    reservoir: float) -> list[tuple[str, float, str]]:
+    """Map four per-case DFI likelihoods onto SLB **GeoX**'s six DFI-Assessment
+    cases (fluid × reservoir-evaluability), scaled so the strongest = 100 %.
+
+    GeoX combines these conditional likelihoods with its own geological prior and
+    only uses their **ratios**, so the absolute scale is free — we normalise to the
+    maximum purely so the six numbers are readable on entry. The three
+    non-evaluable-reservoir cases all map to the ``reservoir`` (reservoir-failure)
+    likelihood, exactly like the SAAM/DHI-Index hand-off.
+
+    Returns a list of ``(geox_case_label, value_pct, represents)`` rows.
+    """
+    vals = [v for v in (success, water, lsg, reservoir) if v and v > 0.0]
+    mx = max(vals) if vals else 1.0
+
+    def _sc(v: float) -> float:
+        return (max(0.0, float(v)) / mx) * 100.0 if mx > 0 else 0.0
+
+    return [
+        ("Oil & Eval. Res.",               _sc(success),   "Success"),
+        ("Oil & Non. Eval. Res.",          _sc(reservoir), "Reservoir failure"),
+        ("Water & Eval. Res.",             _sc(water),     "Water failure"),
+        ("Water & Non. Eval. Res.",        _sc(reservoir), "Reservoir failure"),
+        ("Low Sat. Gas & Eval. Res.",      _sc(lsg),       "LSG / other failure"),
+        ("Low Sat. Gas & Non. Eval. Res.", _sc(reservoir), "Reservoir failure"),
+    ]
+
+
 def apply_discernibility(r: float, d: float) -> float:
     """Squash R toward 1 by a discernibility weight ``d`` ∈ [0, 1] (Monigle 2025).
 

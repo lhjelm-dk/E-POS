@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from logic.dfi_simm import simm_rule_of_thumb, SIMM_R_BANDS
+from logic.dfi_simm import simm_rule_of_thumb, SIMM_R_BANDS, geox_pdfi_cases
 
 
 # Simm rule-of-thumb shaded bands for an R log-axis: (hi, lo, fill, label).
@@ -65,6 +65,49 @@ def render_rscore_metrics(
 # ─────────────────────────────────────────────────────────────────────────────
 # Simm rule-of-thumb verdict banner
 # ─────────────────────────────────────────────────────────────────────────────
+
+def render_geox_pdfi_handoff(success: float, water: float, lsg: float, reservoir: float,
+                             *, method_label: str, context: str, key: str,
+                             fluid_agnostic: bool = False) -> None:
+    """Method-agnostic GeoX hand-off — the six P(DFI | case) inputs for SLB GeoX.
+
+    Mirrors the SAAM/DHI-Index hand-off, but works from any pathway's four per-case
+    DFI likelihoods (``success``, ``water``, ``lsg``, ``reservoir``). Values are
+    relative — scaled so the strongest case = 100 %; GeoX uses only their ratios.
+    Set ``fluid_agnostic=True`` for two-state methods (characteristic / single-curve
+    custom) that don't distinguish failure fluids — the five failure cases share one
+    value and a note explains why.
+    """
+    import pandas as pd
+    rows = geox_pdfi_cases(success, water, lsg, reservoir)
+    df = pd.DataFrame([(r[0], f"{r[1]:.1f}%", r[2]) for r in rows],
+                      columns=["GeoX case", "P(DFI | case)", "Represents"])
+    st.markdown("##### 📤 GeoX hand-off — the 6 P(DFI | case) inputs")
+    st.caption(
+        f"Type these six values into the **DFI Assessment** tab of SLB **GeoX** "
+        f"({context}). Source: **{method_label}**. Values are **relative** — scaled so "
+        f"the strongest case = 100 %; GeoX combines them with its own geological prior "
+        f"and uses only their *ratios*, so the absolute level is free. The three "
+        f"non-evaluable-reservoir cases share the reservoir-failure likelihood."
+    )
+    if fluid_agnostic:
+        st.caption(
+            "⚠️ This is a **two-state** method (success vs failure) — it does **not** "
+            "distinguish water / LSG / reservoir failure, so all five failure cases take "
+            "the **same** value (= 100 % ÷ R when R > 1). Only the success-vs-failure "
+            "contrast is real; the fluid split is carried by GeoX's own prior."
+        )
+    st.dataframe(df, hide_index=True, use_container_width=True)
+    txt = (
+        f"GeoX P(DFI|case) inputs — source: {method_label} ({context})\n"
+        "(relative; strongest case = 100%, ratios are what matter)\n\n"
+        + "\n".join(f"{r[0]:<34} {r[1]:6.1f}%   [{r[2]}]" for r in rows)
+    )
+    with st.expander("📋 Copy / download the GeoX values", expanded=False):
+        st.code(txt, language="text")
+        st.download_button("📥 Download GeoX P(DFI|case) (.txt)", data=txt,
+                           file_name="geox_pdfi_handoff.txt", key=key)
+
 
 def render_simm_verdict_banner(r: float) -> tuple[str, str, str]:
     """Coloured verdict banner for a likelihood ratio ``R``.

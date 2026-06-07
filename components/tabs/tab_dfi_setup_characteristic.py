@@ -455,6 +455,19 @@ def _render_dfi_setup_characteristic(ctx) -> None:
         "informative than the scalar score's own ratio."
     )
 
+    # ── GeoX hand-off — six P(DFI | case) inputs (parity with the DHI-Index method) ──
+    # Characteristic scoring is two-state, so all five failure cases share R_eff⁻¹.
+    from components.dfi_shared import render_geox_pdfi_handoff
+    render_geox_pdfi_handoff(
+        success=r_eff, water=1.0, lsg=1.0, reservoir=1.0,
+        method_label=("Characteristic scoring (Monigle 2025) · "
+                      + ("inferred" if inferred else "raw")
+                      + (f" · ρ={corr_rho:.2f}" if corr_rho > 0 else "")),
+        context=f"R_eff = {r_eff:.2f} (after discernibility & cap)",
+        key="geox_pdfi_char_dl",
+        fluid_agnostic=True,
+    )
+
     # ── Per-attribute LR bars (only attributes active in current mode) ──
     st.markdown("##### Per-attribute LR contributions")
     _anchor_lbl = "vs scale-middle" if rel_middle else "vs base rate"

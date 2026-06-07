@@ -195,6 +195,20 @@ def _render_dfi_setup_custom(ctx) -> None:
         "in the Bayesian update."
     )
 
+    # ── GeoX hand-off — the six P(DFI | case) inputs (parity with the DHI-Index method) ──
+    from components.dfi_shared import render_geox_pdfi_handoff
+    render_geox_pdfi_handoff(
+        success   = cases["oil"].pdf(slider),
+        water     = cases["water"].pdf(slider),
+        lsg       = cases["lsg"].pdf(slider),
+        reservoir = cases["non_reservoir"].pdf(slider),
+        method_label=("Custom R tool — multi-case" if multicase
+                      else "Custom R tool — 2-state (single HC / No-HC curve)"),
+        context=f"at DHI strength = {slider:+.0f}",
+        key="geox_pdfi_custom_dl",
+        fluid_agnostic=not multicase,
+    )
+
     # ── R-at-x helper (shared single-source reconstruction, also used by DFI
     #    Results). ``cases``/``weights`` are keyed per success/failure outcome in
     #    both modes, so grouped_r evaluates R identically (and reduces to custom_r

@@ -155,6 +155,31 @@ def test_score_class_convolution_guard_returns_none(stats):
     assert score_class_convolution_raw(stats, mode_key=MK, max_cells=10) is None
 
 
+# ── GeoX hand-off mapping (shared by custom + characteristic) ────────────────
+
+def test_geox_pdfi_two_state_collapses_failures():
+    from logic.dfi_simm import geox_pdfi_cases
+    rows = geox_pdfi_cases(3.0, 1.0, 1.0, 1.0)        # characteristic / 2-state
+    assert len(rows) == 6
+    assert abs(rows[0][1] - 100.0) < 1e-9            # success scaled to max
+    assert all(abs(v - 100.0 / 3.0) < 1e-6 for _l, v, _r in rows[1:])
+
+
+def test_geox_pdfi_multicase_distinct_and_ratio_preserved():
+    from logic.dfi_simm import geox_pdfi_cases
+    vals = {l: v for l, v, _ in geox_pdfi_cases(0.020, 0.004, 0.009, 0.002)}
+    assert abs(vals["Oil & Eval. Res."] - 100.0) < 1e-9          # strongest → 100%
+    assert abs(vals["Water & Eval. Res."] - 20.0) < 1e-6        # 0.004/0.020 = 20%
+    res = [vals["Oil & Non. Eval. Res."], vals["Water & Non. Eval. Res."],
+           vals["Low Sat. Gas & Non. Eval. Res."]]
+    assert max(res) - min(res) < 1e-9                # the 3 non-eval cases match
+
+
+def test_geox_pdfi_all_zero_safe():
+    from logic.dfi_simm import geox_pdfi_cases
+    assert all(v == 0.0 for _l, v, _r in geox_pdfi_cases(0.0, 0.0, 0.0, 0.0))
+
+
 def test_product_is_sum_in_logs(stats):
     # R_char is the product of the per-attribute LRs.
     sel = {"fluid_contact_reflection": "Excellent", "anomaly_strength": "Very strong"}
