@@ -333,18 +333,12 @@ def _render_analysis_tab(ctx) -> None:
             "Black line = P(G, ESL) — straight, because ESL applies Policy P once at the end. "
             "○ = pillar Bel/Pl endpoints · red dashed = current stance."
         )
-        with st.expander("Reading this plot", expanded=False):
-            st.markdown(
-                "**Coloured lines:** each pillar's P(pillar, ESL) = Policy P(Play, w) × Policy P(Cond, w), "
-                "where Cond uses the ESL-aggregated mass pair across that pillar's sub-elements. "
-                "These curves are **quadratic in w** (product of two linear Policy P factors).  \n"
-                "**Black line:** total P(G, ESL, w) — a **straight line**, because ESL combines "
-                "(S_for, S_against) masses across pillars first and applies Policy P only once at the end.  \n"
-                "**○ markers** at w=0 and w=1 mark each pillar's Bel and Pl (defensible endpoints).  \n"
-                "**Diagnostic:** the linear total is ESL's geometric signature — contrast with the Classic POS "
-                "fan where the total is a curved polynomial. The total does **NOT** equal the product of "
-                "per-pillar curves (that would be the Classic combination, not ESL)."
-            )
+        st.caption(
+            "The **straight** black total is ESL's signature: masses are combined across "
+            "pillars first, and Policy P is applied once at the end — so the total is *not* "
+            "the product of the (curved) per-pillar lines (that would be Classic). "
+            "▸ Full geometry in **Theory & Guide → \"Why P(G, ESL) ≠ P(G, Classic)\"**."
+        )
 
     st.divider()
     render_top5_weakest(conditional, uncertainty_weight, pillar_display=_pillar_display)
@@ -706,7 +700,9 @@ def _render_analysis_tab(ctx) -> None:
 
     # ESL Ratio Plot
     st.subheader("Evidence Support Logic Ratio Plot")
-    st.caption("Ratio = max(For,0.01) / max(Against,0.01); X = residual uncertainty (%).")
+    st.caption("Ratio = max(For,0.01) / max(Against,0.01); X = residual uncertainty (%). "
+               "▸ ESL masses & the Italian Flag: **Theory & Guide → \"Evidence Support "
+               "Logic (ESL) — fundamentals\"**.")
 
     def _local_validation(_play_d, _conditional_d, _cond_results, _tf, _ta):
         _issues = []
@@ -780,7 +776,9 @@ def _render_analysis_tab(ctx) -> None:
     st.caption(
         "Each risk element plotted in POS × Commitment / ECI space. "
         "Green / red boundaries are auto-set from the element POS distribution. "
-        "Use the Element filter above to show/hide individual elements."
+        "Use the Element filter above to show/hide individual elements. "
+        "▸ How to read the CAM: **Theory & Guide → \"Chance Adequacy Matrix (CAM) — "
+        "interpretation guide\"**."
     )
     _cam_show_labels = st.checkbox("Show labels", value=True, key="cam_all_show_labels")
     _render_cam_scatter_plot(

@@ -1516,8 +1516,22 @@ recommendation on the current prospect.*
 | < 10% | High risk — strong evidence against adequacy | Long-shot / concept well |
 
 Calibrate your POS numbers against **analogue discovery rates** from the same play/basin.
-Use the calibration anchors in the Play and Classic POS sections.
 
+Per-pillar **Rose (2001) calibration anchors** — typical POS ranges observed across
+analogue prospect populations — for sense-checking each pillar against the literature:
+""")
+        from components.calibration import ROSE_RANGES as _ROSE
+        st.markdown(
+            "| Pillar | Typical POS range | Median | Basis |\n|---|---|---|---|\n"
+            + "\n".join(f"| {k} | {lo}–{hi} % | {med} % | {desc} |"
+                        for k, (lo, hi, med, desc) in _ROSE.items())
+        )
+        st.caption(
+            "Source: Rose, P.R. (2001), *Risk Analysis and Management of Petroleum "
+            "Exploration Ventures*, AAPG Methods in Exploration 12. A pillar POS far "
+            "outside its range isn't wrong — but it should carry an explicit rationale."
+        )
+        st.markdown("""
 ---
 
 ### Key references

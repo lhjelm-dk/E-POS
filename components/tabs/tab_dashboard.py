@@ -375,16 +375,13 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
         f"📊 Classic POS — source and optional ROSE override — {_mode_badge}",
         expanded=_rose_is_active,
     ):
-        st.markdown(
-            "Classic POS can be sourced in two ways. "
-            "**ESL-derived is the default and recommended mode** — it keeps the assessment fully "
-            "traceable to your evidence. Use the ROSE override only when you have a pre-existing "
-            "independent estimate that you want to display alongside the ESL result.\n\n"
-            "| Mode | When to use |\n|------|-------------|\n"
-            "| **ESL-derived (default)** | Building the assessment in E-POS from evidence. "
-            "Classic POS updates automatically as you adjust S_for / S_against. Fully traceable. |\n"
-            "| **ROSE override** | A pre-existing ROSE/GeoX estimate exists from a separate "
-            "study. Enter it here for comparison. Document the source below — required for audit. |"
+        st.caption(
+            "**ESL-derived is the default** (Classic POS = ∏ pillar Policy P — fully "
+            "traceable to your evidence). Use the **ROSE override** only to display a "
+            "pre-existing external estimate alongside it; document its source for audit. "
+            "▸ The P(G, Classic) method & the ESL↔Classic bridge: **Theory & Guide → "
+            "\"P(G, Classic) — the multiplicative method\"** and **\"Why P(G, ESL) ≠ "
+            "P(G, Classic)\"**."
         )
 
         if _esl_classic is not None and _esl_bel is not None and _esl_pl is not None:
@@ -397,8 +394,6 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
             _esl_display = "—  *(complete Play + Conditional tabs)*"
         st.info(
             f"ESL-derived Classic POS (current): {_esl_display}  \n"
-            "Bel = product of committed evidence floors (S_for per pillar).  \n"
-            "Pl  = product of committed evidence ceilings (1−S_against per pillar).  \n"
             "This is what the comparison table uses unless a ROSE override is active below."
         )
 
