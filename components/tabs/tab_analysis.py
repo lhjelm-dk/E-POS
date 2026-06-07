@@ -71,6 +71,38 @@ def _render_geo_result(ctx) -> None:
         from components.overview_table import render_overview_table
         st.subheader("Risk Overview — geological prior P(G, ESL)")
         render_overview_table("esl", _ov)
+
+        # ── Both headline geological numbers side by side: P(G, ESL) and the
+        #    Rose-style P(G, Classic). Their gap is a data-quality / dependence signal.
+        _esl_point = policy_pos(total_for, total_against, uncertainty_weight)
+        _esl_bel, _esl_pl = total_for, 1.0 - total_against
+        from components.prospect_hub import _compute_classic_pos_with_range_for_hub
+        _cl = _compute_classic_pos_with_range_for_hub(models)
+        _rose_on = bool(st.session_state.get("rose_classic_pos_entered", False))
+        _cl_active = st.session_state.get("comparison_classic_pos")
+        _cl_point = _cl_active if _cl_active is not None else (_cl[0] if _cl else None)
+
+        st.markdown("##### Headline geological POS — ESL vs Classic")
+        _cA, _cB, _cC = st.columns(3)
+        _cA.metric("P(G, ESL)", f"{_esl_point*100:.1f}%",
+                   help="Evidence Support Logic mass-rollup at the current stance w — "
+                        "the geological prior the DFI update conditions on.")
+        _cA.caption(f"Bel–Pl envelope {_esl_bel*100:.0f}–{_esl_pl*100:.0f}%")
+        if _cl_point is not None:
+            _src = "ROSE override" if _rose_on else "ESL-derived (∏ pillar Policy P)"
+            _cB.metric("P(G, Classic)", f"{_cl_point*100:.1f}%",
+                       help=f"Rose-style multiplicative product. Source: {_src}.")
+            if _cl and not _rose_on:
+                _cB.caption(f"Bel–Pl envelope {_cl[1]*100:.0f}–{_cl[2]*100:.0f}%")
+            else:
+                _cB.caption(_src)
+            _cC.metric("ESL − Classic", f"{(_esl_point - _cl_point)*100:+.1f} pp",
+                       help="The gap between the two methods is a data-quality / "
+                            "dependence signal, not an error.")
+        st.caption(
+            "Both are the **geological prior** (before any DFI update). "
+            "▸ Why they differ: **Theory & Guide → \"Why P(G, ESL) ≠ P(G, Classic)\"**."
+        )
         st.divider()
 
 
