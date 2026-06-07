@@ -271,7 +271,7 @@ def _render_dfi_setup_characteristic(ctx) -> None:
         corr_rho = st.slider(
             "Assumed attribute correlation ρ (independence discount)",
             min_value=0.0, max_value=0.8, step=0.05,
-            value=float(st.session_state.get("dhi_char_corr_rho", 0.0)),
+            value=float(st.session_state.get("dhi_char_corr_rho", 0.3)),
             key="dhi_char_corr_rho",
             help=(
                 "**Corrects the naive-Bayes independence assumption.** R = ∏ LRᵢ "
@@ -294,7 +294,7 @@ def _render_dfi_setup_characteristic(ctx) -> None:
 
     # ── Compute ──
     rel_middle = bool(st.session_state.get("dhi_char_rel_middle", False))
-    corr_rho = float(st.session_state.get("dhi_char_corr_rho", 0.0))
+    corr_rho = float(st.session_state.get("dhi_char_corr_rho", 0.3))
     _floor, _hardcap = cap_for_bucket(bucket_name, enabled=apply_cap)
     cap_kw = dict(hard_cap=_hardcap, floor=_floor)
     if inferred:

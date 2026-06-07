@@ -442,7 +442,7 @@ def _render_characteristic_sensitivity(ctx, prior_pg: float, w_cur: float) -> No
     inferred = bool(st.session_state.get("dhi_char_inferred", False))
     apply_cap = bool(st.session_state.get("dhi_char_apply_cap", True))
     rel_middle = bool(st.session_state.get("dhi_char_rel_middle", False))
-    corr_rho = float(st.session_state.get("dhi_char_corr_rho", 0.0))
+    corr_rho = float(st.session_state.get("dhi_char_corr_rho", 0.3))
     _floor, _hardcap = cap_for_bucket(_bucket_name, enabled=apply_cap)
     cap_kw = dict(hard_cap=_hardcap, floor=_floor)
 

@@ -1083,10 +1083,11 @@ For **ESL attribution** there are two modes:
         st.latex(r"f \;=\; \frac{1}{1 + (k-1)\,\rho}, \qquad "
                  r"R_\text{disc} \;=\; \exp\!\big(f \textstyle\sum_k \ln \text{LR}_k\big) \;=\; R_\text{raw}^{\,f}")
         st.markdown(
-            "**ρ = 0 → f = 1** → independent attributes, naive product unchanged (the default, so "
-            "behaviour is identical unless you opt in). **ρ → 1 → f → 1/k** → fully redundant, the "
-            "*k* attributes count as a single line of evidence. ρ ≈ 0.3–0.5 is a reasonable default "
-            "for correlated seismic-amplitude attributes. Note this is an exponent on R, exactly "
+            "**ρ = 0 → f = 1** → independent attributes, naive product unchanged. **ρ → 1 → f → 1/k** "
+            "→ fully redundant, the *k* attributes count as a single line of evidence. The app "
+            "**defaults to ρ = 0.3** — a mild, conservative discount appropriate for correlated "
+            "seismic-amplitude attributes; set it to 0 to recover the pure naive product. Note this "
+            "is an exponent on R, exactly "
             "like the discernibility squash below — the two compose as "
             "$R_\\text{eff} = R_\\text{raw}^{\\,f \\cdot d}$ before the cap. The discount is exposed "
             "as the **Assumed attribute correlation ρ** slider in the DFI Setup advanced controls; "
