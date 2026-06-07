@@ -379,38 +379,61 @@ def _render_dfi_setup_characteristic(ctx) -> None:
     _render_simm_band_strip(r_eff, key="dfi_char_band_strip")
 
     # ── Success vs failure densities over the DHI score (reverse-engineered) ──
-    # Two Gaussians in log-R space (CLT over the 5 independent attributes) mapped
-    # onto the DHI-score axis — the characteristic-method analogue of the Custom /
-    # SAAM P(DFI|class) bells, derived from the Monigle per-attribute stats.
-    from logic.dhi_characteristics import score_class_gaussians
-    _g = score_class_gaussians(cstats, mode_key=mode_key, inferred=inferred,
-                               relative_to_middle=rel_middle, corr_rho=corr_rho)
-    _mu_s, _sd_s = _g["succ"]
-    _mu_f, _sd_f = _g["fail"]
-
-    def _npdf(x, mu, sd):
-        z = (x - mu) / sd
-        return math.exp(-0.5 * z * z) / (sd * math.sqrt(2.0 * math.pi))
-
-    # x = DHI score S ∈ (0,1); L = logit(S); logistic-normal density via the Jacobian.
-    _S = [i / 200.0 for i in range(1, 200)]
-    def _dens(mu, sd):
-        out = []
-        for s in _S:
-            L = math.log(s / (1.0 - s))
-            out.append(_npdf(L, mu, sd) / (s * (1.0 - s)))
-        return out
-    _dens_s, _dens_f = _dens(_mu_s, _sd_s), _dens(_mu_f, _sd_f)
-    _Spct = [s * 100.0 for s in _S]
+    # The plot tracks the Raw / Inferred toggle, on purpose:
+    #   • Inferred → smooth Gaussian (CLT over the 5 independent attributes), the
+    #     "we believe the underlying success-rate curve is smooth" reading.
+    #   • Raw      → the *exact* naive-independence convolution of the discrete
+    #     per-category LRs — a lumpy/rugged distribution showing the literal evidence.
     _s_mark = (r_disc / (r_disc + 1.0)) * 100.0     # prospect's score on the same axis
-
     figd = go.Figure()
-    figd.add_trace(go.Scatter(x=_Spct, y=_dens_f, mode="lines", name="Failure population",
-                              line=dict(color="#b3261e", width=2.2), fill="tozeroy",
-                              fillcolor="rgba(179,38,30,0.10)"))
-    figd.add_trace(go.Scatter(x=_Spct, y=_dens_s, mode="lines", name="Success population",
-                              line=dict(color="#15803d", width=2.2), fill="tozeroy",
-                              fillcolor="rgba(21,128,61,0.10)"))
+    if inferred:
+        from logic.dhi_characteristics import score_class_gaussians
+        _g = score_class_gaussians(cstats, mode_key=mode_key, inferred=True,
+                                   relative_to_middle=rel_middle, corr_rho=corr_rho)
+        _mu_s, _sd_s = _g["succ"]
+        _mu_f, _sd_f = _g["fail"]
+
+        def _npdf(x, mu, sd):
+            z = (x - mu) / sd
+            return math.exp(-0.5 * z * z) / (sd * math.sqrt(2.0 * math.pi))
+
+        _S = [i / 200.0 for i in range(1, 200)]           # score ∈ (0,1)
+        def _dens(mu, sd):                                 # logistic-normal via Jacobian
+            return [_npdf(math.log(s / (1.0 - s)), mu, sd) / (s * (1.0 - s)) for s in _S]
+        _x = [s * 100.0 for s in _S]
+        _ys, _yf, _shape = _dens(_mu_s, _sd_s), _dens(_mu_f, _sd_f), "linear"
+        _model_txt = "smooth **Gaussian (CLT)** model of the inferred-monotone LRs"
+    else:
+        from logic.dhi_characteristics import (
+            score_class_convolution_raw, score_class_gaussians,
+        )
+        _c = score_class_convolution_raw(cstats, mode_key=mode_key,
+                                         relative_to_middle=rel_middle, corr_rho=corr_rho)
+        if _c is not None:
+            _x = [v * 100.0 for v in _c["centers"]]
+            _ys, _yf, _shape = _c["succ"], _c["fail"], "hvh"   # stepped = rugged
+            _model_txt = ("**exact naive-independence convolution** of the raw "
+                          f"per-category LRs ({_c['n_cells']:,} evidence cells)")
+        else:   # combinatorial blow-up — fall back to the Gaussian
+            _g = score_class_gaussians(cstats, mode_key=mode_key, inferred=False,
+                                       relative_to_middle=rel_middle, corr_rho=corr_rho)
+            _mu_s, _sd_s = _g["succ"]; _mu_f, _sd_f = _g["fail"]
+            def _npdf(x, mu, sd):
+                z = (x - mu) / sd
+                return math.exp(-0.5 * z * z) / (sd * math.sqrt(2.0 * math.pi))
+            _S = [i / 200.0 for i in range(1, 200)]
+            _x = [s * 100.0 for s in _S]
+            _ys = [_npdf(math.log(s/(1-s)), _mu_s, _sd_s)/(s*(1-s)) for s in _S]
+            _yf = [_npdf(math.log(s/(1-s)), _mu_f, _sd_f)/(s*(1-s)) for s in _S]
+            _shape = "linear"
+            _model_txt = "Gaussian (CLT) model (too many cells for exact convolution)"
+
+    figd.add_trace(go.Scatter(x=_x, y=_yf, mode="lines", name="Failure population",
+                              line=dict(color="#b3261e", width=2.2, shape=_shape),
+                              fill="tozeroy", fillcolor="rgba(179,38,30,0.10)"))
+    figd.add_trace(go.Scatter(x=_x, y=_ys, mode="lines", name="Success population",
+                              line=dict(color="#15803d", width=2.2, shape=_shape),
+                              fill="tozeroy", fillcolor="rgba(21,128,61,0.10)"))
     figd.add_vline(x=_s_mark, line_dash="dash", line_color="#111827",
                    annotation_text=f"this prospect = {_s_mark:.0f}%",
                    annotation_position="top")
@@ -421,15 +444,15 @@ def _render_dfi_setup_characteristic(ctx) -> None:
     st.markdown("##### Where this prospect sits — drilled success vs failure populations")
     st.plotly_chart(figd, use_container_width=True, key="dfi_char_score_density")
     st.caption(
-        f"**Reverse-engineered from the Monigle per-attribute stats** "
-        f"({'inferred-monotone' if inferred else 'raw'} LRs"
+        f"Success/failure distributions of the composite DHI score across the Monigle "
+        f"drilled population, reverse-engineered from the per-attribute stats — the "
+        f"characteristic-method twin of the Custom/SAAM P(DFI | class) bells. This view "
+        f"follows the **{'Inferred' if inferred else 'Raw'}** toggle: {_model_txt}"
         + (f", ρ={corr_rho:.2f} discount" if corr_rho > 0 else "")
-        + "): the curves are the success/failure distributions of the composite DHI "
-        "score across the drilled population — the characteristic-method twin of the "
-        "Custom/SAAM P(DFI | class) bells. The dashed line is this prospect's score. "
-        "*Note:* this is a **population / calibration** view — the booked update uses "
-        f"the full per-attribute product (**R_eff = {r_eff:.2f}**, after discernibility "
-        "and cap), which is more informative than the scalar score's own ratio."
+        + ". The dashed line is this prospect's score. *Note:* a **population / "
+        "calibration** view — the booked update uses the full per-attribute product "
+        f"(**R_eff = {r_eff:.2f}**, after discernibility and cap), which is more "
+        "informative than the scalar score's own ratio."
     )
 
     # ── Per-attribute LR bars (only attributes active in current mode) ──

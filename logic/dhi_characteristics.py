@@ -591,6 +591,77 @@ def score_class_gaussians(stats: CharacteristicStats, mode_key: str = "5_current
     return out
 
 
+def score_class_convolution_raw(stats: CharacteristicStats, mode_key: str = "5_current",
+                                *, relative_to_middle: bool = False, corr_rho: float = 0.0,
+                                nbins: int = 44, max_cells: int = 300_000) -> "dict | None":
+    """**Exact** naive-independence distribution of the composite DHI score under
+    each class — no CLT approximation.
+
+    Convolves the per-attribute *discrete* log-LR distributions: every combination
+    of one category per attribute is a cell with probability ``∏ P(cᵢ|class)`` and
+    composite ``L = Σ log LRᵢ(cᵢ)`` (then discounted by the correlation exponent
+    ``f`` and mapped to the score ``σ(f·L)``). Binning those cells gives a lumpy,
+    possibly multi-modal "rugged" distribution — the literal raw-evidence counterpart
+    of the smooth Gaussian :func:`score_class_gaussians`.
+
+    Returns ``{"centers", "succ", "fail", "k", "corr_exponent", "n_cells"}`` with
+    densities (mass / bin-width, so each integrates to ~1 over [0,1]). Returns
+    ``None`` when the cell count exceeds ``max_cells`` (caller should fall back to
+    the Gaussian model).
+    """
+    import math
+    import itertools
+    attrs = list(stats.attributes_in_r_for_mode(mode_key).values())
+    # Guard against combinatorial blow-up (e.g. a many-attribute mode).
+    n_cells = 1
+    for attr in attrs:
+        n_cells *= max(1, len(attr.categories(mode_key)))
+    if n_cells > max_cells:
+        return None
+    # Per-attribute rows: (log LR, P(cat|success), P(cat|failure)).
+    per_attr: list[list[tuple[float, float, float]]] = []
+    for attr in attrs:
+        ms = attr.stats_for(mode_key)
+        K = len(ms.categories)
+        ns = ms.n_success + LAPLACE_ADD * K
+        nf = ms.n_failure + LAPLACE_ADD * K
+        mid_lr = (attr.category_lr(_middle_category(attr, mode_key), mode_key)
+                  if relative_to_middle else 1.0)
+        rows: list[tuple[float, float, float]] = []
+        for i, c in enumerate(ms.categories):
+            lr = attr.category_lr(c, mode_key)
+            if relative_to_middle and mid_lr > 0:
+                lr = lr / mid_lr
+            ps = (ms.success[i] + LAPLACE_ADD) / ns if ns > 0 else 1.0 / K
+            pf = (ms.failure[i] + LAPLACE_ADD) / nf if nf > 0 else 1.0 / K
+            rows.append((math.log(max(lr, 1e-12)), ps, pf))
+        per_attr.append(rows)
+    k = len(per_attr)
+    f = correlation_discount_exponent(k, corr_rho)
+    nbins = max(4, int(nbins))
+    succ = [0.0] * nbins
+    fail = [0.0] * nbins
+    for combo in itertools.product(*per_attr):
+        L = 0.0
+        ps = pf = 1.0
+        for lr, p_s, p_f in combo:
+            L += lr
+            ps *= p_s
+            pf *= p_f
+        s = 1.0 / (1.0 + math.exp(-f * L))
+        b = min(nbins - 1, max(0, int(s * nbins)))
+        succ[b] += ps
+        fail[b] += pf
+    bw = 1.0 / nbins
+    centers = [(j + 0.5) * bw for j in range(nbins)]
+    return {
+        "centers": centers,
+        "succ": [v / bw for v in succ],
+        "fail": [v / bw for v in fail],
+        "k": k, "corr_exponent": f, "n_cells": n_cells,
+    }
+
+
 def apply_discernibility(r: float, bucket: DiscernibilityBucket) -> float:
     """Squash R toward 1 by the discernibility weight ``d`` (Monigle 2025).
 

@@ -13,7 +13,7 @@ from logic.dhi_characteristics import (
     inferred_lr_at, inferred_success_rate_at, apply_discernibility,
     simm_bayes_posterior, dhi_score_from_r, cap_for_bucket,
     correlation_discount_exponent,
-    score_class_logr_moments, score_class_gaussians,
+    score_class_logr_moments, score_class_gaussians, score_class_convolution_raw,
     DISCERNIBILITY_CAPS, CHARACTERISTIC_DEFAULT_SELECTIONS,
     R_FLOOR, R_HARD_CAP,
 )
@@ -134,6 +134,25 @@ def test_score_class_gaussians_corr_shrinks_spread(stats):
 def test_score_class_logr_moments_variance_nonneg(stats):
     m = score_class_logr_moments(stats, mode_key=MK)
     assert m["succ"][1] >= 0 and m["fail"][1] >= 0
+
+
+def test_score_class_convolution_raw(stats):
+    c = score_class_convolution_raw(stats, mode_key=MK, nbins=40)
+    assert c is not None
+    assert c["n_cells"] == 5 ** 5            # 5 attributes × 5 categories
+    bw = 1.0 / 40
+    # binned densities integrate to ~1 (it's a proper distribution per class)
+    assert abs(sum(v * bw for v in c["succ"]) - 1.0) < 1e-6
+    assert abs(sum(v * bw for v in c["fail"]) - 1.0) < 1e-6
+    # success population's mean score sits above the failure population's
+    mean_s = sum(x * v * bw for x, v in zip(c["centers"], c["succ"]))
+    mean_f = sum(x * v * bw for x, v in zip(c["centers"], c["fail"]))
+    assert mean_s > mean_f
+
+
+def test_score_class_convolution_guard_returns_none(stats):
+    # An impossibly small cell budget forces the combinatorial guard to bail out.
+    assert score_class_convolution_raw(stats, mode_key=MK, max_cells=10) is None
 
 
 def test_product_is_sum_in_logs(stats):
