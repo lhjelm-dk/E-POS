@@ -149,97 +149,49 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
 
     st.divider()
 
-    # Uncertainty weight / stance controls
-    with st.container(border=True):
-        col_w, col_info = st.columns([3, 1])
-        with col_w:
-            st.markdown("**Stance on unknowns (w)** — Policy P = S_for + w × White")
-            st.caption(
-                "Every risk element splits into evidence **for** success, evidence "
-                "**against**, and an uncommitted **white** band (the unknowns). *Stance* "
-                "(w) decides which way that white band leans when we collapse the Italian "
-                "Flag to a single POS number: **0** = treat all unknowns as bad news "
-                "(pessimistic), **0.5** = stay neutral (recommended), **1** = give the "
-                "unknowns the benefit of the doubt (optimistic). It changes only how "
-                "unknowns are scored — never the hard evidence itself."
-            )
-            with st.expander("What is Stance on unknowns (w)?", expanded=False):
-                st.markdown(
-                    "**Stance (w)** controls how the uncommitted *white* evidence contributes to POS:\n\n"
-                    "| w | Interpretation |\n|---|---|\n"
-                    "| **0.0** | All unknowns count against success — pessimistic lower bound (= Belief) |\n"
-                    "| **0.5** | Unknowns split 50/50 — neutral, Laplace principle (**recommended default**) |\n"
-                    "| **1.0** | All unknowns count for success — optimistic upper bound (= Plausibility) |\n\n"
-                    "**Formula:** Policy P = S_for + w × White  \n"
-                    "This maps the Italian Flag's white segment to a point-estimate POS between Bel (= S_for) "
-                    "and Pl (= 1 − S_against).  \n\n"
-                    "Set w once for the whole prospect here. Individual risk elements can override it "
-                    "in their CAM panel (shown with ⚑ indicator)."
-                )
-            from logic.pos_policy import DEFAULT_BASE_RATE
-            _stance_lbl = {
-                "neutral":   "Neutral — w = 0.5 (split unknowns 50/50, Laplace)",
-                "custom":    "Custom stance w",
-                "base_rate": "Base rate (revert unknowns to the base rate — Exxon)",
-            }
-            _modes = ["neutral", "custom", "base_rate"]
-            # Migrate the legacy use_policy_weight flag on first render.
-            if "stance_mode" not in st.session_state:
-                st.session_state["stance_mode"] = (
-                    "neutral" if st.session_state.get("use_policy_weight", True) else "custom")
-            _sel = st.radio(
-                "Stance on unknowns",
-                options=_modes,
-                format_func=lambda m: _stance_lbl[m],
-                key="stance_mode",
-                help="How the uncommitted *white* band is scored when the Italian Flag is "
-                     "collapsed to a point POS. Neutral treats the unknowns as a coin; "
-                     "Base rate reverts them to the prospect base rate (Exxon 2018: "
-                     "'geology is not a coin').",
-            )
-            if _sel == "custom":
-                w_curr_dash = float(st.session_state.get("uncertainty_weight_slider", 0.5))
-                from components.element_detail_cam import _w_label as _dash_w_label
-                st.slider(
-                    f"Stance (w) — {_dash_w_label(w_curr_dash)}",
-                    0.0, 1.0, w_curr_dash, 0.05,
-                    key="uncertainty_weight_slider",
-                    help="0 = unknowns vote against success (Bel). 0.5 = neutral. "
-                         "1 = unknowns vote for success (Pl). POS = S_for + w × White.",
-                )
-                st.text_area(
-                    "Justification for stance override", key="weight_justification",
-                    placeholder="Document why this prospect warrants a stance different from company default...",
-                )
-            elif _sel == "base_rate":
-                _bc1, _bc2 = st.columns([2, 1])
-                with _bc1:
-                    st.number_input(
-                        "Prospect base rate", min_value=0.0, max_value=1.0,
-                        value=float(st.session_state.get("stance_base_rate", DEFAULT_BASE_RATE)),
-                        step=0.05, key="stance_base_rate",
-                        help="Policy P = S_for + base_rate × White. 'Knowing nothing' "
-                             "reverts the unknowns to this base rate, not a 50/50 coin.")
-                with _bc2:
-                    st.write(""); st.write("")
+    # Italian flags — P(Play) / P(Cond) / P(G, ESL)
+    est_pos = policy_pos(total_for, total_against, uncertainty_weight)
+    play_pos_val = policy_pos(play_for, play_against, uncertainty_weight)
+    cond_pos_val = policy_pos(conditional_for, conditional_against, uncertainty_weight)
 
-                    def _seed_base_rate():
-                        import math
-                        from components.calibration import ROSE_RANGES
-                        _meds = [v[2] / 100.0 for v in ROSE_RANGES.values()]
-                        st.session_state["stance_base_rate"] = (
-                            round(math.prod(_meds), 2) if _meds else DEFAULT_BASE_RATE)
-                    st.button("↧ Seed from Rose medians", on_click=_seed_base_rate,
-                              key="seed_base_rate",
-                              help="Product of the per-pillar Rose median POS — the analogue "
-                                   "prospect base rate (≈ 18%).")
-                st.caption("Exxon 'geology is not a coin': the white band reverts to the base rate.")
-            else:
-                st.caption(f"Neutral stance w = {COMPANY_DEFAULT_WEIGHT} (unknowns split 50/50).")
-        with col_info:
-            from components.element_detail_cam import _w_label as _dash_w_label2
-            st.metric("Stance (w)", f"{uncertainty_weight:.2f}")
-            st.caption(_dash_w_label2(uncertainty_weight))
+    pc1, pc2, pc3 = st.columns(3)
+    with pc1:
+        st.metric("P(Play)", f"{play_pos_val * 100:.1f}%",
+                  help="Play-level geological probability — combined across all pillars at Play scope.")
+        render_flag(play_for, play_against, marker=play_pos_val)
+        render_flag_stats(play_for, play_against, uncertainty_weight)
+    with pc2:
+        st.metric("P(Cond)", f"{cond_pos_val * 100:.1f}%",
+                  help="Conditional-level geological probability — combined across all pillars at Conditional scope.")
+        render_flag(conditional_for, conditional_against, marker=cond_pos_val)
+        render_flag_stats(conditional_for, conditional_against, uncertainty_weight)
+    with pc3:
+        st.metric("P(G, ESL)", f"{est_pos * 100:.1f}%",
+                  help="Total prospect probability via ESL = P(Play) × P(Cond), computed on mass pairs.")
+        render_flag(total_for, total_against, marker=est_pos)
+        render_flag_stats(total_for, total_against, uncertainty_weight)
+
+    g_t, w_t, r_t, _, _ = calculate_flag(total_for, total_against)
+    st.markdown(
+        f"<div style='display:flex;gap:24px;align-items:baseline;margin:4px 0 2px;"
+        f"font-size:0.83rem;color:#374151;'>"
+        f"<span><b style='color:#16a34a;'>Bel(G)</b>&nbsp;"
+        f"<span style='font-size:1.05rem;font-weight:700;'>{g_t*100:.1f}%</span></span>"
+        f"<span style='color:#aaa;'>·</span>"
+        f"<span><b style='color:#6b7280;'>White</b>&nbsp;"
+        f"<span style='font-size:1.05rem;font-weight:700;'>{w_t*100:.1f}%</span></span>"
+        f"<span style='color:#aaa;'>·</span>"
+        f"<span><b style='color:#2563eb;'>Pl(G)</b>&nbsp;"
+        f"<span style='font-size:1.05rem;font-weight:700;'>{(1-r_t)*100:.1f}%</span></span>"
+        f"</div>",
+        unsafe_allow_html=True,
+    )
+    _stance_name = {"neutral": "neutral", "custom": "custom", "base_rate": "base rate"}.get(
+        st.session_state.get("stance_mode", "neutral"), "neutral")
+    st.caption(f"Stance on unknowns **w = {uncertainty_weight:.2f}** ({_stance_name}) — "
+               "change it in **⚙ Advanced** below.")
+
+    st.divider()
 
     # ── DFI / DHI prospect toggle (Phase 3) — separate section ──────────────
     # Scoped CSS: enlarge *this* toggle (and its label) only. The marker span
@@ -312,43 +264,98 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
 
     st.divider()
 
-    # Italian flags — P(Play) / P(Cond) / P(G, ESL)
-    est_pos = policy_pos(total_for, total_against, uncertainty_weight)
-    play_pos_val = policy_pos(play_for, play_against, uncertainty_weight)
-    cond_pos_val = policy_pos(conditional_for, conditional_against, uncertainty_weight)
+    # Uncertainty weight / stance controls — demoted into an Advanced expander
+    # (sensible default; most users never change it). A compact read-out sits up
+    # top near the headline result.
+    with st.expander("⚙ Advanced — stance on unknowns (w)", expanded=False):
+        col_w, col_info = st.columns([3, 1])
+        with col_w:
+            st.markdown("**Stance on unknowns (w)** — Policy P = S_for + w × White")
+            st.caption(
+                "Every risk element splits into evidence **for** success, evidence "
+                "**against**, and an uncommitted **white** band (the unknowns). *Stance* "
+                "(w) decides which way that white band leans when we collapse the Italian "
+                "Flag to a single POS number: **0** = treat all unknowns as bad news "
+                "(pessimistic), **0.5** = stay neutral (recommended), **1** = give the "
+                "unknowns the benefit of the doubt (optimistic). It changes only how "
+                "unknowns are scored — never the hard evidence itself."
+            )
+            from components.ui_help import help_popover as _help_popover
+            _help_popover("What is Stance on unknowns (w)?", (
+                "**Stance (w)** controls how the uncommitted *white* evidence contributes to POS:\n\n"
+                "| w | Interpretation |\n|---|---|\n"
+                "| **0.0** | All unknowns count against success — pessimistic lower bound (= Belief) |\n"
+                "| **0.5** | Unknowns split 50/50 — neutral, Laplace principle (**recommended default**) |\n"
+                "| **1.0** | All unknowns count for success — optimistic upper bound (= Plausibility) |\n\n"
+                "**Formula:** Policy P = S_for + w × White  \n"
+                "This maps the Italian Flag's white segment to a point-estimate POS between Bel (= S_for) "
+                "and Pl (= 1 − S_against).  \n\n"
+                "Set w once for the whole prospect here. Individual risk elements can override it "
+                "in their CAM panel (shown with ⚑ indicator)."))
+            from logic.pos_policy import DEFAULT_BASE_RATE
+            _stance_lbl = {
+                "neutral":   "Neutral — w = 0.5 (split unknowns 50/50, Laplace)",
+                "custom":    "Custom stance w",
+                "base_rate": "Base rate (revert unknowns to the base rate — Exxon)",
+            }
+            _modes = ["neutral", "custom", "base_rate"]
+            # Migrate the legacy use_policy_weight flag on first render.
+            if "stance_mode" not in st.session_state:
+                st.session_state["stance_mode"] = (
+                    "neutral" if st.session_state.get("use_policy_weight", True) else "custom")
+            _sel = st.radio(
+                "Stance on unknowns",
+                options=_modes,
+                format_func=lambda m: _stance_lbl[m],
+                key="stance_mode",
+                help="How the uncommitted *white* band is scored when the Italian Flag is "
+                     "collapsed to a point POS. Neutral treats the unknowns as a coin; "
+                     "Base rate reverts them to the prospect base rate (Exxon 2018: "
+                     "'geology is not a coin').",
+            )
+            if _sel == "custom":
+                w_curr_dash = float(st.session_state.get("uncertainty_weight_slider", 0.5))
+                from components.element_detail_cam import _w_label as _dash_w_label
+                st.slider(
+                    f"Stance (w) — {_dash_w_label(w_curr_dash)}",
+                    0.0, 1.0, w_curr_dash, 0.05,
+                    key="uncertainty_weight_slider",
+                    help="0 = unknowns vote against success (Bel). 0.5 = neutral. "
+                         "1 = unknowns vote for success (Pl). POS = S_for + w × White.",
+                )
+                st.text_area(
+                    "Justification for stance override", key="weight_justification",
+                    placeholder="Document why this prospect warrants a stance different from company default...",
+                )
+            elif _sel == "base_rate":
+                _bc1, _bc2 = st.columns([2, 1])
+                with _bc1:
+                    st.number_input(
+                        "Prospect base rate", min_value=0.0, max_value=1.0,
+                        value=float(st.session_state.get("stance_base_rate", DEFAULT_BASE_RATE)),
+                        step=0.05, key="stance_base_rate",
+                        help="Policy P = S_for + base_rate × White. 'Knowing nothing' "
+                             "reverts the unknowns to this base rate, not a 50/50 coin.")
+                with _bc2:
+                    st.write(""); st.write("")
 
-    pc1, pc2, pc3 = st.columns(3)
-    with pc1:
-        st.metric("P(Play)", f"{play_pos_val * 100:.1f}%",
-                  help="Play-level geological probability — combined across all pillars at Play scope.")
-        render_flag(play_for, play_against, marker=play_pos_val)
-        render_flag_stats(play_for, play_against, uncertainty_weight)
-    with pc2:
-        st.metric("P(Cond)", f"{cond_pos_val * 100:.1f}%",
-                  help="Conditional-level geological probability — combined across all pillars at Conditional scope.")
-        render_flag(conditional_for, conditional_against, marker=cond_pos_val)
-        render_flag_stats(conditional_for, conditional_against, uncertainty_weight)
-    with pc3:
-        st.metric("P(G, ESL)", f"{est_pos * 100:.1f}%",
-                  help="Total prospect probability via ESL = P(Play) × P(Cond), computed on mass pairs.")
-        render_flag(total_for, total_against, marker=est_pos)
-        render_flag_stats(total_for, total_against, uncertainty_weight)
-
-    g_t, w_t, r_t, _, _ = calculate_flag(total_for, total_against)
-    st.markdown(
-        f"<div style='display:flex;gap:24px;align-items:baseline;margin:4px 0 2px;"
-        f"font-size:0.83rem;color:#374151;'>"
-        f"<span><b style='color:#16a34a;'>Bel(G)</b>&nbsp;"
-        f"<span style='font-size:1.05rem;font-weight:700;'>{g_t*100:.1f}%</span></span>"
-        f"<span style='color:#aaa;'>·</span>"
-        f"<span><b style='color:#6b7280;'>White</b>&nbsp;"
-        f"<span style='font-size:1.05rem;font-weight:700;'>{w_t*100:.1f}%</span></span>"
-        f"<span style='color:#aaa;'>·</span>"
-        f"<span><b style='color:#2563eb;'>Pl(G)</b>&nbsp;"
-        f"<span style='font-size:1.05rem;font-weight:700;'>{(1-r_t)*100:.1f}%</span></span>"
-        f"</div>",
-        unsafe_allow_html=True,
-    )
+                    def _seed_base_rate():
+                        import math
+                        from components.calibration import ROSE_RANGES
+                        _meds = [v[2] / 100.0 for v in ROSE_RANGES.values()]
+                        st.session_state["stance_base_rate"] = (
+                            round(math.prod(_meds), 2) if _meds else DEFAULT_BASE_RATE)
+                    st.button("↧ Seed from Rose medians", on_click=_seed_base_rate,
+                              key="seed_base_rate",
+                              help="Product of the per-pillar Rose median POS — the analogue "
+                                   "prospect base rate (≈ 18%).")
+                st.caption("Exxon 'geology is not a coin': the white band reverts to the base rate.")
+            else:
+                st.caption(f"Neutral stance w = {COMPANY_DEFAULT_WEIGHT} (unknowns split 50/50).")
+        with col_info:
+            from components.element_detail_cam import _w_label as _dash_w_label2
+            st.metric("Stance (w)", f"{uncertainty_weight:.2f}")
+            st.caption(_dash_w_label2(uncertainty_weight))
 
     st.divider()
 
