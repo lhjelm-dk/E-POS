@@ -60,7 +60,14 @@ def _render_dashboard_tab(ctx) -> None:
         isinstance(el, dict) and (el.get("support_for", 0) > 0 or el.get("support_against", 0) > 0)
         for el in play.values()
     )
-    with st.expander("How E-POS works — workflow overview (click to open)", expanded=not _has_any_evidence):
+    # A freshly created / blank prospect: the "New" button names it "New Prospect"
+    # and clears the loaded-file pointer. (Default models seed non-zero support, so
+    # _has_any_evidence alone can't tell "untouched" from "assessed".)
+    _is_fresh = (st.session_state.get("meta_title", "") in ("", "New Prospect")
+                 and not st.session_state.get("current_prospect_file"))
+    _show_getting_started = _is_fresh or not _has_any_evidence
+    with st.expander("How E-POS works — workflow overview (click to open)",
+                     expanded=_show_getting_started):
         # Concept flowchart as HTML table — no external dependencies
         st.markdown(
             """
@@ -149,8 +156,8 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
 
     st.divider()
 
-    # ── Empty state — teach the workflow before any evidence exists ──
-    if not _has_any_evidence:
+    # ── Empty state — teach the workflow on a fresh / un-assessed prospect ──
+    if _show_getting_started:
         st.markdown(
             "<div style='background:linear-gradient(135deg,#1e3a5f,#0f172a);color:#fff;"
             "padding:18px 22px;border-radius:10px;margin-bottom:6px;'>"
