@@ -220,6 +220,16 @@ def _render_dfi_setup_custom(ctx) -> None:
     )
 
     # ── GeoX hand-off — the six P(DFI | case) inputs (parity with the DHI-Index method) ──
+    # GeoX has one "Oil/Success" cell but the tool models three success sub-cases
+    # (oil / gas / oil+gas). Hand GeoX the *weighted success-mix* density — the same
+    # success likelihood the tool uses for R — not the oil curve alone (which is the
+    # weakest success sub-case at a weak +DHI and wrongly let a failure case top the
+    # table). Falls back to a plain mean if all success weights are zero.
+    _w_succ = {k: max(weights.get(k, 0.0), 0.0) for k in SUCCESS_KEYS}
+    _pdf_succ = {k: cases[k].pdf(slider) for k in SUCCESS_KEYS}
+    _w_succ_tot = sum(_w_succ.values())
+    _success_cell = (sum(_w_succ[k] * _pdf_succ[k] for k in SUCCESS_KEYS) / _w_succ_tot
+                     if _w_succ_tot > 0 else sum(_pdf_succ.values()) / len(SUCCESS_KEYS))
     # GeoX has a single "LSG/other" failure cell, so blend the LSG and Other cases
     # by their weights (mirrors SAAM, where Other shares the LSG_failure class).
     _w_lsg, _w_oth = weights.get("lsg", 0.0), weights.get("other", 0.0)
@@ -228,7 +238,7 @@ def _render_dfi_setup_custom(ctx) -> None:
                  if (_w_lsg + _w_oth) > 0 else _lsg_pdf)
     from components.dfi_shared import render_geox_pdfi_handoff
     render_geox_pdfi_handoff(
-        success   = cases["oil"].pdf(slider),
+        success   = _success_cell,
         water     = cases["water"].pdf(slider),
         lsg       = _lsg_cell,
         reservoir = cases["non_reservoir"].pdf(slider),
