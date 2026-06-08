@@ -599,29 +599,36 @@ def _render_prospect_hub(models: dict) -> None:
             )
             path = save_prospect(pd_obj)
             st.success(f"Saved: {path.name}")
+    def _on_new_prospect():
+        # Runs as an on_click callback: writes to widget-keyed session_state
+        # (meta_title etc.) BEFORE the widgets are re-instantiated, which is the
+        # only place Streamlit permits it. Inline (post-widget) assignment raised
+        # "st.session_state.meta_title cannot be modified after the widget ...".
+        ts = datetime.datetime.utcnow().strftime("v%Y%m%d-%H%M")
+        _am_new = st.session_state.get("active_risk_model")
+        if _am_new is not None:
+            st.session_state["models"] = _build_rt_models(_am_new)
+            _init_operators(_am_new, st.session_state)
+            _init_classic_operators(_am_new, st.session_state)
+        else:
+            st.session_state["models"] = build_models()
+        st.session_state["meta_title"] = "New Prospect"
+        st.session_state["meta_analyst"] = ""
+        st.session_state["meta_basin"] = ""
+        st.session_state["meta_date"] = datetime.date.today().strftime("%d. %m. %Y")
+        st.session_state["meta_version"] = ts
+        for meth in ["Classic POS", "ESL"]:
+            st.session_state.pop(f"locked_{meth}", None)
+        st.session_state.pop("current_prospect_file", None)
+
     with r2c4:
-        if st.button("New", key="hub_new", help="Reset all values to blank defaults"):
-            ts = datetime.datetime.utcnow().strftime("v%Y%m%d-%H%M")
-            _am_new = st.session_state.get("active_risk_model")
-            if _am_new is not None:
-                st.session_state["models"] = _build_rt_models(_am_new)
-                _init_operators(_am_new, st.session_state)
-                _init_classic_operators(_am_new, st.session_state)
-            else:
-                st.session_state["models"] = build_models()
-            for k in ["meta_title", "meta_analyst", "meta_basin"]:
-                st.session_state[k] = ""
-            st.session_state["meta_title"] = "New Prospect"
-            st.session_state["meta_date"] = datetime.date.today().strftime("%d. %m. %Y")
-            st.session_state["meta_version"] = ts
-            for meth in ["Classic POS", "ESL"]:
-                st.session_state.pop(f"locked_{meth}", None)
-            st.session_state.pop("current_prospect_file", None)
-            st.rerun()
+        st.button("New", key="hub_new", help="Reset all values to blank defaults",
+                  on_click=_on_new_prospect)
     with r2c5:
-        if st.button("Stamp", key="hub_stamp", help="Set version to current UTC timestamp"):
+        def _on_stamp():
             st.session_state["meta_version"] = datetime.datetime.utcnow().strftime("v%Y%m%d-%H%M")
-            st.rerun()
+        st.button("Stamp", key="hub_stamp", help="Set version to current UTC timestamp",
+                  on_click=_on_stamp)
 
     _render_tabs(models)
 
