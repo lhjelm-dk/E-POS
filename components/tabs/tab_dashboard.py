@@ -149,6 +149,24 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
 
     st.divider()
 
+    # ── Empty state — teach the workflow before any evidence exists ──
+    if not _has_any_evidence:
+        st.markdown(
+            "<div style='background:linear-gradient(135deg,#1e3a5f,#0f172a);color:#fff;"
+            "padding:18px 22px;border-radius:10px;margin-bottom:6px;'>"
+            "<div style='font-size:20px;font-weight:800;margin-bottom:4px;'>Getting started</div>"
+            "<div style='font-size:14px;opacity:0.92;line-height:1.7;'>"
+            "<b>① Assess Play</b> — open the <b>Play</b> tab and set the evidence for / against "
+            "each regional pillar (Charge, Closure, Reservoir, Retention).<br>"
+            "<b>② Assess Conditional</b> — the <b>Conditional</b> tab, for the prospect-specific "
+            "sub-elements.<br>"
+            "<b>③ Read your result</b> — your <b>P(G, ESL)</b> and <b>P(G, Classic)</b> appear here "
+            "and on the <b>Geological POS</b> tab.</div></div>",
+            unsafe_allow_html=True,
+        )
+        st.caption("▶ Start on the **Play** tab above. The numbers below are **model defaults** "
+                   "until you enter evidence.")
+
     # Italian flags — P(Play) / P(Cond) / P(G, ESL)
     est_pos = policy_pos(total_for, total_against, uncertainty_weight)
     play_pos_val = policy_pos(play_for, play_against, uncertainty_weight)
