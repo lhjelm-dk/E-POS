@@ -440,7 +440,7 @@ def _render_cam_scatter_plot(
                   help=f"Reset to data-driven defaults: green={_g_default:.0%}, red={_r_default:.0%}")
     _g_th = max(_r_th + 0.05, _g_th)
 
-    _oc1, _oc2, _oc3 = st.columns(3)
+    _oc1, _oc2, _oc3, _oc4 = st.columns(4)
     with _oc1:
         _show_iso = st.checkbox("Iso-Pg contours", value=True, key="cam_iso_pg",
                                 help="Draw Pg iso-lines at 10%, 30%, 50%, 70%, 90%.")
@@ -450,6 +450,11 @@ def _render_cam_scatter_plot(
     with _oc3:
         _opacity_by_c = st.checkbox("Opacity ∝ commitment", value=False, key="cam_opacity_c",
                                     help="More transparent = lower total commitment S_for + S_against.")
+    with _oc4:
+        _show_nogo = st.checkbox("Risking-V no-go", value=False, key="cam_scatter_nogo",
+                                 help="Rose / ExxonMobil 'legacy no-go' (high commitment + "
+                                      "middling POS). A binary-state reference, superseded for a "
+                                      "probability — see Theory & Guide → 'The Risking V'.")
 
     _C_lo = 0.05 if _log_y else 0.0
     _C = np.linspace(_C_lo, 1.0, 500)
@@ -469,6 +474,21 @@ def _render_cam_scatter_plot(
     fig.add_trace(_band(_pos_min, _pos_red, _C, "rgba(210,40,40,0.20)", "Negative (Pg ≤ r)"))
     fig.add_trace(_band(_pos_red, _pos_grn, _C, "rgba(250,250,250,0.88)", "Uncertain"))
     fig.add_trace(_band(_pos_grn, _pos_max, _C, "rgba(30,155,60,0.20)", "Positive (Pg ≥ g)"))
+
+    # Risking-V "legacy no-go" — the uncertain band at high commitment (Rose/Exxon).
+    # A faint, labelled REFERENCE only: it applies to a binary state of nature, not a
+    # probability, so it is superseded for P(G). See Theory & Guide.
+    if _show_nogo:
+        _ng = _C >= 0.55
+        if _ng.sum() >= 2:
+            fig.add_trace(_band(_pos_red[_ng], _pos_grn[_ng], _C[_ng],
+                                "rgba(124,92,160,0.18)",
+                                "Risking-V legacy no-go (binary-state only)"))
+            _ci = int(np.argmax(_C >= 0.90))
+            fig.add_annotation(
+                x=(_pos_red[_ci] + _pos_grn[_ci]) / 2.0, y=0.85,
+                text="legacy no-go", showarrow=False,
+                font=dict(size=10, color="rgba(95,65,135,0.95)"))
 
     if _show_iso:
         for _pg_lv in [0.10, 0.30, 0.50, 0.70, 0.90]:
