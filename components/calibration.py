@@ -3,6 +3,9 @@
 Reference: Rose, P.R. (2001). Risk Analysis and Management of Petroleum Exploration
 Ventures. AAPG Methods in Exploration Series No. 12. American Association of Petroleum
 Geologists. ISBN 978-0-89181-663-8.
+
+``ROSE_RANGES`` is also surfaced read-only in Theory & Guide → Calibration guidance;
+``render_calibration_anchor`` annotates a slider in the Classic POS detail page.
 """
 
 from __future__ import annotations
