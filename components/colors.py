@@ -26,17 +26,19 @@ def lighten_hex(hex_color: str, factor: float = 0.5) -> str:
 
 
 # ── Shared Probability (CoS) colour scale ───────────────────────────────────
-# Single source of truth for the probability→colour mapping used across all
-# three methods (reference tables, DFI characteristic radar, adequacy matrix).
-# Mirrors the CoS_Scale sheet bands.
+# Single source of truth for the probability→colour mapping used across the app:
+# reference tables, DFI characteristic radar, adequacy matrix, Risking-V
+# schematic — anything that calls cos_color()/COS_SCALE adjusts when this changes.
+# Intervals are SYMMETRIC about 50% (0–10 / 10–25 / 25–40 / 40–60 / 60–75 /
+# 75–90 / 90–100); the 7 colours and verbal labels are retained.
 COS_SCALE: list[tuple[float, float, str, str]] = [
-    (0.90, 1.00, "#1A7A4A", "Very High (≥90%)"),
-    (0.70, 0.90, "#70AD47", "High (70–89%)"),
-    (0.55, 0.70, "#A9D18E", "Moderately High (55–69%)"),
-    (0.40, 0.55, "#FFD966", "Moderate (40–54%)"),
-    (0.25, 0.40, "#F4B942", "Moderately Low (25–39%)"),
-    (0.15, 0.25, "#E2603A", "Low (15–24%)"),
-    (0.00, 0.15, "#C00000", "Very Low (<15%)"),
+    (0.90, 1.00, "#1A7A4A", "Very High (90–100%)"),
+    (0.75, 0.90, "#70AD47", "High (75–90%)"),
+    (0.60, 0.75, "#A9D18E", "Moderately High (60–75%)"),
+    (0.40, 0.60, "#FFD966", "Moderate (40–60%)"),
+    (0.25, 0.40, "#F4B942", "Moderately Low (25–40%)"),
+    (0.10, 0.25, "#E2603A", "Low (10–25%)"),
+    (0.00, 0.10, "#C00000", "Very Low (0–10%)"),
 ]
 
 

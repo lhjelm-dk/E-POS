@@ -31,7 +31,7 @@ def _risking_v_schematic():
         rr, gg, bb = int(col[1:3], 16), int(col[3:5], 16), int(col[5:7], 16)
         fig.add_trace(go.Scatter(
             x=[x0, x1, x1, x0], y=[_ylow(x0), _ylow(x1), 1.0, 1.0],
-            fill="toself", fillcolor=f"rgba({rr},{gg},{bb},0.22)",
+            mode="lines", fill="toself", fillcolor=f"rgba({rr},{gg},{bb},0.22)",
             line=dict(width=0), hoverinfo="skip", showlegend=False))
 
     # Arms — coloured at the CoS-scale extremes (success green, failure red)
