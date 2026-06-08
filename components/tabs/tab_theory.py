@@ -373,6 +373,67 @@ levels lie. Use these to read off the implied Pg for any (POS, C) position.
 """)
         st.info("Open the **Geological POS tab → Chance Adequacy Matrix** to interact with the live plot.")
 
+    with _tab_concepts.expander("The Risking V & the \"no-go\" zone (Rose / ExxonMobil)", expanded=False):
+        st.markdown(r"""
+### The Risk Matrix idea — and why it looks like ESL
+
+Rose's *chance-adequacy* matrix and ExxonMobil's **Risk Matrix → Risking V** both start from the
+same insight E-POS is built on: **separate the favourability of the *known* geology from the
+*confidence* you have in it** — i.e. separate committed evidence (green / red) from the
+uncommitted **white** band. Plotting *chance of adequacy* against *confidence* (≈ commitment **C**)
+produces a **V**: at low confidence you are pinned near the base rate (the apex); as confidence
+rises you may move out toward the **success (1)** or **failure (0)** corners — the two arms of the V.
+
+### The classic "no-go" zone
+
+In the original Risk Matrix the **upper-centre is forbidden**: *with high confidence you "cannot sit
+on the fence — you must be close to 0 (failure) or 1 (success)."* A confident-but-middling estimate
+was treated as internally inconsistent.
+
+### Why it is a concept to challenge — ExxonMobil retired it themselves
+
+ExxonMobil's own 2018 review flags the limitation directly: the no-go rule is **"only applicable if
+the state of nature is 0 or 1."** It holds for a **single binary outcome** (this trap either has
+reservoir or it does not), but **not for a probability / success-ratio**: a high-confidence estimate
+of a *chance* can legitimately be **any value in [0, 1]** — you can be highly confident the success
+ratio of a play is 67 % (8 of 12 analogues worked). Their slide 11 makes the deeper point — *"why do
+we assume geology is like a coin?"* Knowing nothing, you should revert to the **base rate
+(generally ≠ 0.5)**, not to a neutral 50/50.
+
+**Because E-POS reports P(G) — a probability, not a binary state — the strict no-go zone does not
+apply.** It is shown on the CAM only as a *faint, labelled reference region* ("legacy no-go —
+binary-outcome only"), never as a forbidden area.
+
+### How ESL supersedes the no-go
+
+ESL replaces the binary boundary with a **continuous, visible representation**:
+
+- The **Bel–Pl envelope** `[S_for, 1 − S_against]` **is the pair of V arms** — the defensible POS
+  bounds at the current commitment, drawn directly on the CAM.
+- The **white fraction** and the **stance _w_** make explicit *how much of the point estimate rests
+  on the unknown*. A confident-but-middling element simply has a **narrow** interval centred on a
+  mid value (a genuine, well-evidenced "uncertain"); a low-commitment element has a **wide**
+  interval — the same information the no-go was groping for, but quantified rather than forbidden.
+
+The CAM's **"Risking-V overlay"** toggle draws the V arms, the labelled legacy-no-go reference, and a
+**stance-driven flag** on elements whose POS sits far above Bel (the number leans on the white band).
+
+> **Base rate as the neutral (forward link).** ExxonMobil's "geology is not a coin" critique applies
+> directly to the default stance **w = 0.5**, which splits the white band 50/50. The **Base-rate
+> stance** (Dashboard → Stance) reverts the white band to the prospect base rate instead —
+> `Policy P = S_for + base_rate · White` — so "knowing nothing" defaults to the base rate, not a coin.
+
+### References
+
+- **Hood, K. & Steffen, K. (2018)** — *The Risking V: One Company's Evolution of Risking Concepts and
+  Applications.* ExxonMobil Risk Coordinator Workshop. *(Internal/conference presentation — cited for
+  its concepts; not bundled with E-POS.)*
+- **Rose, P.R. (2001)** — *Risk Analysis and Management of Petroleum Exploration Ventures*, AAPG
+  Methods in Exploration 12.
+- **Otis, R.M. & Schneidermann, N. (1997)** — A process for evaluating exploration prospects
+  (the ROSE chance-adequacy matrix).
+""")
+
     with _tab_concepts.expander("P(G, Classic) — the multiplicative method", expanded=False):
         st.markdown(r"""
 ### What P(G, Classic) does

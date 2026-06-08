@@ -96,6 +96,7 @@ def make_geoprob_matrix_html(
   <label class="cb-pill"><input type="checkbox" id="cbW" checked> w-intensity</label>
   <label class="cb-pill"><input type="checkbox" id="cbF" checked> Stance fan lines</label>
   <label class="cb-pill"><input type="checkbox" id="cbS"> Sensitivity zones</label>
+  <label class="cb-pill"><input type="checkbox" id="cbN"> Risking-V no-go</label>
   <label class="cb-pill"><input type="checkbox" id="cbLog"> Log Y axis</label>
 </div>
 
@@ -199,6 +200,7 @@ function draw() {{
   const showW = document.getElementById('cbW').checked;
   const showF = document.getElementById('cbF').checked;
   const showS = document.getElementById('cbS').checked;
+  const showN = document.getElementById('cbN').checked;
 
   CTX.fillStyle = bg;
   CTX.fillRect(0, 0, CW, CH);
@@ -341,6 +343,41 @@ function draw() {{
     CTX.closePath();
     CTX.fillStyle = 'rgba(206,43,55,0.13)';
     CTX.fill();
+  }}
+
+  // ── Risking-V "legacy no-go" (high commitment + middling POS) ──────────────
+  // Rose / ExxonMobil's original forbidden upper-centre. Drawn only as a faint,
+  // labelled REFERENCE — it applies to a BINARY state of nature (0 or 1), not to a
+  // probability, so it is superseded for E-POS's P(G) (ExxonMobil 2018). The Bel/Pl
+  // envelope already carries this information continuously. See Theory & Guide.
+  if (showN) {{
+    const Cs = 0.55;                    // "high confidence" threshold
+    CTX.beginPath();
+    let started = false;
+    for (let i = 0; i <= 120; i++) {{
+      const Cv = Cs + (1 - Cs) * (i / 120);
+      const pr = Math.max(posMin(Cv), R_TH * Cv + W * (1 - Cv));   // red boundary
+      const X = cxP(pr), Y = cyE(Cv);
+      if (!started) {{ CTX.moveTo(X, Y); started = true; }} else {{ CTX.lineTo(X, Y); }}
+    }}
+    for (let i = 120; i >= 0; i--) {{
+      const Cv = Cs + (1 - Cs) * (i / 120);
+      const pg = Math.min(posMax(Cv), G_TH * Cv + W * (1 - Cv));   // green boundary
+      CTX.lineTo(cxP(pg), cyE(Cv));
+    }}
+    CTX.closePath();
+    CTX.fillStyle = 'rgba(124,92,160,0.15)';
+    CTX.fill();
+    CTX.strokeStyle = 'rgba(124,92,160,0.55)';
+    CTX.setLineDash([4, 3]); CTX.lineWidth = 1; CTX.stroke(); CTX.setLineDash([]);
+    CTX.fillStyle = 'rgba(95,65,135,0.92)';
+    CTX.font = '10px -apple-system,system-ui,sans-serif';
+    CTX.textAlign = 'center';
+    const Clab = 0.9;
+    const xlab = cxP(((R_TH + G_TH) / 2) * Clab + W * (1 - Clab));
+    CTX.fillText('legacy no-go', xlab, cyE(0.84));
+    CTX.fillText('(binary-state only)', xlab, cyE(0.84) + 11);
+    CTX.textAlign = 'left';
   }}
 
   // ── Stance fan lines ───────────────────────────────────────────────────────
@@ -574,6 +611,7 @@ function buildLegend() {{
     ['rgba(180,20,30,0.7)', 'line-solid', 'Negative zone boundary (Pg = r = S_against)'],
     ['rgba(26,80,192,0.6)', 'line-horiz', 'Defensible POS range [Bel, Pl]'],
     ['rgba(25,55,140,0.4)', 'line-dashed', 'Min/max POS envelope (S_for=0 / S_for=C)'],
+    ['rgba(124,92,160,0.6)', 'line-dashed', 'Risking-V legacy no-go (binary-state only; superseded)'],
   ];
   el.innerHTML = items.map(([col, type, lbl]) => {{
     let shape = '';
@@ -630,6 +668,12 @@ the ESL–ROSE tension is high: you have lots of committed evidence (high C) but
 The blue tick is your current POS at stance w. Any POS within this range is mathematically defensible
 given your evidence masses.<br>
 <br>
+<b>Risking-V no-go (toggle):</b> The faint violet region is Rose / ExxonMobil's original "no-go" — high
+confidence (high commitment) with a middling chance. It only applies when the state of nature is BINARY
+(0 or 1); for a probability / success-ratio it is superseded (ExxonMobil 2018), so E-POS shows it as a
+labelled reference, never a forbidden zone. The Bel/Pl envelope already carries this continuously.
+See <b>Theory &amp; Guide → "The Risking V & the no-go zone"</b>.<br>
+<br>
 <b>Log Y axis toggle:</b> Switches the Y axis from linear (0%–100%) to a two-decade log scale (1%–100%).
 Useful when ECI or C is small (&lt;20%): the log scale stretches the low-evidence region so you can
 see where your dot sits relative to the zone boundaries. The gradient field and all curves redraw
@@ -638,7 +682,7 @@ consistently in log space.`;
 }}
 
 // ── Wiring ────────────────────────────────────────────────────────────────────
-['cbG','cbW','cbF','cbS','cbLog'].forEach(id => {{
+['cbG','cbW','cbF','cbS','cbN','cbLog'].forEach(id => {{
   document.getElementById(id).addEventListener('change', draw);
 }});
 window.addEventListener('resize', () => {{ setup(); draw(); }});
