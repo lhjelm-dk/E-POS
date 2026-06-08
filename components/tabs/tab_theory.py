@@ -7,7 +7,9 @@ import streamlit as st
 def _risking_v_schematic():
     """Schematic Risking-V diagram for the Theory section (conceptual, not a prospect)."""
     import plotly.graph_objects as go
-    br = 0.30  # base-rate apex (low confidence)
+    import streamlit as st
+    # Apex follows the *actual* base-rate stance (clamped so it still reads as a V).
+    br = max(0.12, min(0.88, float(st.session_state.get("stance_base_rate", 0.30))))
     fig = go.Figure()
     # Feasible "V" region (opens upward from the base-rate apex)
     fig.add_trace(go.Scatter(
@@ -19,13 +21,17 @@ def _risking_v_schematic():
         line=dict(color="#b3261e", width=3), hoverinfo="skip", showlegend=False))
     fig.add_trace(go.Scatter(x=[br, 1.0], y=[0, 1], mode="lines",
         line=dict(color="#15803d", width=3), hoverinfo="skip", showlegend=False))
-    # The classic "legacy no-go": high confidence + middling chance
+    # The classic "legacy no-go" — high confidence + middling chance. A trapezoid
+    # centred on 0.5 (max uncertainty) that TAPERS toward lower confidence, so it
+    # tracks the feasible V narrowing rather than a flat rectangle.
+    _y0, _w_lo, _w_hi = 0.45, 0.05, 0.16
     fig.add_trace(go.Scatter(
-        x=[0.36, 0.64, 0.64, 0.36, 0.36], y=[0.55, 0.55, 1.0, 1.0, 0.55],
-        fill="toself", fillcolor="rgba(124,92,160,0.16)",
-        line=dict(color="rgba(124,92,160,0.65)", width=1, dash="dash"),
+        x=[0.5 - _w_lo, 0.5 + _w_lo, 0.5 + _w_hi, 0.5 - _w_hi, 0.5 - _w_lo],
+        y=[_y0,         _y0,         1.0,         1.0,         _y0],
+        fill="toself", fillcolor="rgba(124,92,160,0.09)",
+        line=dict(color="rgba(124,92,160,0.45)", width=1, dash="dash"),
         hoverinfo="skip", showlegend=False))
-    fig.add_annotation(x=0.5, y=0.80, showarrow=False, font=dict(size=12, color="#5f4187"),
+    fig.add_annotation(x=0.5, y=0.82, showarrow=False, font=dict(size=12, color="#6d5494"),
         text="legacy NO-GO<br><span style='font-size:10px'>high confidence + middling chance<br>"
              "(binary state only — superseded)</span>")
     fig.add_annotation(x=br, y=0.04, text="base rate (no data)", showarrow=False,
