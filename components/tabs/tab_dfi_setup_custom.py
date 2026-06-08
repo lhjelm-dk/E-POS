@@ -26,17 +26,23 @@ def _render_dfi_setup_custom(ctx) -> None:
         render_simm_verdict_banner, SIMM_BAND_EDGES, SIMM_R_TICKS,
     )
 
-    st.markdown("### Custom R tool — define your own DHI likelihoods")
-    st.info(
-        "**What the curves mean in the geological risk model.**  \n"
-        "• **Success cases** (Oil / Gas / Oil+Gas in an evaluable reservoir) describe how a "
-        "*hydrocarbon-bearing* prospect tends to look on the DHI — the numerator of P(G).  \n"
-        "• **Failure cases** (Water / Low-sat gas / Non-reservoir) describe how a "
-        "*non-producing* outcome tends to look — the denominator.  \n\n"
-        "R = P(DFI | HC) / P(DFI | No-HC) at your DHI reading is the **likelihood ratio** — "
-        "how many times more consistent your DHI is with success than with failure. R > 1 "
-        "lifts the geological prior P(G); R < 1 lowers it; R ≈ 1 leaves it unchanged."
-    )
+    from components.ui_help import help_popover
+    _c1, _c2 = st.columns([4, 1])
+    with _c1:
+        st.markdown("### Custom R tool — define your own DHI likelihoods")
+        st.caption("Define the **success** and **failure** DHI bell curves below; "
+                   "R = P(DFI | HC) / P(DFI | No-HC) at your reading is the likelihood ratio "
+                   "(R > 1 lifts P(G), R < 1 lowers it).")
+    with _c2:
+        help_popover("What the curves mean", (
+            "**What the curves mean in the geological risk model.**\n\n"
+            "- **Success cases** (Oil / Gas / Oil+Gas in an evaluable reservoir) describe how a "
+            "*hydrocarbon-bearing* prospect tends to look on the DHI — the numerator of P(G).\n"
+            "- **Failure cases** (Water / Low-sat gas / Non-reservoir) describe how a "
+            "*non-producing* outcome tends to look — the denominator.\n\n"
+            "R = P(DFI | HC) / P(DFI | No-HC) at your DHI reading is the **likelihood ratio** — "
+            "how many times more consistent your DHI is with success than with failure. R > 1 "
+            "lifts the geological prior P(G); R < 1 lowers it; R ≈ 1 leaves it unchanged."))
 
     # ── Persist / seed inputs ──
     def _f(key, default):
@@ -60,14 +66,15 @@ def _render_dfi_setup_custom(ctx) -> None:
         help="Where on the DHI-strength axis your prospect sits. R is read off the "
              "bell curves at this point.",
     )
-    st.caption(
-        "ℹ️ The **DHI strength** scale (−100 … +100) is an **uncalibrated**, relative "
-        "measure of how strong/positive your DFI looks — it carries no physical units. It "
-        "is read against the equally **uncalibrated** Success and Failure P(DFI | case) "
-        "distributions you define below. Only the *shape and separation* of the two curves "
-        "matters (R is scale-invariant), so the −100…100 numbers are arbitrary — unlike the "
-        "Modified DHI Index (SAAM) pathway, which reads against a SAAM-derived calibration."
-    )
+    st.caption("The −100…+100 scale is an **uncalibrated**, relative measure — only the "
+               "*shape and separation* of the two curves matter (R is scale-invariant).")
+    help_popover("About the DHI-strength scale", (
+        "The **DHI strength** scale (−100 … +100) is an **uncalibrated**, relative measure of "
+        "how strong/positive your DFI looks — it carries no physical units. It is read against "
+        "the equally **uncalibrated** Success and Failure P(DFI | case) distributions you define "
+        "below. Only the *shape and separation* of the two curves matters (R is scale-invariant), "
+        "so the −100…100 numbers are arbitrary — unlike the Modified DHI Index (SAAM) pathway, "
+        "which reads against a SAAM-derived calibration."))
 
     # ── Build the case set ──
     cases: dict = {}
@@ -129,14 +136,18 @@ def _render_dfi_setup_custom(ctx) -> None:
                 cases[k] = cc; weights[k] = wt
                 plot_specs.append((cc, color_map[k], CASE_LABELS[k], wt, group))
 
-        st.info(
-            "**Weights = a prior probability mix, exactly like the DHI-Index method.**  \n"
-            "Each weight is a mode's **share of its group**, given that outcome (they are "
-            "normalised to sum to 100 %). The failure side mirrors DHI: a **fluid-failure mix "
-            "P(fluid | failure)** over Water / LSG / Other (sums to 1), plus a separate "
-            "**Non-reservoir** (reservoir-failure) case — off by default because reservoir-"
-            "presence risk lives in the geological prior, not the DFI."
-        )
+        _wc1, _wc2 = st.columns([4, 1])
+        with _wc1:
+            st.caption("Weights = each case's **share of its group** (normalised to 100 %), "
+                       "exactly like the DHI-Index fluid mix.")
+        with _wc2:
+            help_popover("About the weights", (
+                "**Weights = a prior probability mix, exactly like the DHI-Index method.**\n\n"
+                "Each weight is a mode's **share of its group**, given that outcome (they are "
+                "normalised to sum to 100 %). The failure side mirrors DHI: a **fluid-failure mix "
+                "P(fluid | failure)** over Water / LSG / Other (sums to 1), plus a separate "
+                "**Non-reservoir** (reservoir-failure) case — off by default because reservoir-"
+                "presence risk lives in the geological prior, not the DFI."))
         st.markdown("##### Success cases (hydrocarbons present)")
         _case_inputs(SUCCESS_KEYS, green, "Success")
         _succ_sum = sum(max(weights[k], 0.0) for k in SUCCESS_KEYS) or 1.0

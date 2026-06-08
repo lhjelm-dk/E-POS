@@ -361,12 +361,12 @@ def _render_dfi_setup_characteristic(ctx) -> None:
         if r_res["was_capped"]:
             st.caption(f"⚠️ Raw product was {r_raw:.2f} — capped to {r_char:.2f} "
                        f"(Simm 2016 empirical maximum).")
-        st.caption(
-            "**Conditional-independence caveat:** these six attributes correlate in "
-            "reality (which is why Monigle 2025 moved to ML for their iCOS score). "
-            "The naive product is an *upper-bound-ish* estimate; the cap protects "
-            "against implausible R values."
-        )
+        from components.ui_help import help_popover as _help_popover
+        _help_popover("Conditional-independence caveat", (
+            "**Conditional-independence caveat:** these attributes correlate in reality "
+            "(which is why Monigle 2025 moved to ML for their iCOS score). The naive product "
+            "is an *upper-bound-ish* estimate; the ρ independence discount and the cap protect "
+            "against implausible R values."))
 
     # ── DHI strength R — shared verdict + Simm band strip (parity across sources).
     #    R_eff is the post-discernibility ratio that drives the Bayes update. ──
