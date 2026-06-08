@@ -5,46 +5,75 @@ import streamlit as st
 
 
 def _risking_v_schematic():
-    """Schematic Risking-V diagram for the Theory section (conceptual, not a prospect)."""
+    """Schematic Risking-V diagram for the Theory section (conceptual, not a prospect).
+
+    The apex is the *symmetric* original Risk Matrix at 0.5 (the "coin") — the model
+    the no-go zone belongs to; a marker shows where the base-rate-aware Referenced V
+    shifts it. X-axis reversed (100%→0%) to match the app's Chance Adequacy Matrix;
+    the feasible region is coloured by the shared CoS probability scale.
+    """
     import plotly.graph_objects as go
     import streamlit as st
-    # Apex follows the *actual* base-rate stance (clamped so it still reads as a V).
-    br = max(0.12, min(0.88, float(st.session_state.get("stance_base_rate", 0.30))))
+    from components.colors import cos_color
+
+    apex = 0.5  # original symmetric Risk Matrix: "no data" = the coin (0.5)
+    br = max(0.03, min(0.97, float(st.session_state.get("stance_base_rate", 0.30))))
     fig = go.Figure()
-    # Feasible "V" region (opens upward from the base-rate apex)
-    fig.add_trace(go.Scatter(
-        x=[br, 0.0, 1.0, br], y=[0, 1, 1, 0], fill="toself",
-        fillcolor="rgba(37,99,235,0.07)", line=dict(width=0),
-        hoverinfo="skip", showlegend=False))
-    # Left arm → failure (red); right arm → success (green)
-    fig.add_trace(go.Scatter(x=[br, 0.0], y=[0, 1], mode="lines",
-        line=dict(color="#b3261e", width=3), hoverinfo="skip", showlegend=False))
-    fig.add_trace(go.Scatter(x=[br, 1.0], y=[0, 1], mode="lines",
-        line=dict(color="#15803d", width=3), hoverinfo="skip", showlegend=False))
-    # The classic "legacy no-go" — high confidence + middling chance. A trapezoid
-    # centred on 0.5 (max uncertainty) that TAPERS toward lower confidence, so it
-    # tracks the feasible V narrowing rather than a flat rectangle.
+
+    def _ylow(x):
+        return abs(2.0 * x - 1.0)   # lower edge of the feasible V at chance x
+
+    # ── Feasible V coloured by chance-of-adequacy (shared CoS scale) ──
+    N = 48
+    for i in range(N):
+        x0, x1 = i / N, (i + 1) / N
+        col = cos_color((x0 + x1) / 2.0)
+        rr, gg, bb = int(col[1:3], 16), int(col[3:5], 16), int(col[5:7], 16)
+        fig.add_trace(go.Scatter(
+            x=[x0, x1, x1, x0], y=[_ylow(x0), _ylow(x1), 1.0, 1.0],
+            fill="toself", fillcolor=f"rgba({rr},{gg},{bb},0.22)",
+            line=dict(width=0), hoverinfo="skip", showlegend=False))
+
+    # Arms — coloured at the CoS-scale extremes (success green, failure red)
+    fig.add_trace(go.Scatter(x=[apex, 1.0], y=[0, 1], mode="lines",
+        line=dict(color="#1A7A4A", width=3), hoverinfo="skip", showlegend=False))   # → success(1)
+    fig.add_trace(go.Scatter(x=[apex, 0.0], y=[0, 1], mode="lines",
+        line=dict(color="#C00000", width=3), hoverinfo="skip", showlegend=False))   # → failure(0)
+
+    # Legacy no-go — high confidence + middling chance; tapered trapezoid, neutral
+    # grey overlay (the zones are already coloured), dashed border.
     _y0, _w_lo, _w_hi = 0.45, 0.05, 0.16
     fig.add_trace(go.Scatter(
         x=[0.5 - _w_lo, 0.5 + _w_lo, 0.5 + _w_hi, 0.5 - _w_hi, 0.5 - _w_lo],
         y=[_y0,         _y0,         1.0,         1.0,         _y0],
-        fill="toself", fillcolor="rgba(124,92,160,0.09)",
-        line=dict(color="rgba(124,92,160,0.45)", width=1, dash="dash"),
+        fill="toself", fillcolor="rgba(55,55,65,0.13)",
+        line=dict(color="rgba(55,55,65,0.55)", width=1, dash="dash"),
         hoverinfo="skip", showlegend=False))
-    fig.add_annotation(x=0.5, y=0.82, showarrow=False, font=dict(size=12, color="#6d5494"),
+    fig.add_annotation(x=0.5, y=0.82, showarrow=False, font=dict(size=12, color="#374151"),
         text="legacy NO-GO<br><span style='font-size:10px'>high confidence + middling chance<br>"
              "(binary state only — superseded)</span>")
-    fig.add_annotation(x=br, y=0.04, text="base rate (no data)", showarrow=False,
+
+    # Apex = the coin (0.5); base-rate marker = where the Referenced V shifts it
+    fig.add_annotation(x=apex, y=0.04, text="neutral 0.5 (the “coin”)", showarrow=False,
                        font=dict(size=10, color="#475569"), yanchor="bottom")
-    fig.add_annotation(x=0.02, y=1.0, text="← Failure (0)", showarrow=False, xanchor="left",
-                       font=dict(size=11, color="#b3261e"))
-    fig.add_annotation(x=0.98, y=1.0, text="Success (1) →", showarrow=False, xanchor="right",
-                       font=dict(size=11, color="#15803d"))
-    fig.update_xaxes(title="Chance of adequacy", range=[-0.02, 1.02], tickformat=".0%",
-                     gridcolor="#eee")
-    fig.update_yaxes(title="Confidence", range=[-0.05, 1.10],
+    fig.add_trace(go.Scatter(x=[br], y=[0.0], mode="markers",
+        marker=dict(symbol="diamond", size=10, color="#6d28d9",
+                    line=dict(color="white", width=1)),
+        hoverinfo="skip", showlegend=False))
+    fig.add_annotation(x=br, y=0.16, text="base rate<br>(Referenced-V shift)", showarrow=True,
+                       arrowhead=2, ax=0, ay=-18, font=dict(size=9, color="#6d28d9"))
+
+    # Corner labels (axis reversed → success on the left, failure on the right)
+    fig.add_annotation(x=0.97, y=1.06, text="Success (1)", showarrow=False, xanchor="left",
+                       font=dict(size=11, color="#1A7A4A"))
+    fig.add_annotation(x=0.03, y=1.06, text="Failure (0)", showarrow=False, xanchor="right",
+                       font=dict(size=11, color="#C00000"))
+
+    fig.update_xaxes(title="Chance of adequacy", range=[1.02, -0.02], tickformat=".0%",
+                     gridcolor="#eee")   # reversed to match the app CAM
+    fig.update_yaxes(title="Confidence", range=[-0.05, 1.12],
                      tickvals=[0, 0.5, 1], ticktext=["Low", "Med", "High"], gridcolor="#eee")
-    fig.update_layout(height=340, margin=dict(t=18, b=44, l=58, r=14),
+    fig.update_layout(height=340, margin=dict(t=20, b=44, l=58, r=14),
                       plot_bgcolor="white", showlegend=False)
     return fig
 
@@ -421,11 +450,13 @@ levels lie. Use these to read off the implied Pg for any (POS, C) position.
     with _tab_concepts.expander("The Risking V & the \"no-go\" zone (Rose / ExxonMobil)", expanded=False):
         st.plotly_chart(_risking_v_schematic(), use_container_width=True)
         st.caption(
-            "**Schematic Risking V.** At low confidence (bottom) the estimate is pinned near the "
-            "**base rate** (apex); rising confidence lets it move out toward the **failure (0)** or "
-            "**success (1)** corners — the two arms. The violet upper-centre is the classic "
-            "**no-go** (confident but middling) — shown here only to explain the idea; it applies to "
-            "a *binary* outcome and is superseded for a probability. See below."
+            "**Schematic Risking V.** Apex at the original symmetric **neutral 0.5 — the “coin”** "
+            "(no data); rising confidence lets the estimate move out to the **success (1)** or "
+            "**failure (0)** corners — the two arms. The fill is coloured by chance on the shared "
+            "CoS scale; the **x-axis is reversed (100%→0%)** to match the app's CAM. The grey "
+            "upper-centre is the classic **no-go** (confident but middling) — superseded for a "
+            "probability. The purple ◆ marks where ExxonMobil's base-rate-aware **Referenced V** "
+            "shifts the apex (here, the current base-rate stance)."
         )
         st.markdown(r"""
 ### The Risk Matrix idea — and why it looks like ESL
