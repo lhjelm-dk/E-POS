@@ -3,6 +3,45 @@ from __future__ import annotations
 
 import streamlit as st
 
+
+def _risking_v_schematic():
+    """Schematic Risking-V diagram for the Theory section (conceptual, not a prospect)."""
+    import plotly.graph_objects as go
+    br = 0.30  # base-rate apex (low confidence)
+    fig = go.Figure()
+    # Feasible "V" region (opens upward from the base-rate apex)
+    fig.add_trace(go.Scatter(
+        x=[br, 0.0, 1.0, br], y=[0, 1, 1, 0], fill="toself",
+        fillcolor="rgba(37,99,235,0.07)", line=dict(width=0),
+        hoverinfo="skip", showlegend=False))
+    # Left arm → failure (red); right arm → success (green)
+    fig.add_trace(go.Scatter(x=[br, 0.0], y=[0, 1], mode="lines",
+        line=dict(color="#b3261e", width=3), hoverinfo="skip", showlegend=False))
+    fig.add_trace(go.Scatter(x=[br, 1.0], y=[0, 1], mode="lines",
+        line=dict(color="#15803d", width=3), hoverinfo="skip", showlegend=False))
+    # The classic "legacy no-go": high confidence + middling chance
+    fig.add_trace(go.Scatter(
+        x=[0.36, 0.64, 0.64, 0.36, 0.36], y=[0.55, 0.55, 1.0, 1.0, 0.55],
+        fill="toself", fillcolor="rgba(124,92,160,0.16)",
+        line=dict(color="rgba(124,92,160,0.65)", width=1, dash="dash"),
+        hoverinfo="skip", showlegend=False))
+    fig.add_annotation(x=0.5, y=0.80, showarrow=False, font=dict(size=12, color="#5f4187"),
+        text="legacy NO-GO<br><span style='font-size:10px'>high confidence + middling chance<br>"
+             "(binary state only — superseded)</span>")
+    fig.add_annotation(x=br, y=0.04, text="base rate (no data)", showarrow=False,
+                       font=dict(size=10, color="#475569"), yanchor="bottom")
+    fig.add_annotation(x=0.02, y=1.0, text="← Failure (0)", showarrow=False, xanchor="left",
+                       font=dict(size=11, color="#b3261e"))
+    fig.add_annotation(x=0.98, y=1.0, text="Success (1) →", showarrow=False, xanchor="right",
+                       font=dict(size=11, color="#15803d"))
+    fig.update_xaxes(title="Chance of adequacy", range=[-0.02, 1.02], tickformat=".0%",
+                     gridcolor="#eee")
+    fig.update_yaxes(title="Confidence", range=[-0.05, 1.10],
+                     tickvals=[0, 0.5, 1], ticktext=["Low", "Med", "High"], gridcolor="#eee")
+    fig.update_layout(height=340, margin=dict(t=18, b=44, l=58, r=14),
+                      plot_bgcolor="white", showlegend=False)
+    return fig
+
 # Header-style Italian-flag chip (HTML, Windows-safe — country-flag emoji render as
 # bare letters like "IT" on Windows). Matches the flag beside the app subtitle.
 _ITALIAN_FLAG_HTML = (
@@ -374,6 +413,14 @@ levels lie. Use these to read off the implied Pg for any (POS, C) position.
         st.info("Open the **Geological POS tab → Chance Adequacy Matrix** to interact with the live plot.")
 
     with _tab_concepts.expander("The Risking V & the \"no-go\" zone (Rose / ExxonMobil)", expanded=False):
+        st.plotly_chart(_risking_v_schematic(), use_container_width=True)
+        st.caption(
+            "**Schematic Risking V.** At low confidence (bottom) the estimate is pinned near the "
+            "**base rate** (apex); rising confidence lets it move out toward the **failure (0)** or "
+            "**success (1)** corners — the two arms. The violet upper-centre is the classic "
+            "**no-go** (confident but middling) — shown here only to explain the idea; it applies to "
+            "a *binary* outcome and is superseded for a probability. See below."
+        )
         st.markdown(r"""
 ### The Risk Matrix idea — and why it looks like ESL
 

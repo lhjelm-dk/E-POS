@@ -128,6 +128,10 @@ def main() -> int:
             scroll_to("Direct Fluid Indicator"); shot("02_dashboard_dfi_toggle")
             open_expander("Classic POS — source"); scroll_to("Classic POS — source")
             shot("03_dashboard_classic_rose")
+            # Stance modes (neutral / custom / base rate) — select base rate to show it
+            click_label("Base rate (revert")
+            scroll_to("Stance on unknowns"); shot("19_dashboard_stance_modes")
+            click_label("Neutral")    # reset so later shots use the neutral stance
 
             # ── Play / Conditional ──
             tab("Play"); pg.evaluate("window.scrollTo(0,0)"); settle(); shot("04_play_tab")
@@ -170,6 +174,10 @@ def main() -> int:
             # ── Theory ──
             tab("Theory & Guide"); pg.evaluate("window.scrollTo(0,0)"); settle()
             shot("18_theory_overview")
+            # Risking-V schematic in the Concepts sub-tab
+            tab("Concepts"); settle()
+            open_expander("Risking V"); scroll_to("The Risking V")
+            shot("20_theory_risking_v")
 
             br.close()
         print("done - images in", IMG)

@@ -112,6 +112,13 @@ ESL-derived and fully traceable.
 
 ![Classic POS / ROSE override](docs/img/03_dashboard_classic_rose.png)
 
+**Stance modes.** The white/unknown band can be scored three ways: **Neutral** (`w = 0.5`,
+split 50/50), **Custom w**, or **Base rate** — which reverts the unknowns to the prospect base
+rate rather than a coin (ExxonMobil 2018: *"geology is not a coin"*), `Policy P = S_for +
+base_rate · White`. A *Seed from Rose medians* button supplies an analogue base rate.
+
+![Stance modes](docs/img/19_dashboard_stance_modes.png)
+
 ### 2 · Play
 
 Assess the **play-level** chance of each pillar (Charge, Closure, Reservoir, Retention) — the
@@ -228,6 +235,22 @@ Policy P = S_for + w · White        (w = 0 → Bel, w = 1 → Pl, w = 0.5 → n
 The **defensible interval** is `[Bel, Pl] = [S_for, 1 − S_against]`. Pillars roll up with the
 ESL product operator (`green = ∏ greenᵢ`, `red = 1 − ∏(1 − redᵢ)`), and **P(G, ESL)** is
 `Policy P` applied **once** to the consolidated masses.
+
+### The Risking V & the "no-go" zone
+
+Rose's chance-adequacy matrix and ExxonMobil's **Risk Matrix → Risking V** share ESL's core idea:
+separate *known-geology favourability* (green/red) from *confidence* (the white band). Plotting
+chance against confidence produces a **V** — pinned to the base rate at low confidence, opening
+toward the failure (0) and success (1) corners as confidence rises.
+
+![The Risking V — schematic](docs/img/20_theory_risking_v.png)
+
+The classic **"no-go" zone** (confident-but-middling, upper-centre) is a *binary-state* artefact —
+ExxonMobil's 2018 review notes it is *"only applicable if the state of nature is 0 or 1,"* not for a
+probability. Since E-POS reports **P(G)**, the no-go does not apply: ESL replaces the forbidden
+region with the continuous **Bel–Pl envelope** (the V arms) and the visible white fraction. The CAM
+offers a *labelled, opt-in* Risking-V overlay; the **Base-rate stance** answers the same paper's
+"geology is not a coin" critique. Full discussion + references: **Theory & Guide → "The Risking V"**.
 
 ### P(G, Classic)
 
