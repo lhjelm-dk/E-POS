@@ -30,16 +30,31 @@ def policy_pos(s_for: float, s_against: float, w: float = COMPANY_DEFAULT_WEIGHT
     return green + float(w) * white
 
 
-def resolve_stance() -> float:
-    """Return the effective global stance weight from Streamlit session state.
+# Default prospect base rate used by the "base rate" stance (Exxon 2018: "geology
+# is not a coin — revert the unknowns to the base rate, generally ≠ 0.5").
+DEFAULT_BASE_RATE: float = 0.30
 
-    Reads the same keys as the ESL tab in app.py:
-      use_policy_weight = True  → company default (COMPANY_DEFAULT_WEIGHT)
-      use_policy_weight = False → user's slider value (uncertainty_weight_slider)
+
+def resolve_stance() -> float:
+    """Return the effective global stance weight *w* from Streamlit session state.
+
+    Three modes, logged in ``stance_mode``:
+      ``neutral``    → company default 0.5 (unknowns split 50/50 — a coin)
+      ``custom``     → the user's ``uncertainty_weight_slider``
+      ``base_rate``  → ``stance_base_rate`` — reverts the white band to the prospect
+                       base rate instead of a coin (Policy P = S_for + base_rate·White)
+
+    Legacy fallback: if ``stance_mode`` is unset, derive it from the old
+    ``use_policy_weight`` flag so existing sessions and saved prospects keep working.
     """
-    if st.session_state.get("use_policy_weight", True):
-        return COMPANY_DEFAULT_WEIGHT
-    return float(st.session_state.get("uncertainty_weight_slider", COMPANY_DEFAULT_WEIGHT))
+    mode = st.session_state.get("stance_mode")
+    if mode is None:
+        mode = "neutral" if st.session_state.get("use_policy_weight", True) else "custom"
+    if mode == "custom":
+        return float(st.session_state.get("uncertainty_weight_slider", COMPANY_DEFAULT_WEIGHT))
+    if mode == "base_rate":
+        return max(0.0, min(1.0, float(st.session_state.get("stance_base_rate", DEFAULT_BASE_RATE))))
+    return COMPANY_DEFAULT_WEIGHT
 
 
 def get_active_pillars() -> list[dict]:

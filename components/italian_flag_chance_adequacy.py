@@ -76,11 +76,8 @@ def render_italian_flag_chance_adequacy_matrix() -> None:
         "for each certainty level (all splits of green vs red). **No fixed coloured zones** — see advisory expander."
     )
     use_hub_w = st.checkbox("Lock uncertainty weight to Prospect Hub value", value=True, key="ifcam_use_hub_w")
-    use_policy = st.session_state.get("use_policy_weight", True)
-    if use_policy:
-        hub_w = COMPANY_DEFAULT_WEIGHT
-    else:
-        hub_w = float(st.session_state.get("uncertainty_weight_slider", COMPANY_DEFAULT_WEIGHT))
+    from logic.pos_policy import resolve_stance
+    hub_w = resolve_stance()
 
     ctrl1, ctrl2 = st.columns([1, 2])
     with ctrl1:

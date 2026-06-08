@@ -39,12 +39,8 @@ def _compute_esl_for_hub(models: dict, build_logic_table_fn=None) -> "tuple[list
     if not play or not conditional:
         return None
     combine_mode = "Evidence Support Logic"
-    _use_policy_hub = st.session_state.get("use_policy_weight", True)
-    uncertainty_weight = (
-        COMPANY_DEFAULT_WEIGHT
-        if _use_policy_hub
-        else float(st.session_state.get("uncertainty_weight_slider", COMPANY_DEFAULT_WEIGHT))
-    )
+    from logic.pos_policy import resolve_stance
+    uncertainty_weight = resolve_stance()
     get_mode, get_dep = make_session_mode_dep_getters(st.session_state)
     get_classic_mode = make_session_classic_mode_getter(st.session_state)
     r = compute_esl_rollup(play, conditional, get_mode, get_dep)
@@ -235,8 +231,8 @@ def _get_esl_overview_data(models: dict) -> "dict | None":
     conditional = models.get("conditional", {})
     if not play or not conditional:
         return None
-    use_policy = st.session_state.get("use_policy_weight", True)
-    uncertainty_weight = COMPANY_DEFAULT_WEIGHT if use_policy else float(st.session_state.get("uncertainty_weight_slider", COMPANY_DEFAULT_WEIGHT))
+    from logic.pos_policy import resolve_stance
+    uncertainty_weight = resolve_stance()
     get_mode, get_dep = make_session_mode_dep_getters(st.session_state)
     r = compute_esl_rollup(play, conditional, get_mode, get_dep)
 

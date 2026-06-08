@@ -176,29 +176,66 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
                     "Set w once for the whole prospect here. Individual risk elements can override it "
                     "in their CAM panel (shown with ⚑ indicator)."
                 )
-            use_policy_cb = st.checkbox(
-                f"Use company default stance (w = {COMPANY_DEFAULT_WEIGHT} — neutral)",
-                value=True,
-                key="use_policy_weight",
+            from logic.pos_policy import DEFAULT_BASE_RATE
+            _stance_lbl = {
+                "neutral":   "Neutral — w = 0.5 (split unknowns 50/50, Laplace)",
+                "custom":    "Custom stance w",
+                "base_rate": "Base rate (revert unknowns to the base rate — Exxon)",
+            }
+            _modes = ["neutral", "custom", "base_rate"]
+            # Migrate the legacy use_policy_weight flag on first render.
+            if "stance_mode" not in st.session_state:
+                st.session_state["stance_mode"] = (
+                    "neutral" if st.session_state.get("use_policy_weight", True) else "custom")
+            _sel = st.radio(
+                "Stance on unknowns",
+                options=_modes,
+                format_func=lambda m: _stance_lbl[m],
+                key="stance_mode",
+                help="How the uncommitted *white* band is scored when the Italian Flag is "
+                     "collapsed to a point POS. Neutral treats the unknowns as a coin; "
+                     "Base rate reverts them to the prospect base rate (Exxon 2018: "
+                     "'geology is not a coin').",
             )
-            if not use_policy_cb:
+            if _sel == "custom":
                 w_curr_dash = float(st.session_state.get("uncertainty_weight_slider", 0.5))
                 from components.element_detail_cam import _w_label as _dash_w_label
                 st.slider(
                     f"Stance (w) — {_dash_w_label(w_curr_dash)}",
                     0.0, 1.0, w_curr_dash, 0.05,
                     key="uncertainty_weight_slider",
-                    help="0 = unknowns vote against success (pessimistic Bel). "
-                         "0.5 = neutral / Laplace (recommended default). "
-                         "1 = unknowns vote for success (optimistic Pl). "
-                         "POS = S_for + w × White.",
+                    help="0 = unknowns vote against success (Bel). 0.5 = neutral. "
+                         "1 = unknowns vote for success (Pl). POS = S_for + w × White.",
                 )
                 st.text_area(
                     "Justification for stance override", key="weight_justification",
                     placeholder="Document why this prospect warrants a stance different from company default...",
                 )
+            elif _sel == "base_rate":
+                _bc1, _bc2 = st.columns([2, 1])
+                with _bc1:
+                    st.number_input(
+                        "Prospect base rate", min_value=0.0, max_value=1.0,
+                        value=float(st.session_state.get("stance_base_rate", DEFAULT_BASE_RATE)),
+                        step=0.05, key="stance_base_rate",
+                        help="Policy P = S_for + base_rate × White. 'Knowing nothing' "
+                             "reverts the unknowns to this base rate, not a 50/50 coin.")
+                with _bc2:
+                    st.write(""); st.write("")
+
+                    def _seed_base_rate():
+                        import math
+                        from components.calibration import ROSE_RANGES
+                        _meds = [v[2] / 100.0 for v in ROSE_RANGES.values()]
+                        st.session_state["stance_base_rate"] = (
+                            round(math.prod(_meds), 2) if _meds else DEFAULT_BASE_RATE)
+                    st.button("↧ Seed from Rose medians", on_click=_seed_base_rate,
+                              key="seed_base_rate",
+                              help="Product of the per-pillar Rose median POS — the analogue "
+                                   "prospect base rate (≈ 18%).")
+                st.caption("Exxon 'geology is not a coin': the white band reverts to the base rate.")
             else:
-                st.caption(f"Using company default stance w = {COMPANY_DEFAULT_WEIGHT} (neutral).")
+                st.caption(f"Neutral stance w = {COMPANY_DEFAULT_WEIGHT} (unknowns split 50/50).")
         with col_info:
             from components.element_detail_cam import _w_label as _dash_w_label2
             st.metric("Stance (w)", f"{uncertainty_weight:.2f}")

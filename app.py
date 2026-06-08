@@ -690,12 +690,8 @@ def _render_tabs(models: dict) -> None:
     """Seven-tab UI orchestrator: builds _TabContext then delegates to tab functions."""
     esl_opts = list(ESL_MODE_OPTIONS)
     get_mode, get_dependency = make_session_mode_dep_getters(st.session_state)
-    use_policy = st.session_state.get("use_policy_weight", True)
-    uncertainty_weight = (
-        COMPANY_DEFAULT_WEIGHT
-        if use_policy
-        else float(st.session_state.get("uncertainty_weight_slider", 0.5))
-    )
+    from logic.pos_policy import resolve_stance
+    uncertainty_weight = resolve_stance()
 
     play = models["play"]
     conditional = models["conditional"]
