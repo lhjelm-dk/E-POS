@@ -1144,12 +1144,16 @@ up-move masks a reservoir down-move. The aggregate-R view cannot show this — t
 pillar-resolved panel can.
 
 #### Where E-POS applies it
-- **Custom multi-case** → full two-channel attribution (the **DFI Results** and **Result**
-  tabs show the prior→posterior per channel/pillar). Display-only for now: the per-pillar
-  *Overview* table still shows pre-DFI values (a later step will fold the resolved update
-  into the table itself).
-- **DHI-Index (SAAM)** already resolves all four pillars via its richer **8-outcome**
-  Bayes (above), so it is left as-is.
+- **Custom multi-case** → full two-channel attribution on the **DFI Results**, **Result**
+  and **Final Prospect POS** pages (prior→posterior per channel/pillar). It is a *parallel*
+  post-DFI view: the per-pillar **prior inputs are never overwritten**, so the geological
+  prior the analyst books stays intact.
+- **DHI-Index (SAAM)** keeps its richer **8-outcome** headline, and its per-pillar
+  attribution is now the **channel-resolved** split too — the Reservoir marginal is the
+  exact `P(reservoir present | DFI)` from the 8 outcomes, replacing the earlier
+  *equal-spread* attribution (which moved every pillar the same way and could not show a
+  reservoir falling while POS rose). The mass-level play/cond Italian-flag tables remain
+  below it for detail.
 - **Characteristic / Custom dual-case** are single-curve models → aggregate headline only.
 
 #### Scope (single segment) & IP

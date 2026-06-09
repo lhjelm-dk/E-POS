@@ -51,10 +51,13 @@ Extend the existing DFI posterior row into a **per-pillar post-DFI block**: for 
 `prior → posterior (Δ pp)` line, with the reservoir-vs-HC divergence visible. Prior pillar
 rows stay exactly as they are (parallel, not overwrite). Headline post-DFI row already present.
 
-### 3b. Sensitivity & CAM
-Overlay the **post-DFI position** on the CAM scatter / sensitivity sweeps (currently
-prior-only): a second marker / curve at the post-DFI headline (and optionally per-pillar
-post-DFI markers). Clearly labelled "post-DFI" vs the prior point.
+### 3b. Sensitivity & CAM  — **DEFERRED (B3)**
+The post-DFI position is already visible on the DFI Results **sensitivity sweep** (the
+posterior curve) and the iso-R / iso-DHI prior→posterior maps. The remaining piece — a
+post-DFI marker overlaid on the **Chance Adequacy Matrix canvas** (Geological POS tab) —
+is deferred: it is a larger JS change on a tab that is *prior-by-design*, with low
+incremental value given the post-DFI position already appears on the DFI pages. Pick up
+later if a single combined prior+posterior CAM view is wanted.
 
 ### 3c. Comparison (ESL vs Classic)
 Add **post-DFI P(G, ESL)** vs **post-DFI P(G, Classic)** alongside the prior comparison, so the
