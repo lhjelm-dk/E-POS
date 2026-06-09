@@ -100,10 +100,34 @@ def _render_dfi_results(ctx) -> None:
                   help="V = L_success / (L_success + E[L|failure]). For the DHI-Index method "
                        "this equals the DHI score, R_SAAM/(R_SAAM+1).")
 
+    # ── ESL vs Classic gap, before AND after the DFI update (B4) ──
+    _gap_pre = (esl_prior_pg - prior_classic.prior_pg) * 100
+    _gap_post = (post_esl.posterior_pg - post_classic.posterior_pg) * 100
+    st.caption(
+        f"**ESL − Classic gap:** prior {_gap_pre:+.1f} pp → post-DFI {_gap_post:+.1f} pp. "
+        "The gap is your method-divergence / data-quality signal; watch whether the DFI "
+        "update widens or narrows it."
+    )
+
     st.divider()
 
-    # ── DFI-modified per-pillar tables ──
-    st.markdown("##### DFI-modified per-pillar values (at current stance)")
+    # ── Channel-resolved post-DFI attribution (GeoX-style, reservoir vs HC-system) ──
+    st.markdown("##### DFI pillar attribution (channel-resolved, GeoX-style)")
+    from logic.dfi_context import dfi_post_pillars as _dfi_post_pillars
+    from components.dfi_shared import render_pillar_attribution
+    render_pillar_attribution(_dfi_post_pillars(ctx), key="dfi_saam_chan_attr")
+    st.caption(
+        "Reservoir comes from the exact 8-outcome P(reservoir present | DFI); the "
+        "HC-system (Charge·Closure·Retention) is split by log-proportion. This replaces "
+        "the earlier equal-spread attribution — a supportive anomaly can now correctly "
+        "lower the Reservoir marginal while raising POS. The mass-level tables below keep "
+        "the play/cond Italian-flag detail."
+    )
+
+    st.divider()
+
+    # ── DFI-modified per-pillar tables (mass-level detail) ──
+    st.markdown("##### DFI-modified per-pillar values — mass-level detail (at current stance)")
 
     # Classic attribution: log-split (workbook method)
     classic_attr = attribute_classic(prior_classic, post_classic)
@@ -298,6 +322,13 @@ def _render_dfi_results_custom(ctx) -> None:
                        help="R / (R + 1) — Monigle-style 0–100 score.")
     with c3: st.metric("P(G | DFI, ESL)", f"{post_esl_pg*100:.1f}%", delta=f"{de:+.1f} pp")
     with c4: st.metric("P(G | DFI, Classic)", f"{post_classic_pg*100:.1f}%", delta=f"{dc:+.1f} pp")
+
+    _gap_pre = (esl_prior_pg - prior_classic.prior_pg) * 100
+    _gap_post = (post_esl_pg - post_classic_pg) * 100
+    st.caption(
+        f"**ESL − Classic gap:** prior {_gap_pre:+.1f} pp → post-DFI {_gap_post:+.1f} pp "
+        "(method-divergence / data-quality signal)."
+    )
 
     # ── Pillar-resolved DFI attribution (multi-case) / aggregate note (dual-case) ──
     st.markdown("##### DFI pillar attribution (GeoX-style, single-segment)")
