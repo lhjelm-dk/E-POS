@@ -287,3 +287,60 @@ def resolve_dfi(
         update=upd, p_res_prior=upd.p_res_prior, p_res_post=upd.p_res_post,
         hc_pillars_prior=dict(hc_pillar_priors), hc_pillars_post=post_pillars,
     )
+
+
+# ── Plan B: unified post-DFI per-pillar marginals (for the tables) ───────────
+
+@dataclass(frozen=True)
+class PostDfiPillars:
+    """Per-pillar prior→posterior marginals for the tables (Plan B).
+
+    ``pillars_*`` are keyed ``{"Reservoir", "Charge", "Closure", "Retention"}``. For
+    aggregate-only methods ``pillar_resolved`` is False and the pillar dicts are empty
+    (only the headline ``pos_*`` is meaningful). Display-only: prior pillar *inputs* are
+    never overwritten — this is the parallel post-DFI view.
+    """
+    pillar_resolved: bool
+    pos_prior: float
+    pos_post: float
+    pillars_prior: dict[str, float]
+    pillars_post: dict[str, float]
+    method_label: str = ""
+
+    @property
+    def opposes_headline(self) -> bool:
+        """True when Reservoir moves opposite to the headline POS."""
+        if not self.pillar_resolved:
+            return False
+        dp = self.pos_post - self.pos_prior
+        dr = self.pillars_post.get("Reservoir", 0.0) - self.pillars_prior.get("Reservoir", 0.0)
+        return abs(dp) > 1e-6 and abs(dr) > 1e-6 and (dp > 0) != (dr > 0)
+
+
+def build_post_pillars(pos_prior: float, pos_post: float,
+                       p_res_prior: float, p_res_post: float,
+                       hc_pillar_priors: dict[str, float],
+                       method_label: str = "") -> PostDfiPillars:
+    """Assemble a channel-resolved :class:`PostDfiPillars` from headline + reservoir
+    marginals and the prior HC-system pillar marginals. The HC-system posterior is
+    ``pos_post / p_res_post`` (residual) and is split across the HC pillars by
+    log-proportion. Shared by the Custom and DHI-Index paths so they produce one shape."""
+    p_hc_post = (pos_post / p_res_post) if p_res_post > _EPS else 0.0
+    hc_post = redistribute_log_proportion(_clamp01(p_hc_post), hc_pillar_priors) if hc_pillar_priors else {}
+    pillars_prior = {"Reservoir": _clamp01(p_res_prior), **{k: _clamp01(v) for k, v in hc_pillar_priors.items()}}
+    pillars_post = {"Reservoir": _clamp01(p_res_post), **hc_post}
+    return PostDfiPillars(True, _clamp01(pos_prior), _clamp01(pos_post),
+                          pillars_prior, pillars_post, method_label)
+
+
+def post_pillars_from_resolved(res: "ResolvedDfi") -> PostDfiPillars:
+    """Convert a Plan-A :class:`ResolvedDfi` (Custom path) into the unified shape."""
+    if not res.pillar_resolved:
+        return PostDfiPillars(False, res.pos_prior, res.pos_post, {}, {},
+                              res.channels.method_label)
+    return PostDfiPillars(
+        True, res.pos_prior, res.pos_post,
+        {"Reservoir": res.p_res_prior, **res.hc_pillars_prior},
+        {"Reservoir": res.p_res_post, **res.hc_pillars_post},
+        res.channels.method_label,
+    )

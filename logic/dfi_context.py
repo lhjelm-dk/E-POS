@@ -152,6 +152,51 @@ def resolve_dfi_custom(ctx):
     return resolve_dfi(pos, p_res, ch, hc_priors)
 
 
+def _hc_pillar_priors(pp) -> dict:
+    """Charge / Closure / Retention marginals from a ``PriorPillars`` (Closure = trap_*)."""
+    return {
+        "Charge":    pp.charge_play * pp.charge_cond,
+        "Closure":   pp.trap_play * pp.trap_cond,
+        "Retention": pp.retention_play * pp.retention_cond,
+    }
+
+
+def dfi_post_pillars(ctx):
+    """Unified per-pillar post-DFI marginals (Plan B) for the tables, dispatched by
+    method, at the current stance. Returns a ``PostDfiPillars`` or ``None`` when the
+    active method has no pillar-resolved view to show.
+
+    - **Custom** → from the Plan-A ``ResolvedDfi`` (multi = pillar-resolved; dual = aggregate).
+    - **DHI-Index** → channel-resolved from the **8-outcome** posterior: Reservoir =
+      ``Σ`` evaluable-reservoir outcomes (the patent's exact ``P(RP|DFI)``), HC-system
+      split across Charge/Closure/Retention by log-proportion. Keeps the 8-outcome
+      headline; this *replaces* the old equal-spread per-pillar attribution.
+    """
+    src = st.session_state.get("dfi_source")
+    if src == "custom":
+        from logic.dfi_pillar_update import post_pillars_from_resolved
+        res = resolve_dfi_custom(ctx)
+        return post_pillars_from_resolved(res) if res is not None else None
+    if src == "dhi_index":
+        from logic.dfi_bayes import compute_dfi_posterior, reservoir_present_marginal
+        from logic.dfi_inputs import read_dfi_inputs
+        from logic.dfi_pillar_update import build_post_pillars
+        inp = read_dfi_inputs(st.session_state)
+        calib = get_effective_calibration()
+        w = ctx.uncertainty_weight
+        pp = esl_prior_pillars_from_ctx_at_w(ctx, w)
+        esl_prior_pg = esl_rollup_prior_at_w(ctx, w)
+        post = compute_dfi_posterior(pp, inp.dhi, calib, inp.fluid_weights,
+                                     inp.sd_mode, inp.fluid_type,
+                                     prior_pg_override=esl_prior_pg)
+        p_res_prior = reservoir_present_marginal(post.prior_outcomes.as_dict())
+        p_res_post = reservoir_present_marginal(post.posterior_outcomes)
+        return build_post_pillars(esl_prior_pg, post.posterior_pg,
+                                  p_res_prior, p_res_post, _hc_pillar_priors(pp),
+                                  "Modified DHI Index (SAAM)")
+    return None
+
+
 def classic_prior_pillars_from_ctx(ctx, w: float | None = None):
     """Build ``PriorPillars`` from ctx using Classic per-pillar Pgs at given stance.
 

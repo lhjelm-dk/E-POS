@@ -143,6 +143,24 @@ class PriorOutcomes:
         return sum(self.as_dict().values())
 
 
+# The four outcomes in which the reservoir is *present* (evaluable). Summing their
+# probability gives the reservoir-presence marginal P(reservoir present) — the
+# patent's P(RP | ...) — for either the prior or the posterior outcome dict.
+EVAL_RES_OUTCOMES: tuple[str, ...] = (
+    "oil_eval_success", "water_eval_failure", "lsg_eval_failure", "other_eval_failure",
+)
+
+
+def reservoir_present_marginal(outcomes: dict[str, float]) -> float:
+    """Reservoir-present marginal = Σ over the evaluable-reservoir outcomes.
+
+    Works on either ``PriorOutcomes.as_dict()`` or ``DFIPosterior.posterior_outcomes``.
+    This is GeoX/Martinelli's exact ``P(reservoir present | DFI)`` (patent US 10,451,762),
+    used to upgrade the DHI-Index per-pillar split from equal-spread to channel-resolved.
+    """
+    return sum(outcomes.get(k, 0.0) for k in EVAL_RES_OUTCOMES)
+
+
 def decompose_prior(p: PriorPillars, w: FluidWeights) -> PriorOutcomes:
     """Workbook columns 22..29 (V..AC):  8 mutually exclusive outcomes.
 

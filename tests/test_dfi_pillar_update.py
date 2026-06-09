@@ -255,3 +255,73 @@ def test_dhi_index_resolves_through_engine():
     res = resolve_dfi(pos=0.25, p_res=0.70, channels=ch, hc_pillar_priors=priors)
     assert res.pillar_resolved is True
     assert res.p_res_post * res.update.p_hc_post == pytest.approx(res.pos_post, abs=1e-12)
+
+
+# ── Plan B: PostDfiPillars / build_post_pillars ──────────────────────────────
+def test_build_post_pillars_product_and_keys():
+    from logic.dfi_pillar_update import build_post_pillars
+    priors = {"Charge": 0.6, "Closure": 0.5, "Retention": 0.8}
+    pp = build_post_pillars(pos_prior=0.072, pos_post=0.132,
+                            p_res_prior=0.50, p_res_post=0.43,
+                            hc_pillar_priors=priors, method_label="m")
+    assert pp.pillar_resolved is True
+    assert set(pp.pillars_post.keys()) == {"Reservoir", "Charge", "Closure", "Retention"}
+    # HC pillars' product == HC-system posterior == pos_post / p_res_post.
+    hc_prod = pp.pillars_post["Charge"] * pp.pillars_post["Closure"] * pp.pillars_post["Retention"]
+    assert hc_prod == pytest.approx(0.132 / 0.43, abs=1e-9)
+    # COS up while Reservoir down → opposes_headline.
+    assert pp.opposes_headline is True
+
+
+def test_post_pillars_from_resolved_matches():
+    from logic.dfi_pillar_update import resolve_dfi, ChannelLikelihoods, post_pillars_from_resolved
+    ch = ChannelLikelihoods(1.4, 0.7, 1.0, "m")
+    priors = {"Charge": 0.6, "Closure": 0.5, "Retention": 0.8}
+    res = resolve_dfi(0.30, 0.80, ch, priors)
+    pp = post_pillars_from_resolved(res)
+    assert pp.pillars_post["Reservoir"] == pytest.approx(res.p_res_post)
+    assert pp.pos_post == pytest.approx(res.pos_post)
+
+
+# ── Plan B: DHI-Index reservoir marginal (patent P(RP|DFI)) ──────────────────
+def test_reservoir_present_marginal_sums_eval_outcomes():
+    from logic.dfi_bayes import reservoir_present_marginal, EVAL_RES_OUTCOMES
+    d = {"oil_eval_success": 0.1, "water_eval_failure": 0.05, "lsg_eval_failure": 0.03,
+         "other_eval_failure": 0.02, "oil_noneval_failure": 0.4,
+         "water_noneval_failure": 0.4}
+    assert reservoir_present_marginal(d) == pytest.approx(0.20)
+    assert EVAL_RES_OUTCOMES[0] == "oil_eval_success"
+
+
+def test_dhi_index_post_pillars_reservoir_down_when_nonres_likely():
+    """A DHI most consistent with the Reservoir_failure class must push the reservoir
+    marginal DOWN even if the headline moves up — the channel-resolved upgrade."""
+    from logic.dfi_bayes import (
+        compute_dfi_posterior, reservoir_present_marginal, PriorPillars, FluidWeights,
+    )
+    from logic.dfi_pillar_update import build_post_pillars
+    # Stub calib where the Reservoir_failure class is most consistent with DHI≈ -10.
+    classes = {
+        "Success": _StubClass(0.30, 0.25), "Oil": _StubClass(0.30, 0.25),
+        "Gas": _StubClass(0.20, 0.25), "OilGas": _StubClass(0.30, 0.25),
+        "H2O_failure": _StubClass(-0.40, 0.25), "LSG_failure": _StubClass(0.00, 0.30),
+        "Reservoir_failure": _StubClass(-0.10, 0.18),
+    }
+    calib = type("C", (), {"classes": classes})()
+    pillars = PriorPillars(
+        charge_play=0.9, trap_play=0.9, reservoir_play=0.8, retention_play=0.9,
+        charge_cond=0.8, trap_cond=0.95, reservoir_cond=0.85, retention_cond=0.8,
+    )
+    esl_prior = pillars.prior_pg
+    post = compute_dfi_posterior(pillars, -10.0, calib, FluidWeights(), "sd_calculated", "Success",
+                                 prior_pg_override=esl_prior)
+    p_res_prior = reservoir_present_marginal(post.prior_outcomes.as_dict())
+    p_res_post = reservoir_present_marginal(post.posterior_outcomes)
+    hc = {"Charge": pillars.charge_play * pillars.charge_cond,
+          "Closure": pillars.trap_play * pillars.trap_cond,
+          "Retention": pillars.retention_play * pillars.retention_cond}
+    pp = build_post_pillars(esl_prior, post.posterior_pg, p_res_prior, p_res_post, hc)
+    # Reservoir marginal moved DOWN (the anomaly looks like a non-reservoir cause).
+    assert pp.pillars_post["Reservoir"] < pp.pillars_prior["Reservoir"]
+    # Headline equals the 8-outcome posterior (unchanged by the channel split).
+    assert pp.pos_post == pytest.approx(post.posterior_pg, abs=1e-12)
