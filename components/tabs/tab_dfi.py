@@ -79,6 +79,12 @@ def _render_dfi_tab(ctx) -> None:
         "</span></div>",
         unsafe_allow_html=True,
     )
+    st.caption(
+        "Single-segment prospect only (*segment* is a GeoX term). E-POS does not model "
+        "multi-segment prospects or inter-segment DFI correlation — the single-segment "
+        "Bayes used here is standard prior art; no patent claim is practised. "
+        "▸ details: **Theory & Guide → The maths → Pillar-resolved DFI**."
+    )
 
     _policy_warn = st.session_state.get("_dfi_policy_warning")
     if _policy_warn:

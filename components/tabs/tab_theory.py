@@ -1096,6 +1096,69 @@ For **ESL attribution** there are two modes:
   then redistributing — useful when you want each pillar's defensible range to remain meaningful after the update.
 """)
 
+    with _tab_maths.expander("Pillar-resolved DFI — which pillar does the anomaly move? (GeoX / Martinelli)", expanded=False):
+        st.markdown(r"""
+A single likelihood ratio R moves the **headline** P(G, ESL), but it hides *where* the
+update lands. A DFI is a **fluid** indicator: it can only sense (a) whether a reservoir
+exists and (b) what fluid fills it. It can **never** tell which of charge / trap /
+retention failed. So the most a DFI can resolve is **two geological channels**:
+
+| Channel | E-POS pillars |
+|---|---|
+| **Reservoir** | Reservoir (whole pillar) |
+| **HC-system** | Charge · Closure · Retention (combined — never separable by a DFI) |
+
+#### The outcome tree (single segment)
+
+```
+   Reservoir present (P_res):  HC          → L_HC        SUCCESS
+                               brine/LSG   → L_fluidfail FLUID failure
+   Reservoir absent (1−P_res): non-reservoir → L_nonres  RESERVOIR failure
+```
+
+The **fluid** update is a clean likelihood ratio $L_{HC}/L_{fluidfail}$ acting on the
+combined Charge·Closure·Retention. The **reservoir** update is *coupled* — it compares
+the non-reservoir curve against the *whole* reservoir-present branch — so the two cannot
+be done as independent 1-D steps. The correct device is a **joint update over the three
+leaves**, from which the pillar marginals fall out (exactly GeoX's "DFI modified risk").
+
+Two design choices make it consistent with ESL:
+- **Residual HC-system prior:** $P_{hc} := P(G,ESL)/P_{res}$, so $P_{res}\cdot P_{hc}$
+  reconstructs the headline exactly (no drift, no double-counting of stance/discernibility).
+- **In-group split (Martinelli rule):** the updated HC-system marginal is shared back onto
+  Charge / Closure / Retention by **preserving their pre-DFI log-proportions**.
+
+The **failure split** (fluid-failure vs non-reservoir) is governed by the **Reservoir
+pillar** $(1-P_{res})$, *not* a free weight — so for the pillar-resolved path the joint
+engine is the source of truth for the headline too.
+
+#### Why this matters — a supportive anomaly can still *degrade* reservoir
+
+Worked example (the patent's, 3-leaf reduction): prior P(G)=**7.2%**, P_res=**0.50**,
+likelihoods $L_{HC}=0.8,\ L_{fluidfail}=0.3,\ L_{nonres}=0.5$.
+
+> **P(G) rises 7.2% → 13.2%**, yet **Reservoir falls 0.50 → 0.43**.
+
+The anomaly is *partly explained by a possible non-reservoir cause*, so the headline
+up-move masks a reservoir down-move. The aggregate-R view cannot show this — the
+pillar-resolved panel can.
+
+#### Where E-POS applies it
+- **Custom multi-case** → full two-channel attribution (the **DFI Results** and **Result**
+  tabs show the prior→posterior per channel/pillar). Display-only for now: the per-pillar
+  *Overview* table still shows pre-DFI values (a later step will fold the resolved update
+  into the table itself).
+- **DHI-Index (SAAM)** already resolves all four pillars via its richer **8-outcome**
+  Bayes (above), so it is left as-is.
+- **Characteristic / Custom dual-case** are single-curve models → aggregate headline only.
+
+#### Scope (single segment) & IP
+This is the **single-segment** case of US 10,451,762 B2 (Martinelli, Stabell, Langlie;
+GeoX) — standard Bayes + marginalisation. E-POS does **not** implement the patent's novel
+**multi-segment** DFI-dependency-group / reference-DFI correlation method. *"Segment"* is a
+GeoX term; E-POS is single-segment only. **No patent claim is practised.**
+""")
+
     with _tab_maths.expander("Alternative: Characteristic scoring (Simm 2016 + Monigle 2025)", expanded=False):
         st.markdown(
             "The 8-outcome SAAM Bayes above is one of **two** pathways the app supports "
@@ -1726,6 +1789,14 @@ as PDFs with this project for direct consultation.
   folding DHI evidence into POS. **📄 in library**
 - *"DHIs work well for de-risking prospects"* — *GeoExpro* feature. Accessible
   overview of DHI performance statistics. **📄 in library**
+- **Martinelli, G., Stabell, C. & Langlie, E. (2019)** — *Direct Fluid Indicators in
+  Multiple Segment Prospects*, US Patent 10,451,762 B2 (Schlumberger). The GeoX
+  single-segment fluid×reservoir scenario Bayes and the **risk-factor (pillar)
+  marginalisation** behind the **Custom multi-case pillar-attribution** view. Its
+  novel *multi-segment* DFI-dependency / reference-DFI correlation method is **not**
+  implemented (see scope note below).
+- **Martinelli, G. et al. (2012)** — *Dynamic Decision Making for Graphical Models
+  Applied to Oil Exploration* (arXiv). Graphical-model basis cited by the patent.
 
 #### 4 · Characteristic / direct-hydrocarbon-indicator scoring
 - **Monigle, P. et al. (2025)** — *Integrated and improved direct hydrocarbon
@@ -1745,6 +1816,19 @@ as PDFs with this project for direct consultation.
 internal database and is **not** a public reference; only a synthetic placeholder
 ships with E-POS. The shipped pathway is a conceptual model reverse-engineered from
 public presentation material and expects a pure DFI-strength input, not a raw SAAM score.*
+
+#### Scope & intellectual-property note (single-segment only)
+E-POS models a **single-segment** prospect. *"Segment"* is a **GeoX** term for one
+fault/reservoir compartment within a multi-segment prospect. E-POS does **not**
+implement multi-segment prospects, **DFI dependency groups**, a **reference-DFI**
+conditional-probability table, or the inter-segment **correlation parameter *k*** —
+the novel, claimed subject matter of **US 10,451,762 B2**. The single-segment
+fluid×reservoir Bayes and the pillar (risk-factor) marginalisation E-POS uses are
+**standard Bayes' theorem** (prior art). **No patent claim is practised.** *(This is an
+engineering rationale, not legal advice; a commercial release should obtain a
+professional claims review.)* E-POS's separate **attribute-correlation discount ρ**
+is a different axis (correlation across characteristic attributes, not segments) and a
+different mechanism (a design-effect exponent on R), independently derived.
 """)
 
     # ═══════════════════════════════════════════════════════════════════════
