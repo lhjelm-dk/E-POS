@@ -600,50 +600,56 @@ def render_dempster_prototype(
         )
 
 
-def render_pillar_attribution(resolved, *, key: str, compact: bool = False) -> None:
-    """Render the GeoX-style two-channel DFI attribution for a ``ResolvedDfi``.
+def render_pillar_attribution(pp, *, key: str, compact: bool = False) -> None:
+    """Render the GeoX-style two-channel DFI attribution from a ``PostDfiPillars``.
 
-    Pillar-resolved (Custom multi-case): a prior→posterior table for the headline
-    P(G, ESL), the Reservoir channel, and the HC-system (Charge·Closure·Retention,
-    with the three pillars split by log-proportion), plus the opposite-direction
-    callout. Aggregate-only (dual-case / Characteristic): a short note that a single
-    failure curve cannot separate reservoir failure from fluid failure.
+    Pillar-resolved (Custom multi-case / DHI-Index): a prior->posterior table for the
+    headline P(G, ESL), the Reservoir channel, and the HC-system (Charge/Closure/
+    Retention, split by log-proportion), plus the opposite-direction callout.
+    Aggregate-only (dual-case / Characteristic): a short note that a single failure
+    curve cannot separate reservoir failure from fluid failure.
 
-    Display-only: the per-pillar Overview table is *not* modified here (that is the
-    deferred Plan B). Single-segment only — no GeoX multi-segment / correlation-k.
+    Accepts a ``PostDfiPillars`` (a ``ResolvedDfi`` is converted for convenience).
+    Single-segment only -- no GeoX multi-segment / correlation-k.
     """
-    if resolved is None:
+    if pp is None:
         return
+    if not hasattr(pp, "pillars_post"):   # a ResolvedDfi was passed -- convert
+        from logic.dfi_pillar_update import post_pillars_from_resolved
+        pp = post_pillars_from_resolved(pp)
 
-    if not resolved.pillar_resolved:
+    if not pp.pillar_resolved:
         st.caption(
             "ℹ️ **Aggregate update only.** This is a dual-case model (one success vs "
             "one failure curve), so the DFI cannot separate reservoir failure from "
-            "fluid failure — it updates the headline P(G, ESL) but not individual "
+            "fluid failure -- it updates the headline P(G, ESL) but not individual "
             "pillars. Switch the Custom tool to **multi-case** for pillar attribution."
         )
         return
 
-    upd = resolved.update
+    res_prior = pp.pillars_prior.get("Reservoir", 0.0)
+    res_post = pp.pillars_post.get("Reservoir", 0.0)
+    hc_prior = pp.pos_prior / res_prior if res_prior > 1e-12 else 1.0
+    hc_post = pp.pos_post / res_post if res_post > 1e-12 else 1.0
 
-    def _pp(x: float) -> str:
+    def _pp(x):
         return f"{x * 100:.1f}%"
 
-    def _delta(d: float) -> str:
+    def _delta(d):
         col = "#15803d" if d > 1e-9 else ("#b3261e" if d < -1e-9 else "#6b7280")
         arrow = "▲" if d > 1e-9 else ("▼" if d < -1e-9 else "·")
         return f"<span style='color:{col}'>{arrow} {d * 100:+.1f}</span>"
 
     rows = [
-        ("P(G, ESL) — headline", resolved.pos_prior, resolved.pos_post, True),
-        ("Reservoir (whole pillar)", upd.p_res_prior, upd.p_res_post, False),
-        ("HC-system (Charge·Closure·Retention)", upd.p_hc_prior, upd.p_hc_post, False),
+        ("P(G, ESL) — headline", pp.pos_prior, pp.pos_post, True),
+        ("Reservoir (whole pillar)", res_prior, res_post, False),
+        ("HC-system (Charge·Closure·Retention)", hc_prior, hc_post, False),
     ]
     for name in ("Charge", "Closure", "Retention"):
-        pr = resolved.hc_pillars_prior.get(name)
-        po = resolved.hc_pillars_post.get(name)
+        pr = pp.pillars_prior.get(name)
+        po = pp.pillars_post.get(name)
         if pr is not None and po is not None:
-            rows.append((f" ↳ {name}", pr, po, False))
+            rows.append((f" ↳ {name}", pr, po, False))
 
     body = "".join(
         f"<tr style=\"{'font-weight:600;background:#f3f4f6' if hl else ''}\">"
@@ -664,8 +670,8 @@ def render_pillar_attribution(resolved, *, key: str, compact: bool = False) -> N
         unsafe_allow_html=True,
     )
 
-    if upd.opposes_headline:
-        if upd.pos_post > upd.pos_prior:
+    if pp.opposes_headline:
+        if pp.pos_post > pp.pos_prior:
             st.warning(
                 "⚠️ **The anomaly raises POS but *lowers* the Reservoir marginal.** "
                 "Part of the DFI is explained by a possible reservoir-failure cause, so "
@@ -681,7 +687,7 @@ def render_pillar_attribution(resolved, *, key: str, compact: bool = False) -> N
     if not compact:
         st.caption(
             "Reservoir-driven failure split (GeoX / Martinelli single-segment). "
-            "Display-only — the per-pillar Overview table is unchanged (that update is "
-            "the deferred Plan B). Single-segment prospect only; no multi-segment / "
-            "correlation method is used (no patent claim practised)."
+            "Parallel **post-DFI** view -- the per-pillar prior *inputs* are unchanged. "
+            "Single-segment prospect only; no multi-segment / correlation method is used "
+            "(no patent claim practised)."
         )

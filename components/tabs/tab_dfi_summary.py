@@ -204,6 +204,14 @@ def _render_dfi_summary(ctx) -> None:
         "divergence between ESL and Classic posteriors is your data-quality signal."
     )
 
+    # ── Channel-resolved post-DFI pillars (Plan B; parallel — prior inputs unchanged) ──
+    from logic.dfi_context import dfi_post_pillars as _dfi_post_pillars
+    _pp = _dfi_post_pillars(ctx)
+    if _pp is not None and getattr(_pp, "pillar_resolved", False):
+        st.markdown("##### Post-DFI pillar attribution (channel-resolved, GeoX-style)")
+        from components.dfi_shared import render_pillar_attribution
+        render_pillar_attribution(_pp, key="finalpos_dfi_attr")
+
     st.divider()
 
     # ── Top movers — pillar slots with biggest absolute DFI impact (Classic table) ──
@@ -472,6 +480,12 @@ def _render_dfi_summary_custom(ctx) -> None:
     esl_prior_pg  = _esl_rollup_prior_at_w(ctx, w_cur)
     post_esl_pg     = simm_bayes_posterior(esl_prior_pg,           r_val)
     post_classic_pg = simm_bayes_posterior(prior_classic.prior_pg, r_val)
+    # Multi-case: the ESL headline is the reservoir-driven joint update (keep bar,
+    # narrative and per-pillar block consistent).
+    from logic.dfi_context import dfi_post_pillars as _dfi_post_pillars
+    _pp_custom = _dfi_post_pillars(ctx)
+    if _pp_custom is not None and getattr(_pp_custom, "pillar_resolved", False):
+        post_esl_pg = _pp_custom.pos_post
     delta_esl     = post_esl_pg     - esl_prior_pg
     delta_classic = post_classic_pg - prior_classic.prior_pg
 
@@ -547,6 +561,12 @@ def _render_dfi_summary_custom(ctx) -> None:
         f"P(G | DFI, ESL) {post_esl_pg*100:.1f}%. The Simm 2-state update collapses the "
         "geological Bel/Pl envelope onto a point estimate given R."
     )
+
+    # ── Channel-resolved post-DFI pillars (Plan B; parallel — prior inputs unchanged) ──
+    if _pp_custom is not None and getattr(_pp_custom, "pillar_resolved", False):
+        st.markdown("##### Post-DFI pillar attribution (channel-resolved, GeoX-style)")
+        from components.dfi_shared import render_pillar_attribution
+        render_pillar_attribution(_pp_custom, key="finalpos_custom_attr")
 
     # ── Decision narrative (shared 2-state generator) ──
     st.markdown("##### Decision narrative")
