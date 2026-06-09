@@ -195,3 +195,63 @@ def test_characteristic_is_aggregate_only():
     assert ch.pillar_resolved is False
     assert ch.r == pytest.approx(1.8)
     assert "Characteristic" in ch.method_label
+
+
+# ── DHI-Index (SAAM) adapter ─────────────────────────────────────────────────
+class _StubClass:
+    def __init__(self, mean, sd):
+        self.mean = mean
+        self._sd = sd
+    def sd(self, _mode):
+        return self._sd
+
+
+class _StubCalib:
+    """Minimal calibration carrying the SAAM class schema for adapter tests."""
+    def __init__(self):
+        self.classes = {
+            "Success": _StubClass(0.30, 0.25),
+            "Oil": _StubClass(0.35, 0.25),
+            "Gas": _StubClass(0.20, 0.25),
+            "OilGas": _StubClass(0.30, 0.25),
+            "H2O_failure": _StubClass(-0.30, 0.25),
+            "LSG_failure": _StubClass(0.00, 0.30),
+            "Reservoir_failure": _StubClass(-0.10, 0.25),
+        }
+
+
+def test_dhi_index_adapter_is_pillar_resolved_and_maps_reservoir():
+    from logic.dfi_orchestration import dhi_index_channel_likelihoods, geox_pdfi_value
+    calib = _StubCalib()
+    ch = dhi_index_channel_likelihoods(7.0, calib, "sd_calculated",
+                                       fluid_type="Success",
+                                       fluid_weights={"water": 0.80, "lsg": 0.20, "other": 0.0})
+    assert ch.pillar_resolved is True
+    # L_nonres comes straight from the Reservoir_failure class.
+    assert ch.l_nonres == pytest.approx(geox_pdfi_value(7.0, calib, "Reservoir_failure", "sd_calculated"))
+    # L_HC is the chosen success class.
+    assert ch.l_hc == pytest.approx(geox_pdfi_value(7.0, calib, "Success", "sd_calculated"))
+    # L_fluidfail is the weighted blend of H2O + LSG.
+    v_wat = geox_pdfi_value(7.0, calib, "H2O_failure", "sd_calculated")
+    v_lsg = geox_pdfi_value(7.0, calib, "LSG_failure", "sd_calculated")
+    assert ch.l_fluidfail == pytest.approx(0.80 * v_wat + 0.20 * v_lsg)
+    assert ch.method_label == "Modified DHI Index (SAAM)"
+
+
+def test_dhi_index_other_weight_shares_lsg():
+    from logic.dfi_orchestration import dhi_index_channel_likelihoods, geox_pdfi_value
+    calib = _StubCalib()
+    ch = dhi_index_channel_likelihoods(7.0, calib, "sd_calculated", fluid_type="Success",
+                                       fluid_weights={"water": 0.0, "lsg": 0.0, "other": 1.0})
+    v_lsg = geox_pdfi_value(7.0, calib, "LSG_failure", "sd_calculated")
+    assert ch.l_fluidfail == pytest.approx(v_lsg)  # 'other' shares LSG_failure
+
+
+def test_dhi_index_resolves_through_engine():
+    from logic.dfi_orchestration import dhi_index_channel_likelihoods
+    calib = _StubCalib()
+    ch = dhi_index_channel_likelihoods(7.0, calib, "sd_calculated")
+    priors = {"Charge": 0.6, "Closure": 0.5, "Retention": 0.8}
+    res = resolve_dfi(pos=0.25, p_res=0.70, channels=ch, hc_pillar_priors=priors)
+    assert res.pillar_resolved is True
+    assert res.p_res_post * res.update.p_hc_post == pytest.approx(res.pos_post, abs=1e-12)

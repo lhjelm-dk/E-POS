@@ -22,6 +22,33 @@ def geox_pdfi_value(dhi_index: float, calib, class_name: str, sd_mode: str) -> f
     return gaussian_pdf(dhi_index / 100.0, cl.mean, cl.sd(sd_mode)) * _GEOX_PDFI_SCALE
 
 
+def dhi_index_channel_likelihoods(dhi_index: float, calib, sd_mode: str,
+                                  fluid_type: str = "Success",
+                                  fluid_weights: dict | None = None):
+    """Express the Modified DHI Index (SAAM) evidence in the shared channel language.
+
+    The SAAM class names encode the channels directly: the success class
+    (``fluid_type`` in Success/Oil/Gas/OilGas) is L_HC; the ``Reservoir_failure``
+    class is the reservoir-failure channel (L_nonres); ``H2O_failure`` and
+    ``LSG_failure`` are blended by the fluid-failure weights P(fluid|failure) into
+    the fluid-failure channel (``other`` shares the LSG class). This makes the
+    method pillar-resolved (3-channel), parallel to the Custom multi-case tool.
+    """
+    from logic.dfi_pillar_update import ChannelLikelihoods
+    fluid_weights = fluid_weights or {"water": 0.80, "lsg": 0.20, "other": 0.00}
+    v_hc = geox_pdfi_value(dhi_index, calib, fluid_type, sd_mode)
+    v_wat = geox_pdfi_value(dhi_index, calib, "H2O_failure", sd_mode)
+    v_lsg = geox_pdfi_value(dhi_index, calib, "LSG_failure", sd_mode)
+    v_res = geox_pdfi_value(dhi_index, calib, "Reservoir_failure", sd_mode)
+    w_w = max(float(fluid_weights.get("water", 0.0)), 0.0)
+    w_l = max(float(fluid_weights.get("lsg", 0.0)), 0.0)
+    w_o = max(float(fluid_weights.get("other", 0.0)), 0.0)   # 'other' shares LSG_failure
+    tot = w_w + w_l + w_o
+    l_ff = (w_w * v_wat + (w_l + w_o) * v_lsg) / tot if tot > 0 else v_wat
+    return ChannelLikelihoods(l_hc=v_hc, l_fluidfail=l_ff, l_nonres=v_res,
+                              method_label="Modified DHI Index (SAAM)")
+
+
 def _set_pillar_combined(pillars, pillar_name: str, target: float):
     """Return a new PriorPillars with one pillar's combined Pg set to `target`.
 
