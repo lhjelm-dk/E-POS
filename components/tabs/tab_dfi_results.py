@@ -279,6 +279,13 @@ def _render_dfi_results_custom(ctx) -> None:
     post_esl_pg     = simm_bayes_posterior(esl_prior_pg,           r_val)
     post_classic_pg = simm_bayes_posterior(prior_classic.prior_pg, r_val)
 
+    # Pillar-resolved (multi-case): the headline ESL posterior comes from the joint
+    # engine (reservoir-driven failure split), not the grouped-R two-state value.
+    from logic.dfi_context import resolve_dfi_custom
+    _resolved = resolve_dfi_custom(ctx)
+    if _resolved is not None and _resolved.pillar_resolved:
+        post_esl_pg = _resolved.pos_post
+
     de = (post_esl_pg     - esl_prior_pg)           * 100
     dc = (post_classic_pg - prior_classic.prior_pg) * 100
 
@@ -292,13 +299,18 @@ def _render_dfi_results_custom(ctx) -> None:
     with c3: st.metric("P(G | DFI, ESL)", f"{post_esl_pg*100:.1f}%", delta=f"{de:+.1f} pp")
     with c4: st.metric("P(G | DFI, Classic)", f"{post_classic_pg*100:.1f}%", delta=f"{dc:+.1f} pp")
 
+    # ── Pillar-resolved DFI attribution (multi-case) / aggregate note (dual-case) ──
+    st.markdown("##### DFI pillar attribution (GeoX-style, single-segment)")
+    from components.dfi_shared import render_pillar_attribution
+    render_pillar_attribution(_resolved, key="dfi_custom_attr")
+
     st.info(
-        "In custom mode the posterior comes from Simm's 2-state Bayes (R applied to the "
-        "geological prior). R is read off your user-defined bell curves on the DFI Setup "
-        "sub-tab. The SAAM-specific decomposition (per-pillar attribution, fluid-mix sweep, "
-        "GeoX hand-off) is not available, but the **DHI-strength sweep** and **iso-R "
-        "prior→posterior map** below are the custom-tool analogues of the SAAM sensitivity "
-        "and iso-DHI plots."
+        "In custom mode the posterior comes from Bayes on your user-defined bell curves "
+        "(DFI Setup sub-tab). **Multi-case** resolves the update onto the Reservoir pillar "
+        "and the combined Charge·Closure·Retention (HC-system) — the headline ESL posterior "
+        "above is the reservoir-driven joint update. **Dual-case** updates only the headline. "
+        "The **DHI-strength sweep** and **iso-R prior→posterior map** below are the custom-tool "
+        "analogues of the SAAM sensitivity and iso-DHI plots."
     )
 
     st.markdown("##### Posterior trajectory — P(G) vs stance w")

@@ -598,3 +598,90 @@ def render_dempster_prototype(
             "'DFI as a line of evidence' view; the production pathway still uses the Simm "
             "point update (+ the Bel/Pl envelope on the overview table)."
         )
+
+
+def render_pillar_attribution(resolved, *, key: str, compact: bool = False) -> None:
+    """Render the GeoX-style two-channel DFI attribution for a ``ResolvedDfi``.
+
+    Pillar-resolved (Custom multi-case): a prior→posterior table for the headline
+    P(G, ESL), the Reservoir channel, and the HC-system (Charge·Closure·Retention,
+    with the three pillars split by log-proportion), plus the opposite-direction
+    callout. Aggregate-only (dual-case / Characteristic): a short note that a single
+    failure curve cannot separate reservoir failure from fluid failure.
+
+    Display-only: the per-pillar Overview table is *not* modified here (that is the
+    deferred Plan B). Single-segment only — no GeoX multi-segment / correlation-k.
+    """
+    if resolved is None:
+        return
+
+    if not resolved.pillar_resolved:
+        st.caption(
+            "ℹ️ **Aggregate update only.** This is a dual-case model (one success vs "
+            "one failure curve), so the DFI cannot separate reservoir failure from "
+            "fluid failure — it updates the headline P(G, ESL) but not individual "
+            "pillars. Switch the Custom tool to **multi-case** for pillar attribution."
+        )
+        return
+
+    upd = resolved.update
+
+    def _pp(x: float) -> str:
+        return f"{x * 100:.1f}%"
+
+    def _delta(d: float) -> str:
+        col = "#15803d" if d > 1e-9 else ("#b3261e" if d < -1e-9 else "#6b7280")
+        arrow = "▲" if d > 1e-9 else ("▼" if d < -1e-9 else "·")
+        return f"<span style='color:{col}'>{arrow} {d * 100:+.1f}</span>"
+
+    rows = [
+        ("P(G, ESL) — headline", resolved.pos_prior, resolved.pos_post, True),
+        ("Reservoir (whole pillar)", upd.p_res_prior, upd.p_res_post, False),
+        ("HC-system (Charge·Closure·Retention)", upd.p_hc_prior, upd.p_hc_post, False),
+    ]
+    for name in ("Charge", "Closure", "Retention"):
+        pr = resolved.hc_pillars_prior.get(name)
+        po = resolved.hc_pillars_post.get(name)
+        if pr is not None and po is not None:
+            rows.append((f" ↳ {name}", pr, po, False))
+
+    body = "".join(
+        f"<tr style=\"{'font-weight:600;background:#f3f4f6' if hl else ''}\">"
+        f"<td style='padding:3px 10px'>{nm}</td>"
+        f"<td style='padding:3px 10px;text-align:right'>{_pp(pri)}</td>"
+        f"<td style='padding:3px 10px;text-align:right'>{_pp(pos)}</td>"
+        f"<td style='padding:3px 10px;text-align:right'>{_delta(pos - pri)}</td></tr>"
+        for nm, pri, pos, hl in rows
+    )
+    st.markdown(
+        "<table style='border-collapse:collapse;font-size:0.9rem;width:100%'>"
+        "<thead><tr style='border-bottom:1px solid #d1d5db;color:#6b7280'>"
+        "<th style='text-align:left;padding:3px 10px'>Channel / pillar</th>"
+        "<th style='text-align:right;padding:3px 10px'>Prior</th>"
+        "<th style='text-align:right;padding:3px 10px'>Posterior</th>"
+        "<th style='text-align:right;padding:3px 10px'>Δ (pp)</th></tr></thead>"
+        f"<tbody>{body}</tbody></table>",
+        unsafe_allow_html=True,
+    )
+
+    if upd.opposes_headline:
+        if upd.pos_post > upd.pos_prior:
+            st.warning(
+                "⚠️ **The anomaly raises POS but *lowers* the Reservoir marginal.** "
+                "Part of the DFI is explained by a possible reservoir-failure cause, so "
+                "the headline up-move masks a reservoir down-move. The aggregate-R view "
+                "cannot show this."
+            )
+        else:
+            st.warning(
+                "⚠️ **The anomaly lowers POS but *raises* the Reservoir marginal.** "
+                "The reservoir looks more likely present even as the overall chance falls."
+            )
+
+    if not compact:
+        st.caption(
+            "Reservoir-driven failure split (GeoX / Martinelli single-segment). "
+            "Display-only — the per-pillar Overview table is unchanged (that update is "
+            "the deferred Plan B). Single-segment prospect only; no multi-segment / "
+            "correlation method is used (no patent claim practised)."
+        )

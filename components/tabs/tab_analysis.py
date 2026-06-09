@@ -103,6 +103,16 @@ def _render_geo_result(ctx) -> None:
             "Both are the **geological prior** (before any DFI update). "
             "▸ Why they differ: **Theory & Guide → \"Why P(G, ESL) ≠ P(G, Classic)\"**."
         )
+
+        # ── DFI pillar attribution (Custom multi-case only; compact) ──
+        from logic.dfi_context import resolve_dfi_custom
+        _res = resolve_dfi_custom(ctx)
+        if _res is not None and _res.pillar_resolved:
+            st.markdown("###### DFI pillar attribution — where the update lands")
+            from components.dfi_shared import render_pillar_attribution
+            render_pillar_attribution(_res, key="analysis_dfi_attr", compact=True)
+            st.caption("Full view + sweeps on **Bayesian DFI Update → Results**.")
+
         st.divider()
 
 

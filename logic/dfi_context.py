@@ -124,6 +124,34 @@ def esl_rollup_prior_at_w(ctx, w: float) -> float:
     return policy_pos(tf, ta, w)
 
 
+def resolve_dfi_custom(ctx):
+    """Pillar-resolved DFI result for the **Custom R tool** at current stance.
+
+    Returns a ``ResolvedDfi`` (pillar-resolved for multi-case, aggregate-only for
+    dual-case) or ``None`` when the active method is not the Custom tool. The
+    Reservoir prior is the Reservoir-pillar marginal; the headline prior is the
+    ESL mass-rollup ``P(G, ESL)``; the HC-system pillars are Charge / Closure /
+    Retention marginals (used for the log-proportion split). DHI-Index keeps its
+    own richer 8-outcome attribution and is intentionally not routed here.
+    """
+    if st.session_state.get("dfi_source") != "custom":
+        return None
+    from logic.dfi_custom import custom_config_from_state, custom_channel_likelihoods
+    from logic.dfi_pillar_update import resolve_dfi
+    w = ctx.uncertainty_weight
+    pos = esl_rollup_prior_at_w(ctx, w)
+    pp = esl_prior_pillars_from_ctx_at_w(ctx, w)
+    p_res = pp.reservoir_play * pp.reservoir_cond
+    hc_priors = {
+        "Charge":    pp.charge_play * pp.charge_cond,
+        "Closure":   pp.trap_play * pp.trap_cond,        # PriorPillars uses trap_* for Closure
+        "Retention": pp.retention_play * pp.retention_cond,
+    }
+    cfg = custom_config_from_state(st.session_state)
+    ch = custom_channel_likelihoods(cfg)
+    return resolve_dfi(pos, p_res, ch, hc_priors)
+
+
 def classic_prior_pillars_from_ctx(ctx, w: float | None = None):
     """Build ``PriorPillars`` from ctx using Classic per-pillar Pgs at given stance.
 
