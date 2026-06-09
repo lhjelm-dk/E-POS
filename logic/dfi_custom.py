@@ -284,5 +284,35 @@ def custom_config_from_state(state) -> CustomRConfig:
             cases[k] = no;  weights[k] = 1.0
     return CustomRConfig(multicase=multicase, slider=slider, cases=cases, weights=weights)
 
+def _weighted_mix_pdf(cfg: "CustomRConfig", keys: tuple[str, ...]) -> float:
+    """Weight-blended P(DFI|case) density over ``keys`` at the current slider.
+    Falls back to a plain mean if all weights are zero (matches the GeoX hand-off)."""
+    x = cfg.slider
+    w = {k: max(cfg.weights.get(k, 0.0), 0.0) for k in keys}
+    pdfs = {k: cfg.cases[k].pdf(x) for k in keys}
+    tot = sum(w.values())
+    if tot > 0:
+        return sum(w[k] * pdfs[k] for k in keys) / tot
+    return sum(pdfs.values()) / len(keys) if keys else 0.0
+
+
+def custom_channel_likelihoods(cfg: "CustomRConfig"):
+    """Express a Custom-tool config in the shared channel language.
+
+    Multi-case → 3 channels (pillar-resolved): success-mix, fluid-failure-mix, and
+    the dedicated ``non_reservoir`` curve as the reservoir-failure channel.
+    Dual-case → aggregate-only (one HC vs one No-HC curve cannot separate reservoir).
+    """
+    from logic.dfi_pillar_update import ChannelLikelihoods, aggregate_channels
+    if not cfg.multicase:
+        return aggregate_channels(cfg.r, "Custom R tool — dual-case")
+    return ChannelLikelihoods(
+        l_hc=_weighted_mix_pdf(cfg, SUCCESS_KEYS),
+        l_fluidfail=_weighted_mix_pdf(cfg, FLUID_FAILURE_KEYS),
+        l_nonres=cfg.cases["non_reservoir"].pdf(cfg.slider),
+        method_label="Custom R tool — multi-case",
+    )
+
+
 # ``simm_rule_of_thumb`` and ``SIMM_R_BANDS`` are imported from ``logic.dfi_simm``
 # above (canonical home, shared with the characteristic pathway).

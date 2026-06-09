@@ -5,6 +5,14 @@
 1. Implement **Plan A** (attribution read-out) now; **Plan B** (overwrite pillar values everywhere) is deferred — see §9.
 2. The DFI reservoir signal updates the **whole Reservoir pillar** (presence + quality lumped).
 3. **Dual-case methods** (Characteristic / Custom-dual) are **aggregate-only** by physical necessity.
+4. **Failure split is reservoir-driven.** The split between fluid-failure (reservoir
+   present) and non-reservoir failure is governed by the **Reservoir pillar prior**
+   `(1−P_res)`, NOT by a free user weight. For pillar-resolved methods this makes the
+   **engine the source of truth for the headline POS too** — `pos_post` from the joint
+   update replaces the old grouped-`R` posterior. Consequence: the `non_reservoir` user
+   weight is **deprecated for multi-case** (the split comes from `P_res`), and saved
+   prospects may show a slightly different (more correct) DFI posterior that now accounts
+   for the reservoir-failure mode. Document in Theory + changelog.
 
 ---
 

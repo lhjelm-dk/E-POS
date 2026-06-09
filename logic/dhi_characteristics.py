@@ -685,3 +685,13 @@ from logic.dfi_simm import (  # noqa: E402  (re-export after class defs)
     SIMM_RULE_OF_THUMB,
     apply_discernibility as _simm_apply_discernibility,
 )
+
+
+def characteristic_channels(r_char: float):
+    """Express the characteristic (Monigle 2025) evidence in the shared channel
+    language. It is a single success/failure curve pair, so it is **aggregate-only**
+    (a 2-channel model cannot separate reservoir failure from fluid failure) and
+    updates only the headline POS.
+    """
+    from logic.dfi_pillar_update import aggregate_channels
+    return aggregate_channels(r_char, "Characteristic scoring (Monigle 2025)")

@@ -35,6 +35,8 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
+from logic.dfi_simm import simm_bayes_posterior
+
 # The three pillars that make up the HC-system channel, in the canonical order
 # used elsewhere in the app. Reservoir is handled as its own whole pillar.
 HC_SYSTEM_PILLARS: tuple[str, ...] = ("Charge", "Closure", "Retention")
@@ -194,3 +196,94 @@ def redistribute_log_proportion(
         w = logs[k] / total
         out[k] = _clamp01(p_hc_post ** w)
     return out
+
+
+# ── Method-agnostic adapter layer ───────────────────────────────────────────
+# Each DFI method emits a ``ChannelLikelihoods`` describing its evidence in the
+# common 2-/3-channel language. ``resolve_dfi`` then produces a uniform result
+# the UI can render regardless of method.
+
+@dataclass(frozen=True)
+class ChannelLikelihoods:
+    """A method's DFI evidence expressed in channel form.
+
+    ``l_nonres is None`` marks an **aggregate-only** method (a dual-case model with
+    a single failure curve): it physically cannot separate reservoir failure from
+    fluid failure, so it updates only the headline POS. A 3-channel method supplies
+    all three and is pillar-resolved.
+
+    Only likelihood *ratios* matter (any common scale cancels).
+    """
+    l_hc: float
+    l_fluidfail: float
+    l_nonres: float | None
+    method_label: str = ""
+
+    @property
+    def pillar_resolved(self) -> bool:
+        return self.l_nonres is not None
+
+    @property
+    def r(self) -> float:
+        """Aggregate likelihood ratio success vs fluid-failure (for the 2-channel
+        headline and for verbal R bands)."""
+        if self.l_fluidfail <= 0:
+            return float("inf") if self.l_hc > 0 else 0.0
+        return self.l_hc / self.l_fluidfail
+
+
+def aggregate_channels(r: float, method_label: str = "") -> ChannelLikelihoods:
+    """Build an aggregate-only (2-channel) ``ChannelLikelihoods`` from a scalar R.
+    Used by dual-case methods (Characteristic / Custom-dual)."""
+    return ChannelLikelihoods(l_hc=max(0.0, float(r)), l_fluidfail=1.0,
+                              l_nonres=None, method_label=method_label)
+
+
+@dataclass(frozen=True)
+class ResolvedDfi:
+    """Uniform DFI result for the UI, whether or not the method is pillar-resolved."""
+    channels: ChannelLikelihoods
+    pos_prior: float
+    pos_post: float
+    update: PillarUpdateResult | None            # None => aggregate-only
+    p_res_prior: float | None                    # None => aggregate-only
+    p_res_post: float | None
+    hc_pillars_prior: dict[str, float]           # {} when aggregate-only
+    hc_pillars_post: dict[str, float]
+
+    @property
+    def pillar_resolved(self) -> bool:
+        return self.update is not None
+
+
+def resolve_dfi(
+    pos: float,
+    p_res: float,
+    channels: ChannelLikelihoods,
+    hc_pillar_priors: dict[str, float] | None = None,
+) -> ResolvedDfi:
+    """Apply a method's channels to the prior, returning a uniform result.
+
+    Pillar-resolved (3-channel): runs the joint update (reservoir-driven failure
+    split — the engine is the headline source of truth) and redistributes the
+    HC-system marginal across ``hc_pillar_priors`` by log-proportion.
+
+    Aggregate-only (2-channel): updates just the headline via two-state Bayes;
+    pillar marginals are left untouched (and reported as not available).
+    """
+    hc_pillar_priors = hc_pillar_priors or {}
+    if not channels.pillar_resolved:
+        pos_post = simm_bayes_posterior(pos, channels.r)
+        return ResolvedDfi(
+            channels=channels, pos_prior=_clamp01(pos), pos_post=pos_post,
+            update=None, p_res_prior=None, p_res_post=None,
+            hc_pillars_prior=dict(hc_pillar_priors), hc_pillars_post=dict(hc_pillar_priors),
+        )
+    upd = pillar_resolved_update(pos, p_res, channels.l_hc, channels.l_fluidfail, channels.l_nonres)
+    post_pillars = (redistribute_log_proportion(upd.p_hc_post, hc_pillar_priors)
+                    if hc_pillar_priors else {})
+    return ResolvedDfi(
+        channels=channels, pos_prior=upd.pos_prior, pos_post=upd.pos_post,
+        update=upd, p_res_prior=upd.p_res_prior, p_res_post=upd.p_res_post,
+        hc_pillars_prior=dict(hc_pillar_priors), hc_pillars_post=post_pillars,
+    )

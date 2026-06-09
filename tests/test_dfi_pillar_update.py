@@ -13,7 +13,12 @@ from logic.dfi_pillar_update import (
     pillar_resolved_update,
     redistribute_log_proportion,
     HC_SYSTEM_PILLARS,
+    ChannelLikelihoods,
+    aggregate_channels,
+    resolve_dfi,
 )
+from logic.dfi_custom import custom_config_from_state, custom_channel_likelihoods
+from logic.dhi_characteristics import characteristic_channels
 
 
 # A spread of non-degenerate scenarios: (pos, p_res, l_hc, l_fluidfail, l_nonres)
@@ -123,3 +128,70 @@ def test_redistribution_all_ones_splits_equally():
 
 def test_hc_system_pillars_constant():
     assert HC_SYSTEM_PILLARS == ("Charge", "Closure", "Retention")
+
+
+# ── Adapter layer: ChannelLikelihoods / resolve_dfi ──────────────────────────
+def test_aggregate_channels_is_not_pillar_resolved():
+    ch = aggregate_channels(2.5, "Characteristic")
+    assert ch.pillar_resolved is False
+    assert ch.l_nonres is None
+    assert ch.r == pytest.approx(2.5)
+
+
+def test_resolve_dfi_aggregate_matches_two_state():
+    ch = aggregate_channels(2.5, "x")
+    res = resolve_dfi(pos=0.30, p_res=0.80, channels=ch, hc_pillar_priors={"Charge": 0.6})
+    assert res.pillar_resolved is False
+    assert res.update is None
+    assert res.pos_post == pytest.approx(simm_bayes_posterior(0.30, 2.5), abs=1e-12)
+    # Pillars left untouched for aggregate-only methods.
+    assert res.hc_pillars_post == res.hc_pillars_prior
+    assert res.p_res_post is None
+
+
+def test_resolve_dfi_pillar_resolved_is_consistent():
+    ch = ChannelLikelihoods(l_hc=1.4, l_fluidfail=0.7, l_nonres=1.0, method_label="m")
+    priors = {"Charge": 0.6, "Closure": 0.5, "Retention": 0.8}
+    res = resolve_dfi(pos=0.30, p_res=0.80, channels=ch, hc_pillar_priors=priors)
+    assert res.pillar_resolved is True
+    # Headline equals the engine's joint success leaf (reservoir-driven).
+    assert res.pos_post == pytest.approx(res.update.pos_post, abs=1e-12)
+    # Product of redistributed HC pillars == HC-system marginal.
+    assert math.prod(res.hc_pillars_post.values()) == pytest.approx(res.update.p_hc_post, abs=1e-9)
+    # Reservoir * HC-system == headline.
+    assert res.p_res_post * res.update.p_hc_post == pytest.approx(res.pos_post, abs=1e-12)
+
+
+# ── Custom-tool adapter ──────────────────────────────────────────────────────
+def test_custom_dual_is_aggregate_only():
+    cfg = custom_config_from_state({"dfi_custom_multicase": False})
+    ch = custom_channel_likelihoods(cfg)
+    assert ch.pillar_resolved is False
+    assert "dual" in ch.method_label.lower()
+
+
+def test_custom_multi_is_pillar_resolved_with_three_channels():
+    cfg = custom_config_from_state({"dfi_custom_multicase": True})
+    ch = custom_channel_likelihoods(cfg)
+    assert ch.pillar_resolved is True
+    assert ch.l_nonres is not None and ch.l_nonres > 0.0
+    assert ch.l_hc > 0.0 and ch.l_fluidfail > 0.0
+    assert "multi" in ch.method_label.lower()
+
+
+def test_custom_multi_default_success_mix_beats_oil_only():
+    # Sanity: the success channel is the weighted mix, not the oil curve alone.
+    from logic.dfi_custom import CASE_DEFAULTS, CustomCase
+    cfg = custom_config_from_state({"dfi_custom_multicase": True})
+    ch = custom_channel_likelihoods(cfg)
+    p1, p99 = CASE_DEFAULTS["oil"]
+    oil_only = CustomCase("oil", "oil", p1, p99).pdf(cfg.slider)
+    assert ch.l_hc != pytest.approx(oil_only, abs=1e-9)
+
+
+# ── Characteristic adapter ───────────────────────────────────────────────────
+def test_characteristic_is_aggregate_only():
+    ch = characteristic_channels(1.8)
+    assert ch.pillar_resolved is False
+    assert ch.r == pytest.approx(1.8)
+    assert "Characteristic" in ch.method_label
