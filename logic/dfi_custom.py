@@ -13,7 +13,7 @@ The user defines two probability-density curves over a common DHI-strength axis
                       tends to look on the DHI
 
 Each curve is a normal distribution specified by its **1st and 99th percentiles**
-(P1, P99) — i.e. the user gives a plausible min and max, and the mean/SD follow:
+(P1, P99), i.e. the user gives a plausible min and max, and the mean/SD follow:
 
     mean = (P1 + P99) / 2
     sd   = (P99 − P1) / (2·Φ⁻¹(0.99)) = (P99 − P1) / 4.65269…
@@ -128,7 +128,7 @@ DEFAULT_NOHC = CustomCase(
 # ── Multi-case extension ────────────────────────────────────────────────────
 # Six named outcomes, split into a SUCCESS group (hydrocarbons present) and a
 # FAILURE group (no producible HC). By default every success case shares one
-# curve and every failure case shares one curve — so multi-case reduces exactly
+# curve and every failure case shares one curve, so multi-case reduces exactly
 # to the simple HC vs No-HC two-state until the user unlinks a case.
 SUCCESS_KEYS: tuple[str, ...] = ("oil", "gas", "oil_gas")
 # Failure side mirrors the DHI-Index decomposition: three *fluid* failure modes
@@ -231,7 +231,7 @@ class CustomRConfig:
     the current DHI-strength reading. ``cases``/``weights`` are keyed by the same
     SUCCESS/FAILURE keys in both modes (in linked mode every success key shares the
     HC curve and every failure key the No-HC curve), so :func:`grouped_r` evaluates
-    R identically for both — and reduces to :func:`custom_r` in the linked case."""
+    R identically for both, and reduces to :func:`custom_r` in the linked case."""
 
     multicase: bool
     slider: float

@@ -408,7 +408,7 @@ def _render_geo_diagnostics(ctx) -> None:
         )
         st.caption(
             "The **straight** black total is ESL's signature: masses are combined across "
-            "pillars first, and Policy P is applied once at the end — so the total is *not* "
+            "pillars first, and Policy P is applied once at the end, so the total is *not* "
             "the product of the (curved) per-pillar lines (that would be Classic). "
             "▸ Full geometry in **Theory & Guide → \"Why P(G, ESL) ≠ P(G, Classic)\"**."
         )

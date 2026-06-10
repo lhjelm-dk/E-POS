@@ -159,9 +159,9 @@ def _verdict(bel_y_pct: float, cur_y_pct: float, pl_y_pct: float) -> str:
     if pl_y_pct < 0:
         return "RISK-DRIVEN — even at most optimistic stance, compounding risk in two weakest pillars."
     if cur_y_pct >= 0:
-        return ("BALANCED at current stance — but the diagnosis flips to risk-driven at the "
+        return ("BALANCED at current stance, but the diagnosis flips to risk-driven at the "
                 "pessimistic end of the ESL range. Data quality matters.")
-    return ("ATTENTION at current stance — but the diagnosis flips to robust at the optimistic "
+    return ("ATTENTION at current stance, but the diagnosis flips to robust at the optimistic "
             "end of the ESL range. Data quality matters.")
 
 
@@ -571,7 +571,7 @@ def render_sensitivity_tornado(
                 # the "aggregate-equivalent" override that matches the baseline.
                 # Practical approach: pass the SUB-ELEMENT extremes ("all sub-elements
                 # at white-against" and "all at white-for") via successive cond_sub
-                # overrides — but a simpler proxy is to vary an aggregate (sf, sa)
+                # overrides, but a simpler proxy is to vary an aggregate (sf, sa)
                 # equal to the average of sub-element extremes.
                 _sf_sum_lo, _sa_sum_lo = 0.0, 0.0
                 _sf_sum_hi, _sa_sum_hi = 0.0, 0.0

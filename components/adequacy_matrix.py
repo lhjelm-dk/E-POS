@@ -61,7 +61,7 @@ def _adequacy_table_html() -> str:
             val = MATRIX_GRID.get((conf, news))
             if val is None:
                 cells += ("<td style='border:1px solid #444; padding:8px; background:#ffffff; "
-                          "color:#374151; font-style:italic;'>N/A — not valid</td>")
+                          "color:#374151; font-style:italic;'>N/A, not valid</td>")
             else:
                 lo, hi = val
                 bg = cos_color((lo + hi) / 200.0)
@@ -141,7 +141,7 @@ def render_adequacy_matrix_reference() -> None:
     st.markdown(_adequacy_table_html(), unsafe_allow_html=True)
     st.plotly_chart(_adequacy_heatmap_fig(10), use_container_width=True,
                     key="adequacy_matrix_ref_v3")
-    st.caption("Invalid cell (High confidence × Coin Toss) has no colour on the heatmap — see table above.")
+    st.caption("Invalid cell (High confidence × Coin Toss) has no colour on the heatmap; see table above.")
 
 
 def render_adequacy_matrix() -> None:
@@ -217,4 +217,4 @@ def render_adequacy_matrix() -> None:
     with st.expander("2D Adequacy Matrix Plot", expanded=False):
         st.plotly_chart(_adequacy_heatmap_fig(10), use_container_width=True,
                         key="adequacy_matrix_expander_v3")
-        st.caption("Invalid cell (High confidence × Coin Toss) has no colour on the heatmap — see table above.")
+        st.caption("Invalid cell (High confidence × Coin Toss) has no colour on the heatmap; see table above.")

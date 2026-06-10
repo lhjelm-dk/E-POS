@@ -70,7 +70,7 @@ def _render_dfi_setup_custom(ctx) -> None:
                "*shape and separation* of the two curves matter (R is scale-invariant).")
     help_popover("About the DHI-strength scale", (
         "The **DHI strength** scale (−100 … +100) is an **uncalibrated**, relative measure of "
-        "how strong/positive your DFI looks — it carries no physical units. It is read against "
+        "how strong/positive your DFI looks; it carries no physical units. It is read against "
         "the equally **uncalibrated** Success and Failure P(DFI | case) distributions you define "
         "below. Only the *shape and separation* of the two curves matters (R is scale-invariant), "
         "so the −100…100 numbers are arbitrary — unlike the Modified DHI Index (SAAM) pathway, "
@@ -222,7 +222,7 @@ def _render_dfi_setup_custom(ctx) -> None:
     # ── GeoX hand-off — the six P(DFI | case) inputs (parity with the DHI-Index method) ──
     # GeoX has one "Oil/Success" cell but the tool models three success sub-cases
     # (oil / gas / oil+gas). Hand GeoX the *weighted success-mix* density — the same
-    # success likelihood the tool uses for R — not the oil curve alone (which is the
+    # success likelihood the tool uses for R, not the oil curve alone (which is the
     # weakest success sub-case at a weak +DHI and wrongly let a failure case top the
     # table). Falls back to a plain mean if all success weights are zero.
     _w_succ = {k: max(weights.get(k, 0.0), 0.0) for k in SUCCESS_KEYS}
@@ -304,7 +304,7 @@ def _render_dfi_setup_custom(ctx) -> None:
     # Band labels placed *inside* the plot, just inside the right edge and
     # centred on each band (geometric-mean centre because the y-axis is log).
     # NOTE: on a log axis Plotly expects annotation y as log10(value), unlike
-    # shapes which auto-convert — so we pass the log of the geometric-mean centre.
+    # shapes which auto-convert, so we pass the log of the geometric-mean centre.
     for _hi, _lo, _col, _lbl in SIMM_BAND_EDGES:
         figr.add_annotation(xref="paper", x=0.99, xanchor="right",
                             yref="y", y=float(0.5 * np.log10(_hi * _lo)),

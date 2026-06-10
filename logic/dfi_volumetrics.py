@@ -68,7 +68,7 @@ def hcwc_mixture(
 
         combined = (1 − w) · Geo  +  w · DFI
 
-    where ``w = dfi_weight`` is the weight on the DFI-defined volume — i.e. the DHI
+    where ``w = dfi_weight`` is the weight on the DFI-defined volume, i.e. the DHI
     score / SAAM DHI Volume Weight V (Monigle 2025 use the DHI rating directly as the
     blend weight; this is the 68%/32% split in their HCWC figure). A higher V → the
     combined contact follows the (narrow) DFI distribution; a lower V → it reverts to
@@ -119,7 +119,7 @@ def _discernibility_gate(discernibility: str | None) -> str:
         return ("**Low discernibility:** only the *most-likely* volumetric parameters need "
                 "be permissible within the DHI observations; widen the ranges with geology.")
     if d == "absent":
-        return ("**No discernibility:** no geophysical tie required — but the volumes must "
+        return ("**No discernibility:** no geophysical tie required, but the volumes must "
                 "not violate the root cause of the no-discernibility call (e.g. carbonate, "
                 "imaging).")
     return ("Set discernibility on the DFI Setup tab to gate how strictly the volumes must "

@@ -149,7 +149,7 @@ The Italian Flag makes that quality visible. You enter evidence once, and three 
 **Step 1 — Set your stance (Dashboard tab, top)**
 > Choose **w** (0.0 = pessimistic, 0.5 = neutral / recommended, 1.0 = optimistic).
 > This controls how the uncommitted *white* evidence contributes to POS.
-> Use the company default (w = 0.5) unless you have a specific reason to deviate — and document it.
+> Use the company default (w = 0.5) unless you have a specific reason to deviate, and document it.
 
 **Step 2 — Assess the Play pillars (Play tab)**
 > For each pillar (Charge, Closure, Reservoir, Retention):
@@ -186,14 +186,14 @@ estimate is the whole story.
 
 ---
 
-### The independence assumption — and where it breaks
+### The independence assumption, and where it breaks
 
 The classic POS multiplication
 
 $$P(G) = P(\text{Charge}) \times P(\text{Reservoir}) \times P(\text{Closure}) \times P(\text{Retention})$$
 
 is only valid if the pillars are **statistically independent**. In real geology they
-rarely are — they share a common burial, structural and depositional history, so the
+rarely are; they share a common burial, structural and depositional history, so the
 true joint probability can be **higher or lower** than the naive product. Treating
 correlated risks as independent is one of the most common ways a prospect portfolio
 ends up mis-calibrated.
@@ -203,7 +203,7 @@ Risks fall on a spectrum:
 | Type | Example | Consequence for the product rule |
 |------|---------|----------------------------------|
 | **Truly independent** | Charge from an entirely separate kitchen vs. a structural-only closure risk | Product rule is fair |
-| **Partially dependent** | Reservoir *presence* and reservoir *quality* (same depositional system drives both) | Product over-penalises — you risk the same geology twice |
+| **Partially dependent** | Reservoir *presence* and reservoir *quality* (same depositional system drives both) | Product over-penalises; you risk the same geology twice |
 | **Strongly conditional** | Source maturity → expulsion → migration path → trap charge | Must be chained as conditional probabilities, not multiplied as if separate |
 
 ---
@@ -214,7 +214,7 @@ The subtlest error is **semantic overlap** between elements. If "Reservoir prese
 already docks the score for a high-risk depositional setting, and "Reservoir quality"
 then docks it *again* for the same lithological uncertainty, the prospect is penalised
 twice for one underlying fact. The product rule has no way to know the two factors are
-correlated — it just multiplies. Good practice:
+correlated; it just multiplies. Good practice:
 
 - **Define each element by what it adds**, not what it overlaps. Write down the precise
   question each pillar answers so two pillars never answer the same question.
@@ -246,7 +246,7 @@ independent when they share one kitchen **under-represents** the common-cause ri
 - Make the dependency explicit in the **Conditional tab** (ESL-ALL / ESL-ANY / ESL-IPT
   operators) rather than hiding it inside a single fudged number.
 - When in doubt, put the shared uncertainty in **one** element's White mass and reference
-  it from the others' justification text — so the audit trail shows the doubt was counted
+  it from the others' justification text, so the audit trail shows the doubt was counted
   **once**.
 """)
 
@@ -267,7 +267,7 @@ Each risk element is represented by three quantities that must sum to ≤ 1:
 | **S(¬H)** / S_against | Support Against | Fraction of evidence actively contradicting adequacy |
 | **W** = 1 − S_for − S_against | White / uncommitted | Evidence present but unresolved, or simply absent |
 
-If S_for + S_against > 1 the element is **over-committed** (yellow flag). This is not an error — it means
+If S_for + S_against > 1 the element is **over-committed** (yellow flag). This is not an error; it means
 two bodies of evidence are in direct conflict. Document the conflict; it is geologically significant.
 
 ---
@@ -284,12 +284,13 @@ The interval **[Bel, Pl]** = [S_for, 1 − S_against] is the defensible range fo
 The wider the interval, the more uncertain the element.
 
 > **Vocabulary in this app:** use **Policy P** for the per-element point estimate
-> (= S_for + w × White) and **P(...)** for aggregated values — for example
-> **P(G, ESL)** for the total prospect probability via ESL, **P(G, Classic)** for the
-> Rose-style multiplicative result, **P(pillar)** for per-pillar combined chance.
-> The bare term **POS** is intentionally *not* used in this app: it is reserved as
-> the symbol for the future DHI-updated Bayesian-conditioned probability. Until
-> that release ships, all current values are expressed as Policy P or P(...).
+> (= S_for + w × White) and **P(...)** for aggregated values: **P(G, ESL)** for the
+> total prospect probability via ESL, **P(G, Classic)** for the Rose-style
+> multiplicative result, **P(pillar)** for per-pillar combined chance, and
+> **P(G | DFI, ESL)** for the Bayesian DFI-updated posterior. The bare term **POS**
+> appears informally on plot axes and captions as shorthand for whichever point
+> probability the plot shows; the precise reportable quantities are always one of
+> the P(...) forms above.
 
 ---
 
@@ -348,7 +349,7 @@ three:
 
 ### 2 · Why the Italian Flag (not plain probability)
 Classical probability carries a **completeness axiom**: beliefs on the sample space must sum
-to 1, forcing $p(\neg H) = 1 - p(H)$ — there is no way to say *"don't know."* Blockley drops
+to 1, forcing $p(\neg H) = 1 - p(H)$; there is no way to say *"don't know."* Blockley drops
 completeness and represents a belief as an **interval**:
 
 $$p(H) = [\,g,\; 1-r\,] = [\text{Bel},\;\text{Pl}], \qquad p(H)\neq 1-p(\neg H)$$
@@ -399,7 +400,7 @@ release** — useful where one pillar is informed by multiple conflicting lines 
         st.markdown(r"""
 Before the DFI maths, the **one idea** behind every probability update in E-POS:
 
-> **A Bayesian update revises a prior belief in light of new evidence — it does
+> **A Bayesian update revises a prior belief in light of new evidence; it does
 > not replace it.** Strong evidence on top of a weak prior still gives a guarded
 > answer. Evidence acts as a *multiplier on the odds*, not a verdict.
 
@@ -586,11 +587,11 @@ levels lie. Use these to read off the implied Pg for any (POS, C) position.
             "shifts the apex (here, the current base-rate stance)."
         )
         st.markdown(r"""
-### The Risk Matrix idea — and why it looks like ESL
+### The Risk Matrix idea, and why it looks like ESL
 
 Rose's *chance-adequacy* matrix and ExxonMobil's **Risk Matrix → Risking V** both start from the
 same insight E-POS is built on: **separate the favourability of the *known* geology from the
-*confidence* you have in it** — i.e. separate committed evidence (green / red) from the
+*confidence* you have in it**, i.e. separate committed evidence (green / red) from the
 uncommitted **white** band. Plotting *chance of adequacy* against *confidence* (≈ commitment **C**)
 produces a **V**: at low confidence you are pinned near the base rate (the apex); as confidence
 rises you may move out toward the **success (1)** or **failure (0)** corners — the two arms of the V.
@@ -598,7 +599,7 @@ rises you may move out toward the **success (1)** or **failure (0)** corners —
 ### The classic "no-go" zone
 
 In the original Risk Matrix the **upper-centre is forbidden**: *with high confidence you "cannot sit
-on the fence — you must be close to 0 (failure) or 1 (success)."* A confident-but-middling estimate
+on the fence; you must be close to 0 (failure) or 1 (success)."* A confident-but-middling estimate
 was treated as internally inconsistent.
 
 ### Why it is a concept to challenge — ExxonMobil retired it themselves
@@ -606,7 +607,7 @@ was treated as internally inconsistent.
 ExxonMobil's own 2018 review flags the limitation directly: the no-go rule is **"only applicable if
 the state of nature is 0 or 1."** It holds for a **single binary outcome** (this trap either has
 reservoir or it does not), but **not for a probability / success-ratio**: a high-confidence estimate
-of a *chance* can legitimately be **any value in [0, 1]** — you can be highly confident the success
+of a *chance* can legitimately be **any value in [0, 1]**; you can be highly confident the success
 ratio of a play is 67 % (8 of 12 analogues worked). Their slide 11 makes the deeper point — *"why do
 we assume geology is like a coin?"* Knowing nothing, you should revert to the **base rate
 (generally ≠ 0.5)**, not to a neutral 50/50.
@@ -632,7 +633,7 @@ The CAM's **"Risking-V overlay"** toggle draws the V arms, the labelled legacy-n
 > **Base rate as the neutral (forward link).** ExxonMobil's "geology is not a coin" critique applies
 > directly to the default stance **w = 0.5**, which splits the white band 50/50. The **Base-rate
 > stance** (Dashboard → Stance) reverts the white band to the prospect base rate instead —
-> `Policy P = S_for + base_rate · White` — so "knowing nothing" defaults to the base rate, not a coin.
+> `Policy P = S_for + base_rate · White`, so "knowing nothing" defaults to the base rate, not a coin.
 
 ### References
 
@@ -658,7 +659,7 @@ depending on the Classic operator setting.
 
 ### Relationship to ESL
 
-E-POS derives P(G, Classic) **directly from your ESL evidence** — you do not enter separate
+E-POS derives P(G, Classic) **directly from your ESL evidence**; you do not enter separate
 ROSE numbers (unless you explicitly override on the Dashboard). The per-element value used in
 the Classic chain is the **Policy P**:
 
@@ -720,7 +721,7 @@ both with S_for = 0.60, S_against = 0.10, w = 0.5, using a **Product** operator:
 | Residual White | 1 − 0.36 − 0.19 = **0.45** | (absorbed — unavailable) |
 | Final value | 0.36 + 0.5 × 0.45 = **0.585** | 0.75 × 0.75 = **0.563** |
 
-Same data. Same operator intent. **0.585 vs 0.563** — and the gap widens with more elements
+Same data. Same operator intent. **0.585 vs 0.563**, and the gap widens with more elements
 and more White.
 
 ---
@@ -818,7 +819,7 @@ closer the two methods will be. A large spread is a data-quality signal, not an 
 
 **Reporting guidance:** Report both P(G, ESL) and P(G, Classic). Classic is the
 industry-standard language (AAPG/Rose). ESL is the primary method. The difference
-between them is the quantified evidence of your uncertainty — and that belongs
+between them is the quantified evidence of your uncertainty, and that belongs
 in the risk narrative, not hidden in a single number.
 """)
 
@@ -886,7 +887,7 @@ If $L_\text{success} \ll L_\text{failure}$, the posterior moves toward 0.
 
 This is the entire intuition. Everything that follows is just figuring out **what to plug in** for $L_\text{success}$ and $L_\text{failure}$.
 
-> **What is the prior $P(G)$ here?** It is *not* a fresh number — it is the geological result
+> **What is the prior $P(G)$ here?** It is *not* a fresh number; it is the geological result
 > **P(G, ESL)** (or P(G, Classic)), which is itself a **Policy P**: a stance-weighted point
 > $P = S_\text{for} + w\cdot\text{White}$ chosen from inside the Bel/Pl envelope. So the stance $w$
 > is baked into the prior, and the Bayesian update inherits it: a more optimistic stance (higher $w$)
@@ -1131,12 +1132,12 @@ blend slides back toward the geological picture; V = 0.5 → exactly halfway.
 You might be tempted to write $p_\text{posterior} = V\cdot p_\text{DFI} + (1-V)\cdot p_\text{geo}$
 (probability-weighted mixture of the two distributions). Don't. That formulation treats the two
 descriptions as **mutually exclusive hypotheses** — either the DFI is right (with probability V) or
-the geology is right (with probability 1−V) — and produces a **bimodal** posterior (a sharp peak at
+the geology is right (with probability 1−V), and produces a **bimodal** posterior (a sharp peak at
 the DFI pick sitting on top of a broad geological pedestal).
 
 That's the wrong cognitive model:
-- The geology is not "right or wrong" — it just provides a defensible range that includes the answer.
-- The DFI is not "right or wrong" either — it provides a more precise indication, partially trustworthy.
+- The geology is not "right or wrong"; it just provides a defensible range that includes the answer.
+- The DFI is not "right or wrong" either; it provides a more precise indication, partially trustworthy.
 - Both are partially correct and *complementary*. You want to combine them, not switch between them.
 
 Direct V-weighting (above) treats them as complementary measurements of the same underlying quantity.
@@ -1178,7 +1179,7 @@ residual 24 % geological weight keeps the lower tail honest.
 - **V = 0.1** (DFI suggests failure) → volumes fall back to ~geology, *and* the same low V drives a
   P(G | DFI) **downgrade** on the risk side (Step 6) — treat the anomaly as a likely LSG/lithology artefact.
 
-**Bottom line:** one number, V, does two jobs — it updates P(G) on the risk side and weights the
+**Bottom line:** one number, V, does two jobs; it updates P(G) on the risk side and weights the
 volume blend on the resource side. Record the V used (shown on the DFI Results tab) in the same
 audit-trail line as P(G | DFI).
 
@@ -1223,7 +1224,7 @@ For **ESL attribution** there are two modes:
   then redistributing — useful when you want each pillar's defensible range to remain meaningful after the update.
 """)
 
-    with _tab_maths.expander("Pillar-resolved DFI — which pillar does the anomaly move? (GeoX / Martinelli)", expanded=False):
+    with _tab_maths.expander("Pillar-resolved DFI, which pillar does the anomaly move? (GeoX / Martinelli)", expanded=False):
         st.markdown(r"""
 A single likelihood ratio R moves the **headline** P(G, ESL), but it hides *where* the
 update lands. A DFI is a **fluid** indicator: it can only sense (a) whether a reservoir
@@ -1244,8 +1245,8 @@ retention failed. So the most a DFI can resolve is **two geological channels**:
 ```
 
 The **fluid** update is a clean likelihood ratio $L_{HC}/L_{fluidfail}$ acting on the
-combined Charge·Closure·Retention. The **reservoir** update is *coupled* — it compares
-the non-reservoir curve against the *whole* reservoir-present branch — so the two cannot
+combined Charge·Closure·Retention. The **reservoir** update is *coupled*; it compares
+the non-reservoir curve against the *whole* reservoir-present branch, so the two cannot
 be done as independent 1-D steps. The correct device is a **joint update over the three
 leaves**, from which the pillar marginals fall out (exactly GeoX's "DFI modified risk").
 
@@ -1256,7 +1257,7 @@ Two design choices make it consistent with ESL:
   Charge / Closure / Retention by **preserving their pre-DFI log-proportions**.
 
 The **failure split** (fluid-failure vs non-reservoir) is governed by the **Reservoir
-pillar** $(1-P_{res})$, *not* a free weight — so for the pillar-resolved path the joint
+pillar** $(1-P_{res})$, *not* a free weight, so for the pillar-resolved path the joint
 engine is the source of truth for the headline too.
 
 #### Why this matters — a supportive anomaly can still *degrade* reservoir
@@ -1341,7 +1342,7 @@ GeoX term; E-POS is single-segment only. **No patent claim is practised.**
         st.markdown("---")
         st.markdown("#### Step C3 — Convert each success rate to a likelihood ratio")
         st.markdown(
-            "Monigle reports a **success rate** per verbal category — e.g. 82 % of drilled prospects "
+            "Monigle reports a **success rate** per verbal category, e.g. 82 % of drilled prospects "
             "with a *Fair* fluid-contact reflection found hydrocarbons. That figure is "
             "$P(\\text{HC}\\,|\\,\\text{category})$ *inside Monigle's drilled population*, so it "
             "already carries that population's overall base rate. To use it as evidence on **your** "
@@ -1381,7 +1382,7 @@ GeoX term; E-POS is single-segment only. **No patent claim is practised.**
         )
         st.latex(r"R_\text{char} \;=\; \prod_{k=1}^{6} \text{LR}_k(c_k)")
         st.markdown(
-            "**Caveat (independence assumption).** The six attributes correlate in reality — e.g. "
+            "**Caveat (independence assumption).** The six attributes correlate in reality, e.g. "
             "a prospect with a strong anomaly tends also to show good amplitude terminations. "
             "Treating them as independent over-counts the evidence and can push R far above what "
             "the joint data support. Monigle 2025 moved to a Supervised Machine Learning model "
@@ -1399,13 +1400,13 @@ GeoX term; E-POS is single-segment only. **No patent claim is practised.**
         )
         st.markdown(
             "Simm's [1/3, 3] is calibrated to a *single* DFI line of evidence, but R_char is a "
-            "*composite* of five attributes — effectively several lines — so a flat single-line "
+            "*composite* of five attributes — effectively several lines, so a flat single-line "
             "cap is too tight when the data is genuinely discernible. Widening it with "
             "discernibility lets an expected-but-absent DHI produce the strong downgrade that is "
             "Monigle 2025's signature result (their **Prospect B: GCOS 46% → iCOS 8%**), which the "
             "flat cap cannot express — while keeping low-discernibility prospects conservative. "
             "*(Caveat: the low-DHI region is poorly constrained — Monigle drilled <10 weak-DHI "
-            "successes — so treat strong downgrades as directional.)*"
+            "successes, so treat strong downgrades as directional.)*"
         )
         st.markdown("---")
         st.markdown("#### Step C4b — Independence discount ρ (a principled alternative to the cap)")
@@ -1432,7 +1433,7 @@ GeoX term; E-POS is single-segment only. **No patent claim is practised.**
             "like the discernibility squash below — the two compose as "
             "$R_\\text{eff} = R_\\text{raw}^{\\,f \\cdot d}$ before the cap. The discount is exposed "
             "as the **Assumed attribute correlation ρ** slider in the DFI Setup advanced controls; "
-            "with ρ > 0 the cap rarely binds, because the statistics — not a hard wall — are doing "
+            "with ρ > 0 the cap rarely binds, because the statistics, not a hard wall — are doing "
             "the work."
         )
         st.markdown("---")
@@ -1520,7 +1521,7 @@ GeoX term; E-POS is single-segment only. **No patent claim is practised.**
             "|---|---|---|\n"
             "| You have a **pure DFI-strength index** (geology neutralised) | **Modified DHI "
             "Index (SAAM)** | 8-outcome decomposition gives per-pillar attribution + fluid-class "
-            "diagnostics. *Do not feed a raw SAAM DHI Index — see the warning on that page.* |\n"
+            "diagnostics. *Do not feed a raw SAAM DHI Index; see the warning on that page.* |\n"
             "| You don't have SAAM access or want a stand-alone assessment | **Characteristic scoring** | "
             "Six verbal sliders + public Monigle 2025 calibration; no external tool required. |\n"
             "| You want a sanity check on a SAAM-derived R | Run both; compare | The two R values "
@@ -1586,7 +1587,7 @@ Navigate to the **Bayesian DFI Update** tab → **DFI Setup**. You'll see four p
 Four blocks, top to bottom:
 
 1. **Headline tiles** — prior vs posterior, ESL and Classic.
-2. **Per-pillar attribution tables** — which pillar absorbed the most uplift/downgrade.
+2. **Per-pillar attribution tables**, which pillar absorbed the most uplift/downgrade.
 3. **Posterior trajectory plot** — 4 curves: P(G, ESL) prior/posterior and P(G, Classic) prior/posterior, swept across stance w. The vertical dashed line is your current stance.
 4. **Sensitivity sweep** — configurable: pick X-axis variable (DHI Index, Reservoir Pg, stance w, etc.) and curve family (water fraction, LSG fraction, etc.). Use this to *stress-test* the posterior against assumptions.
 
@@ -1698,7 +1699,7 @@ A single posterior number is not the answer.
 
 ### Pitfall 5 — Using DFI when reservoir risk dominates
 
-If the prospect's main risk is reservoir presence (e.g., wildcat in a poorly-imaged sub-salt setting), the DHI signature is dominated by the `Reservoir_failure` and `Non-Eval-Res` classes — which look very similar to many failure modes. The Bayes update will produce a small uplift even at high DHI Index, which is **correct behaviour**: the DFI can't tell you about something it can't see.
+If the prospect's main risk is reservoir presence (e.g., wildcat in a poorly-imaged sub-salt setting), the DHI signature is dominated by the `Reservoir_failure` and `Non-Eval-Res` classes, which look very similar to many failure modes. The Bayes update will produce a small uplift even at high DHI Index, which is **correct behaviour**: the DFI can't tell you about something it can't see.
 
 ---
 
@@ -1723,7 +1724,7 @@ R = 3 means *the observation is 3× more likely under success than under failure
         st.markdown(r"""
 ### Minimum reportable set
 
-For a DFI-updated prospect, every write-up should contain — at minimum — these eight numbers and three plots:
+For a DFI-updated prospect, every write-up should contain — at minimum; these eight numbers and three plots:
 
 | # | Quantity | Symbol |
 |---|----------|--------|
@@ -1868,7 +1869,7 @@ analogue prospect populations — for sense-checking each pillar against the lit
         st.caption(
             "Source: Rose, P.R. (2001), *Risk Analysis and Management of Petroleum "
             "Exploration Ventures*, AAPG Methods in Exploration 12. A pillar POS far "
-            "outside its range isn't wrong — but it should carry an explicit rationale."
+            "outside its range isn't wrong, but it should carry an explicit rationale."
         )
         st.markdown("""
 ---
@@ -1909,7 +1910,7 @@ as PDFs with this project for direct consultation.
   estimation of the probability of geological success.* Earth-Science Reviews, v. 150.
   Basis of the Milkov reference-table scheme on the **Reference Tables** tab.
 - Reference-table schemes also implemented in E-POS: **Malvić (2009)** and the
-  **CCOP (2000)** guidelines — see the **Reference Tables** tab.
+  **CCOP (2000)** guidelines; see the **Reference Tables** tab.
 
 #### 3 · DHI / DFI & seismic-amplitude risking (the Bayesian update)
 - **Simm, R. (2016)** — *Seismic Amplitude and Risk: A Sense Check.* FORCE seminar,
@@ -2021,7 +2022,7 @@ A single reference for every term in E-POS — the ESL/Classic core and the Baye
 | **DFI update** | Bayesian update | Conditioning the prior on the DFI observation. Can **raise or lower** P(G) — a strong DFI lifts it; an absent/weak DFI where one was expected lowers it. |
 | **R_SAAM** | DHI-Index strength | Likelihood ratio = $L_\text{success} / E[L \mid \text{failure}]$. R_SAAM > 1 favours success; R_SAAM < 1 against. |
 | **V** | DHI Volume Weight | Bounded version of R = $L_\text{success}/(L_\text{success}+E[L\mid\text{failure}])$. Range 0..1; 0.5 = neutral. Also the weight on a DFI-derived volume constraint. |
-| **L** | Likelihood | Probability *density* of observing the DHI Index given a specific outcome class (a Gaussian PDF value — not a probability; can exceed 1). |
+| **L** | Likelihood | Probability *density* of observing the DHI Index given a specific outcome class (a Gaussian PDF value, not a probability; can exceed 1). |
 | **π** (pi) | Outcome prior | Prior probability of one of the 8 mutually-exclusive outcomes (categorical-prior convention, kept distinct from P(·) and pillar Pgs). |
 | **HC** | Hydrocarbon | Catch-all for oil and/or gas. |
 | **LSG** | Low-Saturation Gas | A failed-prospect outcome where reservoir contains gas at saturation too low to produce — generates DFIs that mimic commercial gas. |

@@ -73,7 +73,7 @@ def _min_max_pos_curves_y_pct(w: float, y_hi_pct: float) -> tuple[np.ndarray, np
 def render_italian_flag_chance_adequacy_matrix() -> None:
     st.caption(
         "Policy POS vs certainty **(S_p+S_n)** at your **w**. **Brown / green curves** = min and max Policy POS "
-        "for each certainty level (all splits of green vs red). **No fixed coloured zones** — see advisory expander."
+        "for each certainty level (all splits of green vs red). **No fixed coloured zones**; see advisory expander."
     )
     use_hub_w = st.checkbox("Lock uncertainty weight to Prospect Hub value", value=True, key="ifcam_use_hub_w")
     from logic.pos_policy import resolve_stance
@@ -141,7 +141,7 @@ def render_italian_flag_chance_adequacy_matrix() -> None:
               single traffic-light partition in **POS × (S_p+S_n)** space.
             - **TESLA / Quintessa** often use **ratio-style** views (e.g. support ratio vs **residual uncertainty**),
               not the same axes as here. Any coloured *regions* in such plots are typically **calibration or
-              workshop conventions**, not universal constants — see *Evidence Support Logic: A Guide for TESLA Users*
+              workshop conventions**, not universal constants; see *Evidence Support Logic: A Guide for TESLA Users*
               (e.g. v3.0) and [Quintessa ESL](https://quintessa.org/services/decision-support/evidence-support-logic).
             - **Rose (2001, AAPG Methods 12)** “chance adequacy” is usually framed as **matrix guidance**
               (confidence × geological news → **recommended P ranges**), implemented elsewhere in this app as the
@@ -259,7 +259,7 @@ def render_italian_flag_chance_adequacy_matrix() -> None:
 
     st.caption(
         "Only the **min/max curves** and your point are drawn. Any coloured adequacy zones would be "
-        "organisation-specific — see the advisory expander."
+        "organisation-specific; see the advisory expander."
     )
     st.markdown(
         """

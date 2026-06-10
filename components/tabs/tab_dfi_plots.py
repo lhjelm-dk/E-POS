@@ -341,12 +341,12 @@ def _render_sensitivity_sweep(ctx, dhi_cur, calib, fw_cur, sd_mode, fluid_type) 
     # Auto-interpretation caption
     cur_post_pg = star_yvals[0] * 100
     prior_pg_pct = pillars_cur.prior_pg * 100
-    direction = "uplift" if cur_post_pg > prior_pg_pct else "downgrade"
+    direction = "raises P(G)" if cur_post_pg > prior_pg_pct else "lowers P(G)"
     delta = cur_post_pg - prior_pg_pct
     st.caption(
         f"★ = current prospect at ({x_label} = {x_cur:.2f}, {fam_label or 'fixed'}"
         f"{(' = ' + format(fam_cur, '.2f')) if fam_cur is not None else ''}). "
-        f"At this point the DFI observation produces a **{direction} of {delta:+.1f} pp** "
+        f"At this point the DFI observation **{direction} by {delta:+.1f} pp** "
         f"(prior {prior_pg_pct:.1f}% → posterior {cur_post_pg:.1f}%). "
         f"Curves spreading apart = high sensitivity to that family choice; "
         f"curves bunching = robust to it."

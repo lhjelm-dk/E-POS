@@ -31,7 +31,7 @@ discards the white band), and the DFI is **automatically weighted by discernibil
       barely changed (an ambiguous observation is correctly discounted)
     * high discernibility → the flag sharpens (white shrinks) and shifts toward G or ¬G
 
-Note Dempster combination *reduces* white as evidence accumulates — it does not
+Note Dempster combination *reduces* white as evidence accumulates; it does not
 add uncertainty; a weak DFI simply leaves the prior almost untouched.
 
 Caveat: Dempster's rule normalises away conflict (the ``K`` term). Under highly

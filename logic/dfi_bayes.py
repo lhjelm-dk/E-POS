@@ -191,7 +191,7 @@ def decompose_prior(p: PriorPillars, w: FluidWeights) -> PriorOutcomes:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Likelihood mapping — which SAAM class supplies P(DFI | outcome)
+# Likelihood mapping, which SAAM class supplies P(DFI | outcome)
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _likelihood_per_outcome(dhi_index: float, calib: Calibration,

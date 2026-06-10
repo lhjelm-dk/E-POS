@@ -39,7 +39,7 @@ LAPLACE_ADD: float = 0.5         # Smoothing prior — avoids zero-cell LR
 
 # Discernibility-aware caps on R_char (log-symmetric).  Rationale: Simm's [1/3, 3]
 # is calibrated to a *single* DFI line of evidence, but R_char is a *composite* of
-# five attributes — effectively several lines — so a single-line cap is too tight
+# five attributes — effectively several lines, so a single-line cap is too tight
 # when the geophysics is genuinely discernible. Monigle 2025's signature result is
 # the strong downgrade for an expected-but-absent DHI (e.g. their Prospect B,
 # GCOS 46% → iCOS 8%), which the flat [1/3, 3] cap cannot express. We widen the cap

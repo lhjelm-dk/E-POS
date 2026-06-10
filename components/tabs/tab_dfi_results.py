@@ -508,7 +508,7 @@ def _render_characteristic_sensitivity(ctx, prior_pg: float, w_cur: float) -> No
         r_eff = apply_discernibility(r, bucket)
         return simm_bayes_posterior(prior_pg, r_eff) * 100.0
 
-    st.markdown("##### Sensitivity sweep — which DHI attributes move the posterior?")
+    st.markdown("##### Sensitivity sweep, which DHI attributes move the posterior?")
     st.caption(
         "Each attribute is swept across **all its categories** while the others stay "
         "at your current slider positions. The bar spans the resulting posterior P(G) "

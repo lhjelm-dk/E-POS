@@ -7,7 +7,7 @@ the update onto **two geological channels** and reports per-pillar prior->poster
 
 See ``docs/dfi_pillar_update_spec.md`` for the full derivation. The construction is
 the single-segment case of the algorithm in US 10,451,762 B2 (Martinelli, Stabell,
-Langlie; Schlumberger 2019) — i.e. standard Bayes' theorem + marginalisation. E-POS
+Langlie; Schlumberger 2019), i.e. standard Bayes' theorem + marginalisation. E-POS
 does **not** implement the patent's novel multi-segment DFI-dependency-group /
 reference-DFI-CPT / correlation-k method; no patent claim is practised here.
 
@@ -298,7 +298,7 @@ class PostDfiPillars:
     ``pillars_*`` are keyed ``{"Reservoir", "Charge", "Closure", "Retention"}``. For
     aggregate-only methods ``pillar_resolved`` is False and the pillar dicts are empty
     (only the headline ``pos_*`` is meaningful). Display-only: prior pillar *inputs* are
-    never overwritten — this is the parallel post-DFI view.
+    never overwritten; this is the parallel post-DFI view.
     """
     pillar_resolved: bool
     pos_prior: float

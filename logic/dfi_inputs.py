@@ -10,7 +10,7 @@ overlays always read the hard-coded defaults regardless of analyst input.
 Reading the bundle through :func:`read_dfi_inputs` makes that whole class of bug
 structurally impossible: the canonical keys and defaults live here once.
 
-This module is pure — it takes a session-state-like mapping as an argument and
+This module is pure; it takes a session-state-like mapping as an argument and
 does not import Streamlit, so it stays unit-testable.
 """
 from __future__ import annotations

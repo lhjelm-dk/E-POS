@@ -49,7 +49,7 @@ def _render_dashboard_tab(ctx) -> None:
         "padding:16px 20px;border-radius:10px;margin-bottom:8px;'>"
         "<b style='font-size:1.15rem;'>E-POS — Evidence-supported Probability of Success</b><br>"
         "<span style='font-size:0.85rem;opacity:0.85;'>"
-        "Enter evidence once — ESL and Classic POS update together. "
+        "Enter evidence once: ESL and Classic POS update together. "
         "The gap between them is your uncertainty signal."
         "</span></div>",
         unsafe_allow_html=True,
@@ -139,7 +139,7 @@ Your existing probability estimates translate directly:
 | Charge POS = 0.20 (risky) | S_for = 0.10, S_against = 0.60 |
 
 The key difference: E-POS **separates what you know (green/red) from what you don't know (white).**
-A single probability of 0.40 could mean "strong evidence both ways" or "no data at all" — E-POS makes that distinction explicit and auditable.
+A single probability of 0.40 could mean "strong evidence both ways" or "no data at all". E-POS makes that distinction explicit and auditable.
 
 → Use the **ROSE entry panel below** to enter your traditional single probabilities alongside the ESL assessment for a direct comparison.
 """)
@@ -149,7 +149,7 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
             "**Why does E-POS show two numbers?**  \n"
             "P(G, ESL) carries the unknown mass through the whole calculation, applying Policy P "
             "once at the end. P(G, Classic) converts each element to a single probability first, "
-            "then multiplies — absorbing the unknown mass early. **The spread between them measures "
+            "then multiplies, absorbing the unknown mass early. **The spread between them measures "
             "how much uncommitted evidence your assessment contains.** Large spread = data gaps "
             "dominate; small spread = robust evidence. See Theory tab for the full explanation."
         )
@@ -182,12 +182,12 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
     pc1, pc2, pc3 = st.columns(3)
     with pc1:
         st.metric("P(Play)", f"{play_pos_val * 100:.1f}%",
-                  help="Play-level geological probability — combined across all pillars at Play scope.")
+                  help="Play-level geological probability, combined across all pillars at Play scope.")
         render_flag(play_for, play_against, marker=play_pos_val)
         render_flag_stats(play_for, play_against, uncertainty_weight)
     with pc2:
         st.metric("P(Cond)", f"{cond_pos_val * 100:.1f}%",
-                  help="Conditional-level geological probability — combined across all pillars at Conditional scope.")
+                  help="Conditional-level geological probability, combined across all pillars at Conditional scope.")
         render_flag(conditional_for, conditional_against, marker=cond_pos_val)
         render_flag_stats(conditional_for, conditional_against, uncertainty_weight)
     with pc3:
@@ -261,12 +261,12 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
             key="dfi_enabled",
             help=(
                 "**The most decisive evidence switch in the workflow.**\n\n"
-                "Turn ON whenever the subsurface is **capable of showing a DFI** — i.e. the "
+                "Turn ON whenever the subsurface is **capable of showing a DFI**, i.e. the "
                 "reservoir/fluid contrast and seismic quality are such that a direct fluid "
                 "indicator *would* be visible if hydrocarbons were present. This is not just "
                 "for prospects where a DFI is seen: a **DFI that is absent when one was "
                 "expected is itself evidence**, and the update will then *lower* P(G).\n\n"
-                "The update is a true Bayesian conditioning — it can raise **or** lower the "
+                "The update is a true Bayesian conditioning; it can raise **or** lower the "
                 "prior. A strong, conformant DFI lifts P(G); a weak/absent DFI on a "
                 "DFI-capable prospect downgrades it."
             ),
@@ -289,7 +289,7 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
                 "Edit on the Bayesian DFI Update tab."
             )
         else:
-            st.caption("DFI not in use — comparison table will show priors only.")
+            st.caption("DFI not in use: comparison table will show priors only.")
 
     st.divider()
 
@@ -307,7 +307,7 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
                 "Flag to a single POS number: **0** = treat all unknowns as bad news "
                 "(pessimistic), **0.5** = stay neutral (recommended), **1** = give the "
                 "unknowns the benefit of the doubt (optimistic). It changes only how "
-                "unknowns are scored — never the hard evidence itself."
+                "unknowns are scored, never the hard evidence itself."
             )
             from components.ui_help import help_popover as _help_popover
             _help_popover("What is Stance on unknowns (w)?", (
@@ -376,7 +376,7 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
                             round(math.prod(_meds), 2) if _meds else DEFAULT_BASE_RATE)
                     st.button("↧ Seed from Rose medians", on_click=_seed_base_rate,
                               key="seed_base_rate",
-                              help="Product of the per-pillar Rose median POS — the analogue "
+                              help="Product of the per-pillar Rose median POS, the analogue "
                                    "prospect base rate (≈ 18%).")
                 st.caption("Exxon 'geology is not a coin': the white band reverts to the base rate.")
             else:

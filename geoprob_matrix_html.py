@@ -347,7 +347,7 @@ function draw() {{
 
   // ── Risking-V "legacy no-go" (high commitment + middling POS) ──────────────
   // Rose / ExxonMobil's original forbidden upper-centre. Drawn only as a faint,
-  // labelled REFERENCE — it applies to a BINARY state of nature (0 or 1), not to a
+  // labelled REFERENCE; it applies to a BINARY state of nature (0 or 1), not to a
   // probability, so it is superseded for E-POS's P(G) (ExxonMobil 2018). The Bel/Pl
   // envelope already carries this information continuously. See Theory & Guide.
   if (showN) {{
@@ -658,7 +658,7 @@ points to the right of the red line are in the negative zone. These fade from gr
 <br>
 <b>Stance fan lines:</b> Show where your dot would move if you changed w while keeping S_for and S_against fixed.
 Solid fan lines = POS_min (w votes against, S_for=0 scenario); dashed = POS_max.
-These are NOT commitment lines — they are sensitivity-to-stance lines. Your dot lies between them.<br>
+These are NOT commitment lines; they are sensitivity-to-stance lines. Your dot lies between them.<br>
 <br>
 <b>Blue dot:</b> Your current assessment at (POS, ECI). In ECI mode, this is always inside the gradient field.
 <b>Gray dot:</b> Where the same assessment would plot if Y = C (ESL commitment mode). When these are far apart,

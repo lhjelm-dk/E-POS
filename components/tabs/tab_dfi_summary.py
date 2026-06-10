@@ -130,7 +130,7 @@ def _render_dfi_summary(ctx) -> None:
         st.caption(
             "Per-pillar breakdown of the geological **prior** P(G, ESL), with the "
             "consolidated **before → after** DFI update (both methods, Δ) appended at "
-            "the bottom. The DFI Bayesian update acts on the combined prospect Pg — it "
+            "the bottom. The DFI Bayesian update acts on the combined prospect Pg; it "
             "does not change the per-pillar masses above the divider. The prior→posterior "
             "bar visual is in the next block."
         )
@@ -196,7 +196,7 @@ def _render_dfi_summary(ctx) -> None:
 
     st.caption(
         "**Reading guide:** the geological prior carries an uncertainty envelope "
-        "(Bel/Pl) from the ESL Italian flag — see the **DFI Update** rows at the bottom "
+        "(Bel/Pl) from the ESL Italian flag; see the **DFI Update** rows at the bottom "
         "of the Risk Overview table above for the consolidated before → after figures "
         "(both methods, with Δ). The DFI posterior is a **point estimate** — the Bayesian "
         "update collapses the envelope onto a single Pg given the seismic evidence at "
@@ -362,7 +362,7 @@ def _render_dfi_summary_characteristic(ctx) -> None:
         _reportable_pos_callout(_ov_data["dfi"]["esl_post"] * 100, after_dfi=True)
 
     # ── Diagnostic strip ──
-    direction = "uplift" if delta_esl > 0.005 else ("downgrade" if delta_esl < -0.005 else "no change")
+    direction = "raised" if delta_esl > 0.005 else ("lowered" if delta_esl < -0.005 else "no change")
     arrow = "↑" if delta_esl > 0.005 else ("↓" if delta_esl < -0.005 else "→")
     st.markdown(
         f"<div style='background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;"

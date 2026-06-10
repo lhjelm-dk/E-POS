@@ -73,9 +73,9 @@ def render_geox_pdfi_handoff(success: float, water: float, lsg: float, reservoir
 
     Mirrors the SAAM/DHI-Index hand-off, but works from any pathway's four per-case
     DFI likelihoods (``success``, ``water``, ``lsg``, ``reservoir``). Values are
-    relative — scaled so the strongest case = 100 %; GeoX uses only their ratios.
+    relative, scaled so the strongest case = 100 %; GeoX uses only their ratios.
     Set ``fluid_agnostic=True`` for two-state methods (characteristic / single-curve
-    custom) that don't distinguish failure fluids — the five failure cases share one
+    custom) that don't distinguish failure fluids: the five failure cases share one
     value and a note explains why.
     """
     import pandas as pd
@@ -92,7 +92,7 @@ def render_geox_pdfi_handoff(success: float, water: float, lsg: float, reservoir
     )
     if fluid_agnostic:
         st.caption(
-            "⚠️ This is a **two-state** method (success vs failure) — it does **not** "
+            "⚠️ This is a **two-state** method (success vs failure); it does **not** "
             "distinguish water / LSG / reservoir failure, so all five failure cases take "
             "the **same** value (= 100 % ÷ R when R > 1). Only the success-vs-failure "
             "contrast is real; the fluid split is carried by GeoX's own prior."
@@ -117,7 +117,7 @@ def render_simm_verdict_banner(r: float) -> tuple[str, str, str]:
     in nearby captions/legends.
     """
     label, comment, color = simm_rule_of_thumb(r)
-    direction = "↑ uplift" if r > 1.0 else ("↓ downgrade" if r < 1.0 else "→ no change")
+    direction = "↑ raises P(G)" if r > 1.0 else ("↓ lowers P(G)" if r < 1.0 else "→ no change")
     st.markdown(
         f"<div style='background:{color}1a;border-left:5px solid {color};"
         f"border-radius:6px;padding:8px 12px;margin:6px 0;'>"
@@ -181,7 +181,7 @@ def render_simm_band_strip(r: float, *, height: int = 120, key: str | None = Non
     st.plotly_chart(fig, use_container_width=True, key=key)
     st.caption(
         f"Current **R = {r:.2f} → {label}**. Simm rule of thumb: |R| ≈ 1.5 moderate, "
-        "≈ 3 strong (his practical ceiling for a single DFI), ≥ 10 decisive — audit the "
+        "≈ 3 strong (his practical ceiling for a single DFI), ≥ 10 decisive; audit the "
         "inputs. Bands are symmetric in log-odds (R and 1/R mirror)."
     )
 
@@ -393,7 +393,7 @@ def render_volumetrics_recommendation(
         + (" / Volume Weight V**" if _is_saam else "**")
         + " (left) is *how strong the DHI is* (0–1). The **column-height trial weight** "
         "(right) is *how to use that strength in the volume Monte-Carlo* (Monigle's "
-        f"transform) — so a {rec.dhi_score*100:.0f}% score maps to a {rec.w_ch*100:.0f}% "
+        f"transform), so a {rec.dhi_score*100:.0f}% score maps to a {rec.w_ch*100:.0f}% "
         "trial weight. They are related but not the same number."
     )
 
@@ -404,7 +404,7 @@ def render_volumetrics_recommendation(
         f"padding:10px 14px;margin:6px 0;'>"
         f"<b style='color:#0e7490;'>Recommended blend (linear V-mixture):</b> weight the "
         f"<b>DFI-defined</b> volume at <b>{_w_dfi*100:.0f}%</b> and the "
-        f"<b>geological/structural</b> volume at <b>{(1-_w_dfi)*100:.0f}%</b> — i.e. the "
+        f"<b>geological/structural</b> volume at <b>{(1-_w_dfi)*100:.0f}%</b>, i.e. the "
         f"combined HC–water-contact distribution = {_w_dfi*100:.0f}%·DFI + "
         f"{(1-_w_dfi)*100:.0f}%·Geo. Enter the contact elevations below to see the mixture.</div>",
         unsafe_allow_html=True,
@@ -594,7 +594,7 @@ def render_dempster_prototype(
                 "reconcile the geology vs the geophysics first."
             )
         st.caption(
-            "Prototype only — not wired into the headline POS. Conceptually this is the "
+            "Prototype only, not wired into the headline POS. Conceptually this is the "
             "'DFI as a line of evidence' view; the production pathway still uses the Simm "
             "point update (+ the Bel/Pl envelope on the overview table)."
         )

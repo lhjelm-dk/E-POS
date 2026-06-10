@@ -62,7 +62,7 @@ def render_comparison(
         },
     )
     st.caption(
-        "**P(G, ESL)** is the primary method — it preserves the uncertainty structure of the "
+        "**P(G, ESL)** is the primary method; it preserves the uncertainty structure of the "
         "evidence through aggregation and is fully traceable. "
         "**P(G, Classic)** is shown alongside for reporting continuity with peers familiar with "
         "Rose/GeoX — both numbers are valid for sign-off, and reporting both with the "
@@ -247,7 +247,7 @@ def render_comparison_agreement(
             st.markdown(
                 f"**P(G, ESL) lower than P(G, Classic) by {abs(delta_esl_vs_classic):.1f}%:** "
                 "ESL is capturing conflicting or ambiguous evidence that Classic averages out. "
-                "Check for overcommitted (yellow overlap) elements in the ESL tab — these represent "
+                "Check for overcommitted (yellow overlap) elements in the ESL tab; these represent "
                 "genuine conflicts that Classic POS cannot represent."
             )
         elif delta_esl_vs_classic > 3:

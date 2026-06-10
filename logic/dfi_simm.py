@@ -59,7 +59,7 @@ def simm_rule_of_thumb(r: float) -> tuple[str, str, str]:
     """Verbal interpretation of a likelihood ratio ``R``.
 
     Returns ``(label, comment, color)``. The bands follow Simm (2016) "Sense
-    Check" guidance and the standard Bayes-factor convention — they are symmetric
+    Check" guidance and the standard Bayes-factor convention; they are symmetric
     in log-odds, so an uplift of R and a downgrade of 1/R carry equal strength.
     Simm cautions that for a *single* DFI line of evidence an honest R rarely
     exceeds ~3 either way; treat |R| ≳ 10 as exceptional and audit the inputs.
@@ -98,7 +98,7 @@ def geox_pdfi_cases(success: float, water: float, lsg: float,
     cases (fluid × reservoir-evaluability), scaled so the strongest = 100 %.
 
     GeoX combines these conditional likelihoods with its own geological prior and
-    only uses their **ratios**, so the absolute scale is free — we normalise to the
+    only uses their **ratios**, so the absolute scale is free; we normalise to the
     maximum purely so the six numbers are readable on entry. The three
     non-evaluable-reservoir cases all map to the ``reservoir`` (reservoir-failure)
     likelihood, exactly like the SAAM/DHI-Index hand-off.

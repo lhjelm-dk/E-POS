@@ -8,7 +8,7 @@ NOTE on geological terminology:
   The published reference tables below use the historical term "Trap" freely
   (e.g. "Position of Trap", "Trap timing", "Structural Trap Style") because
   that is the language of the source literature. These are geological
-  *concepts* in the reference text — they are NOT pillar identifiers.
+  *concepts* in the reference text; they are NOT pillar identifiers.
   The E-POS app uses the pillar id "Closure" (matching its display name) for
   the equivalent risk pillar. The two terms refer to the same underlying
   geology; only the in-app symbol differs.
@@ -294,7 +294,7 @@ MILKOV_2015: dict[str, list[tuple]] = {
          "Direct evidence of active petroleum system"),
         ("Data: Direct Evidence",
          "HC shows in drilled basin + valid DHI on seismic", 0.80, True,
-         "Combination of direct and geophysical (DHI) evidence — see DHI caveat"),
+         "Combination of direct and geophysical (DHI) evidence; see DHI caveat"),
         ("Data: Direct Evidence",
          "Lack of pools, seeps and shows in drilled basin", 0.20, False,
          "No direct evidence despite drilling; system may be inactive"),
@@ -358,7 +358,7 @@ MALVIC_2009: dict[str, list[tuple]] = {
          "Favourable palaeo-facies organic matter sedimentation (inferred)", 0.55, False,
          "Geological setting supports source rock deposition; not proven"),
         ("Source Rock Facies",
-         "Regionally known source rock — not proven at observed locality", 0.40, False,
+         "Regionally known source rock, not proven at observed locality", 0.40, False,
          "Regional play concept only; local confirmation absent"),
         ("Source Rock Facies",
          "Undefined source rock type", 0.20, False,
@@ -1016,7 +1016,7 @@ def render_reference_tables() -> None:
         "AVO) evidence directly into a probability value. **This is methodologically "
         "problematic**: geophysical evidence is Auxiliary and should be handled via a "
         "formal Bayesian likelihood update (e.g. ExxonMobil iCOS / Rose DHI Consortium "
-        "SAAM/SaRA, calibrated from 400+ drilled wells) — not folded into geological "
+        "SAAM/SaRA, calibrated from 400+ drilled wells), not folded into geological "
         "CoS factors. All DHI-related rows are marked with ⚠️ DHI / Geophysical "
         "and highlighted in yellow.\n\n"
         "3. **Final CoS** — All three methods combine factor CoS values by **multiplication** "

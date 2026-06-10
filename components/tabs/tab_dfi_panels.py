@@ -67,7 +67,7 @@ def _render_geox_pdfi_panel(dhi, calib, sd_mode, fluid_type) -> None:
             "The **success** case is the numerator of P(G); the others are the mutually-exclusive "
             "ways the prospect can fail. The fluid label only changes the *prior weight* of each "
             "failure (via the fluid-failure weights), not the bell curve once the reservoir is "
-            "non-evaluable — which is why the three Non. Eval. Res. rows share one likelihood.  \n\n"
+            "non-evaluable, which is why the three Non. Eval. Res. rows share one likelihood.  \n\n"
             "---\n"
             "**What is P(DFI | case)?**  \n"
             "For each possible outcome (\"case\"), the SAAM database gives a bell curve (Gaussian) "

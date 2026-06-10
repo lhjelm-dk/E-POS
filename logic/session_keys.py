@@ -2,7 +2,7 @@
 
 All Streamlit ``st.session_state`` key patterns used across the app are
 documented and generated here.  Import from this module instead of embedding
-raw f-string literals in UI code — this is the single source of truth for
+raw f-string literals in UI code; this is the single source of truth for
 the key namespace.
 
 Usage::

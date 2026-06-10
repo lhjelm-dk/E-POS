@@ -90,7 +90,7 @@ def _render_dfi_setup_characteristic(ctx) -> None:
             "applies **weighted isotonic regression** (pool-adjacent-violators) so the "
             "rate never decreases Poor→Excellent (Good ≥ Fair), and interpolates a "
             "near-continuous slider. The likelihood ratio at any position comes from the "
-            "monotone success-rate odds — so the slider is seamless and the evidence "
+            "monotone success-rate odds, so the slider is seamless and the evidence "
             "behaves monotonically."
         ),
     )
@@ -109,7 +109,7 @@ def _render_dfi_setup_characteristic(ctx) -> None:
         _anchor_caption = (
             "Each slider's **middle** position is the neutral / non-informative baseline "
             "(LR = 1); moving toward the ends pushes R up or down. *(Scale-middle anchoring "
-            "is ON — see the controls below.)*"
+            "is ON; see the controls below.)*"
             if _rel_mid_now else
             "Each category maps to a likelihood ratio measured **vs the dataset base rate**: "
             "a category whose success rate equals the overall base rate gives LR = 1, above "
@@ -226,7 +226,7 @@ def _render_dfi_setup_characteristic(ctx) -> None:
                 "• high → [1/10, 10]  • moderate → [1/6, 6]  • low/absent → [1/3, 3]\n\n"
                 "This lets a high-discernibility, expected-but-absent DHI produce the strong "
                 "downgrade that Monigle 2025 demonstrate (e.g. their Prospect B, GCOS 46% → "
-                "iCOS 8%) — which the flat Simm cap cannot express — while keeping low "
+                "iCOS 8%), which the flat Simm cap cannot express — while keeping low "
                 "discernibility conservative.\n\n"
                 "**Default ON.** Turn OFF only to inspect the raw, unconstrained product "
                 "(the naive independence assumption over-counts correlated attributes)."
@@ -256,7 +256,7 @@ def _render_dfi_setup_characteristic(ctx) -> None:
                 "selection then yields R = 1). Convenient for the slider, but it discards "
                 "real evidence when the middle category is itself far from the base rate "
                 "— e.g. fluid-contact-reflection 'Fair' (82 % vs a 56 % base) is the "
-                "middle, so this mode reports it as neutral instead of a 3.25× uplift."
+                "middle, so this mode reports it as neutral instead of a 3.25× upward update."
             ),
         )
         if rel_middle:
@@ -542,11 +542,11 @@ def _render_dfi_setup_characteristic(ctx) -> None:
             "built from — note that it is **not always monotonic** (small-N categories "
             "can buck the trend; see the fluid-contact-reflection note)."
             + ("  \n\n**Inferred mode is ON:** the **dark line** is the *monotone "
-               "(isotonic) success-rate curve* actually used for scoring — it pools any "
+               "(isotonic) success-rate curve* actually used for scoring; it pools any "
                "out-of-order categories (e.g. Fair/Good) so the rate never decreases."
                if inferred else
                "  \n\nThe **dotted grey line** is the *monotone (isotonic) fit* for "
-               "reference — it is **not** used while Raw scoring is selected, but shows "
+               "reference; it is **not** used while Raw scoring is selected, but shows "
                "what would change if you toggled Inferred on (it removes non-monotonic "
                "dips like Fair > Good).")
         )

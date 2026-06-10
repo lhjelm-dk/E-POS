@@ -76,7 +76,7 @@ def _render_dfi_setup(ctx) -> None:
                 "two-state Bayes; no per-pillar attribution. Stand-alone — no SAAM needed.\n\n"
                 "• **Modified DHI Index (SAAM)** — a *conceptual* DFI-strength model reverse-"
                 "engineered from public SAAM presentation material (not the proprietary SAAM "
-                "score). Enter a **pure DFI-strength index**, not a raw SAAM DHI Index — see the "
+                "score). Enter a **pure DFI-strength index**, not a raw SAAM DHI Index; see the "
                 "warning on that page. 8-outcome Bayes, per-pillar attribution available."
             ),
         )
@@ -101,7 +101,7 @@ def _render_dfi_setup(ctx) -> None:
     st.error(
         "⚠️ **Modified method — do not enter a raw SAAM DHI Index here.**\n\n"
         "This pathway is a **conceptual representation**, reverse-engineered from "
-        "publicly available SAAM presentation material — it is **not** the proprietary "
+        "publicly available SAAM presentation material; it is **not** the proprietary "
         "SAAM model. The DHI Index booked in the original SAAM database **cannot be used "
         "directly** in this Bayesian update: that index bundles the *geological* chance "
         "together with the seismic signal, and all non-DHI (geology) contributions must be "
