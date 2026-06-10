@@ -194,6 +194,16 @@ def dfi_post_pillars(ctx):
         return build_post_pillars(esl_prior_pg, post.posterior_pg,
                                   p_res_prior, p_res_post, _hc_pillar_priors(pp),
                                   "Modified DHI Index (SAAM)")
+    if src == "characteristic":
+        # Aggregate-only (single success/failure curve cannot resolve reservoir):
+        # report just the headline shift so the CAM overlay still works.
+        from logic.dfi_simm import simm_bayes_posterior
+        from logic.dfi_pillar_update import PostDfiPillars
+        r_eff = float(st.session_state.get("dhi_char_r_eff", 1.0))
+        w = ctx.uncertainty_weight
+        pos_prior = esl_rollup_prior_at_w(ctx, w)
+        return PostDfiPillars(False, pos_prior, simm_bayes_posterior(pos_prior, r_eff),
+                              {}, {}, "Characteristic scoring (Monigle 2025)")
     return None
 
 

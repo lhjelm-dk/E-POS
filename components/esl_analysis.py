@@ -388,8 +388,14 @@ def _render_cam_scatter_plot(
     pillar_display: dict,
     leaf_filter: "set | None" = None,
     show_labels: bool = True,
+    dfi_overlay: "tuple | None" = None,
 ) -> None:
-    """Chance Adequacy Matrix — all elements on POS × ECI/C axes."""
+    """Chance Adequacy Matrix — all elements on POS × ECI/C axes.
+
+    ``dfi_overlay`` (optional) is ``(prior_pos, post_pos)`` — the prospect-level
+    headline P(G, ESL) before and after the DFI update. When supplied, a toggle adds
+    two vertical reference lines showing the headline shift against the zone bands.
+    """
     _sym = {"Charge": "diamond", "Closure": "square",
             "Reservoir": "triangle-up", "Retention": "circle"}
     w = float(uncertainty_weight)
@@ -545,6 +551,32 @@ def _render_cam_scatter_plot(
                        showarrow=False, font=dict(color="rgba(0,120,45,0.80)", size=13))
     fig.add_annotation(x=_r_th * 0.5, y=0.88, text="Negative",
                        showarrow=False, font=dict(color="rgba(170,30,30,0.80)", size=13))
+
+    # ── Post-DFI headline shift overlay (Plan B / B3) ──────────────────────────
+    # The CAM is prior-by-design, so this is an opt-in reference: two vertical lines
+    # at the prospect-level P(G, ESL) before and after the DFI update, showing which
+    # zone the headline lands in pre vs post.
+    if dfi_overlay is not None:
+        _pri_pos, _post_pos = float(dfi_overlay[0]), float(dfi_overlay[1])
+        _show_dfi = st.checkbox(
+            "Show post-DFI headline shift", value=True, key="cam_scatter_dfi_shift",
+            help="Vertical lines at the prospect P(G, ESL) before (prior) and after the "
+                 "DFI update. The CAM itself stays the geological prior; this is a reference "
+                 "overlay of the headline move.")
+        if _show_dfi:
+            _up = _post_pos >= _pri_pos
+            _post_col = "rgba(20,120,70,0.95)" if _up else "rgba(180,40,30,0.95)"
+            fig.add_vline(x=_pri_pos, line=dict(color="rgba(80,80,90,0.85)", width=1.6, dash="dot"),
+                          annotation_text=f"prior {_pri_pos*100:.0f}%",
+                          annotation_position="bottom", annotation_font_size=10)
+            fig.add_vline(x=_post_pos, line=dict(color=_post_col, width=2.2),
+                          annotation_text=f"post-DFI {_post_pos*100:.0f}%",
+                          annotation_position="top", annotation_font_size=10)
+            # Arrow from prior to post at mid-height to read direction at a glance.
+            fig.add_annotation(x=_post_pos, y=0.5, ax=_pri_pos, ay=0.5,
+                               xref="x", yref="y", axref="x", ayref="y",
+                               showarrow=True, arrowhead=2, arrowsize=1.1,
+                               arrowwidth=1.8, arrowcolor=_post_col, text="")
 
     def _yv(sf, sa):
         v = abs(float(sf) - float(sa)) if _use_eci else (float(sf) + float(sa))

@@ -500,12 +500,23 @@ def _render_geo_diagnostics(ctx) -> None:
         "interpretation guide\"**."
     )
     _cam_show_labels = st.checkbox("Show labels", value=True, key="cam_all_show_labels")
+    # Optional post-DFI headline-shift overlay (only when the DFI update is active).
+    _dfi_overlay = None
+    if st.session_state.get("dfi_enabled"):
+        from logic.pos_policy import policy_pos as _policy_pos
+        from logic.dfi_context import dfi_post_pillars as _dfi_post_pillars
+        _pp_cam = _dfi_post_pillars(ctx)
+        if _pp_cam is not None:
+            _prior_pos = _policy_pos(total_for, total_against, uncertainty_weight)
+            _dfi_overlay = (_prior_pos, _pp_cam.pos_post)
+
     _render_cam_scatter_plot(
         play, conditional, conditional_results,
         total_for, total_against, uncertainty_weight,
         _pillar_colors, _pillar_display,
         leaf_filter=_sel_eids,
         show_labels=_cam_show_labels,
+        dfi_overlay=_dfi_overlay,
     )
 
 
