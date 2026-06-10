@@ -49,6 +49,10 @@ def initialise_dfi_session_defaults() -> None:
     the user flips ``dfi_enabled`` ON.
     """
     defaults = {
+        # Seed the evidence-source so post-DFI views (CAM overlay, attribution
+        # panels) work immediately on toggle-on, before DFI Setup is visited.
+        # "custom" matches the Setup radio's first/default option.
+        "dfi_source":              "custom",
         "dfi_index":               _DEFAULT_DHI_INDEX,
         "dfi_fluid_water":         _DEFAULT_FLUID_WATER,
         "dfi_fluid_lsg":           _DEFAULT_FLUID_LSG,

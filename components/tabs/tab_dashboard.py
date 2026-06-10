@@ -271,8 +271,12 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
                 "DFI-capable prospect downgrades it."
             ),
         )
-        # First-time activation: seed the DFI session-state defaults.
-        if _dfi_new and not _dfi_prev:
+        # Seed the DFI session-state defaults whenever the toggle is on. The
+        # initialiser is idempotent (setdefault), and gating it on the OFF->ON
+        # transition alone misses sessions restored with dfi_enabled already
+        # true (saved prospects), leaving dfi_source unset and hiding the
+        # post-DFI views until DFI Setup was visited.
+        if _dfi_new:
             from components.tabs.tab_dfi import initialise_dfi_session_defaults
             initialise_dfi_session_defaults()
         if _dfi_new:

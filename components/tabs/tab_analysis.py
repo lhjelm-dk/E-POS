@@ -443,6 +443,16 @@ def _render_geo_diagnostics(ctx) -> None:
                     _issues.append({"level": "error", "message": f"Conditional {_n}: not assessed."})
         if _tf + _ta > 1.0:
             _issues.append({"level": "warning", "message": f"Total overcommitted (For={_tf:.3f}, Against={_ta:.3f})."})
+        # Conflict pedagogy: one teaching note whenever anything is overcommitted.
+        if any("overcommitted" in _i["message"] for _i in _issues):
+            _issues.append({"level": "info", "message": (
+                "What overcommitment means: S_for + S_against > 1 leaves no white, so the "
+                "stance w no longer moves that element (Policy P stays pinned at S_for) and "
+                "the For/Against overlap is **evidential conflict** (Zadeh / Blockley), not "
+                "extra certainty. Two bodies of evidence directly contradict each other — "
+                "that is geologically significant: resolve the conflict if you can, otherwise "
+                "document it in the write-up. See Theory & Guide → 'Theoretical foundations "
+                "— Blockley (2013)'.")})
         if _tf < 0.01:
             _issues.append({"level": "error", "message": f"P(G, ESL) lower bound near zero ({_tf*100:.1f}%)."})
         _cpl = min(_v["for"] for _v in _cond_results.values()) if _cond_results else 0.0
