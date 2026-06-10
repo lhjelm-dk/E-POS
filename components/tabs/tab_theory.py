@@ -324,6 +324,77 @@ P(G) = P(Play) × P(Cond)
 ```
 """)
 
+    with _tab_concepts.expander("Theoretical foundations — Blockley (2013) & the Bayes / Italian-Flag hybrid", expanded=False):
+        st.markdown(r"""
+E-POS is not an ad-hoc scheme — its core is grounded in peer-reviewed uncertainty theory.
+The Italian Flag comes from **David Blockley** (the originator), most directly:
+
+- **Blockley, D.I. (2013)** — *Analysing uncertainties: Towards comparing Bayesian and
+  interval probabilities.* Mechanical Systems and Signal Processing 37, 30–42.
+- **Blockley, D.I. & Godfrey, P. (2000)** — *Doing it Differently.* Thomas Telford.
+- **Cui, W.C. & Blockley, D.I. (1990)** — *Interval probability theory for evidential support.*
+- **Shafer, G. (1976)** — *A Mathematical Theory of Evidence* (Bel/Pl, Dempster's rule).
+
+### 1 · FIR — three orthogonal kinds of uncertainty
+Blockley argues the usual *aleatory vs epistemic* split is too coarse. Uncertainty has
+three independent axes — **F**uzziness, **I**ncompleteness, **R**andomness. E-POS spans all
+three:
+
+| Axis | Blockley | In E-POS |
+|---|---|---|
+| **F** — fuzziness (vagueness of definition) | verbal "levels of definition" | verbal categories, discernibility buckets, the CoS scale |
+| **I** — incompleteness ("don't know") | the **white** of the flag | `White`, the stance `w`, the Bel/Pl envelope, the Uncertainty Index |
+| **R** — randomness | classical probability | the Bayes DFI likelihoods (Gaussian densities), volumetrics |
+
+### 2 · Why the Italian Flag (not plain probability)
+Classical probability carries a **completeness axiom**: beliefs on the sample space must sum
+to 1, forcing $p(\neg H) = 1 - p(H)$ — there is no way to say *"don't know."* Blockley drops
+completeness and represents a belief as an **interval**:
+
+$$p(H) = [\,g,\; 1-r\,] = [\text{Bel},\;\text{Pl}], \qquad p(H)\neq 1-p(\neg H)$$
+
+with **g** (green) = support *for*, **r** (red) = support *against*, **w** (white)
+$= 1-g-r$ = incompleteness. **This is exactly E-POS's flag** (`S_for`, `S_against`, `White`).
+
+### 3 · The Rosetta Stone — Blockley's Table 5, mapped to E-POS
+E-POS uses **both** frameworks the paper compares, in different places:
+
+| | **Bayesian** | **Italian Flag** | **Where E-POS uses it** |
+|---|---|---|---|
+| Measure | one number | interval `[g, 1−r]` | ESL gives the interval; **Policy P** reads a point |
+| Negation | $p(\neg H)=1-p(H)$ | $p(\neg E)\neq 1-p(E)$ | White decouples; `S_against` assessed separately |
+| Output | $p(H\mid E)=\dfrac{p(E\mid H)\,p(H)}{p(E)}$ | $p(H)=p(H\mid E)\,p(E)+(1-p(\neg H\mid\neg E))(1-p(E))$ | **DFI update** = Bayes row; **ESL rollup** = Flag row |
+
+### 4 · E-POS is a deliberate hybrid
+The geological **prior** is pure Italian-Flag (incompleteness-aware: `S_for/S_against/White`,
+Bel/Pl, stance `w`). The **DFI update** is Bayesian (the likelihood ratio R). The stance
+slider is literally *where in Blockley's interval you read the point*: `w=0` → Bel,
+`w=1` → Pl, `w=0.5` → midpoint.
+
+> **The key tension Blockley names:** a Bayesian update "does not allow the decision maker to
+> acknowledge incompleteness explicitly." So the DFI update **collapses the Bel/Pl envelope
+> onto a point** — the white is lost. That is why E-POS keeps showing the Bel/Pl band beside
+> the posterior and offers the **Dempster–Shafer prototype** (which carries the interval
+> through the update). Both are conscious answers to this paper.
+
+### 5 · The dependence warning — the root of E-POS's caution
+Blockley stresses that **Dempster's rule = multiplication = an assumption of independence**,
+"not warranted except where independence is known," and that it mishandles **conflict** (the
+Zadeh problem). His practical answer is **pairwise-comparison** combination. This single
+warning is the intellectual root of E-POS's whole anti-double-counting posture: the
+characteristic-attribute correlation discount **ρ**, the ESL dependency modes, the
+Dempster–Shafer conflict-**K** warning, and the *"why risking is hard — double-dipping"*
+section all descend from it.
+
+### 6 · Suggested for a future update — the *fuzzy* Italian Flag
+Blockley's final idea (his Fig. 5) is a **fuzzy Italian Flag**: when several *disagreeing*
+evidence sources each imply a different `[Bel, Pl]`, shade the flag with **gradations** of
+green→white→red built from the multiple pairwise bounds, rather than a single hard interval.
+E-POS currently uses one `[Bel, Pl]` per element. **A graded/fuzzy flag (and optionally the
+full pairwise-comparison combination operator) is logged as a candidate for a future
+release** — useful where one pillar is informed by multiple conflicting lines of evidence.
+""")
+
     with _tab_concepts.expander("Bayesian updating in 2 minutes — a non-geological primer", expanded=False):
         st.markdown(r"""
 Before the DFI maths, the **one idea** behind every probability update in E-POS:
