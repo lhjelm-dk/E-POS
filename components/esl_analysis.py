@@ -459,8 +459,10 @@ def _render_cam_scatter_plot(
     with _oc4:
         _show_nogo = st.checkbox("Risking-V no-go", value=False, key="cam_scatter_nogo",
                                  help="Rose / ExxonMobil 'legacy no-go' (high commitment + "
-                                      "middling POS). A binary-state reference, superseded for a "
-                                      "probability — see Theory & Guide → 'The Risking V'.")
+                                      "middling POS). A binary-state reference for the "
+                                      "PROSPECT-level decision (the ★ point) only — NOT a "
+                                      "verdict on individual elements, and superseded for a "
+                                      "probability. See Theory & Guide → 'The Risking V'.")
 
     _C_lo = 0.05 if _log_y else 0.0
     _C = np.linspace(_C_lo, 1.0, 500)
@@ -742,6 +744,16 @@ def _render_cam_scatter_plot(
                     yanchor="top", y=1.0, xanchor="left", x=1.02),
     )
     st.plotly_chart(fig, use_container_width=True)
+    if _show_nogo:
+        st.caption(
+            "ℹ️ **About the violet no-go band:** it is a *binary-state* reference for the "
+            "**prospect-level decision** (the filled ★ = P(G, ESL)) only. It is **not** a "
+            "verdict on individual elements — sub-elements sitting in the band is normal and "
+            "expected (a confidently-middling element, often with conflicting evidence to "
+            "document, not a kill). For a probability the no-go is superseded entirely: a "
+            "well-evidenced 50–70% element is a legitimate result, not a forbidden zone. "
+            "See **Theory & Guide → 'The Risking V & the no-go zone'**."
+        )
     _y_note = "ECI = |S_for − S_against|" if _use_eci else "Commitment C = S_for + S_against"
     st.caption(
         f"X: Policy P reversed (high confidence left) · Y: {_y_note}. "
