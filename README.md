@@ -160,6 +160,12 @@ with their Bel–Pl envelopes and the gap.
 
   ![Chance Adequacy Matrix](docs/img/10_geo_cam.png)
 
+  When the DFI update is active, an opt-in overlay marks the prospect-level headline
+  **before and after** the update (prior P(G, ESL) vs posterior P(G | DFI, ESL)) directly
+  on the zone bands:
+
+  ![CAM with post-DFI overlay](docs/img/22_cam_post_dfi.png)
+
 **Detail** — the full risk-element hierarchy, per-element tables, agreement analysis, and the
 Classic POS detail.
 
@@ -174,7 +180,7 @@ Three **mutually-exclusive evidence sources** derive the DFI strength as a likel
 |---|---|---|
 | **Custom R tool** | Simm 2-state Bayes | You define your own P(DFI \| HC) / P(DFI \| No-HC) bell curves — fully transparent, no external calibration |
 | **Characteristic scoring (Monigle 2025)** | naive-Bayes product → Simm 2-state | Score the prospect on 5 DHI attributes; R from a published drilled-prospect database. Stand-alone, no SAAM needed |
-| **Modified DHI Index (SAAM)** | 8-outcome Bayes | A conceptual DFI-strength model with per-pillar attribution & fluid-class diagnostics |
+| **Modified DHI Index (SAAM)** | 8-outcome Bayes | A conceptual DFI-strength model with channel-resolved per-pillar attribution & fluid-class diagnostics |
 
 **Custom R tool** — define the success/failure curves (multi-case: oil/gas/oil+gas vs
 water/LSG/other + non-reservoir, with a DHI-style `P(fluid | failure)` mix), read R off a
@@ -186,6 +192,17 @@ Every source can export a **GeoX hand-off** — the six `P(DFI | case)` likeliho
 GeoX's DFI Assessment (the absolute scale is free; GeoX uses only their ratios):
 
 ![GeoX hand-off](docs/img/13_dfi_custom_geox.png)
+
+**Pillar-resolved attribution (GeoX-style, single-segment)** — for the pillar-resolved
+sources (Custom multi-case and the Modified DHI Index) the update is resolved onto two
+geological channels: the **Reservoir** pillar and the combined **HC-system**
+(Charge·Closure·Retention, split by log-proportion). This exposes the key insight an
+aggregate likelihood ratio hides: a supportive anomaly can *raise* P(G) while *lowering*
+the Reservoir marginal, because part of the anomaly is explained by a possible
+non-reservoir cause. It is a parallel post-DFI view; the prior pillar inputs are never
+overwritten.
+
+![DFI pillar attribution](docs/img/21_dfi_pillar_attribution.png)
 
 **Characteristic scoring** — five verbal sliders; R is the product of per-attribute likelihood
 ratios from the Monigle 2025 database. E-POS also **reverse-engineers the success vs failure
@@ -213,9 +230,11 @@ The reportable one-page view: the Italian-flag overview, the **before → after*
 
 ### 7 · Theory & Guide
 
-A complete reference: ESL fundamentals, Policy P & the Bel–Pl envelope, the full Bayesian DFI
-derivation, the characteristic-scoring math, the CAM interpretation guide, calibration anchors,
-a glossary, and the source papers.
+A complete reference: ESL fundamentals, the theoretical foundations (Blockley 2013, FIR and
+the Bayes / Italian-Flag hybrid), Policy P & the Bel–Pl envelope, the full Bayesian DFI
+derivation (including the pillar-resolved update and a note on prior/likelihood conditional
+independence), the characteristic-scoring math, the CAM interpretation guide, the Risking V,
+calibration anchors, a glossary, and the source papers.
 
 ![Theory & Guide](docs/img/18_theory_overview.png)
 

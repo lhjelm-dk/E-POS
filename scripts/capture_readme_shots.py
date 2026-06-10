@@ -57,7 +57,7 @@ def main() -> int:
 
         with sync_playwright() as p:
             br = p.chromium.launch()
-            pg = br.new_page(viewport={"width": 1480, "height": 1000},
+            pg = br.new_page(viewport={"width": 1480, "height": 1280},
                              device_scale_factor=2)
             pg.goto(f"http://localhost:{PORT}", wait_until="networkidle")
             pg.wait_for_timeout(5000)
@@ -95,7 +95,17 @@ def main() -> int:
                     " if(e){e.scrollIntoView({block:'start'}); return true;}} return false;}", needle)
                 if not found:
                     print("    (scroll target not found:", needle, ")")
-                pg.wait_for_timeout(1200)
+                pg.wait_for_timeout(900)
+                # Anti-crop nudge: if the first plot below the viewport top is cut off
+                # at the bottom, scroll just enough to bring its bottom edge into view.
+                pg.evaluate(
+                    "()=>{const plots=[...document.querySelectorAll("
+                    "'.js-plotly-plot, canvas, [data-testid=\"stImage\"] img')];"
+                    " const vh=window.innerHeight;"
+                    " const p=plots.map(e=>e.getBoundingClientRect())"
+                    ".find(r=>r.height>120 && r.top>=-10 && r.top<vh && r.bottom>vh);"
+                    " if(p){window.scrollBy(0, Math.min(p.bottom-vh+24, Math.max(p.top-90,0)));}}")
+                pg.wait_for_timeout(600)
 
             def open_expander(substr):
                 pg.evaluate(
@@ -158,6 +168,11 @@ def main() -> int:
             scroll_to("Custom R tool"); shot("12_dfi_custom_setup")
             scroll_to("GeoX hand-off"); shot("13_dfi_custom_geox")
 
+            # Pillar-resolved attribution (Custom multi-case, DFI Results)
+            tab("DFI Results")
+            scroll_to("DFI pillar attribution"); shot("21_dfi_pillar_attribution")
+            tab("DFI Setup")
+
             # Characteristic scoring
             click_label("Characteristic scoring")
             scroll_to("Where this prospect sits"); shot("14_dfi_char_density")
@@ -170,6 +185,10 @@ def main() -> int:
             # ── Final Prospect POS ──
             tab("Final Prospect POS"); settle()
             scroll_to("Risk Overview"); shot("17_final_pos")
+
+            # ── CAM with the post-DFI headline-shift overlay (DFI still active) ──
+            tab("Geological POS"); tab("Diagnostics")
+            scroll_to("Chance Adequacy Matrix"); shot("22_cam_post_dfi")
 
             # ── Theory ──
             tab("Theory & Guide"); pg.evaluate("window.scrollTo(0,0)"); settle()

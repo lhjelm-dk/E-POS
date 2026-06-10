@@ -210,7 +210,7 @@ def render_prior_post_bar(
     delta = post - prior
     delta_color = "#16a34a" if delta >= 0 else "#dc2626"
     delta_bg    = "#dcfce7" if delta >= 0 else "#fee2e2"
-    direction   = "UPLIFT" if delta >= 0.005 else ("DOWNGRADE" if delta <= -0.005 else "NO CHANGE")
+    direction   = "RAISED" if delta >= 0.005 else ("LOWERED" if delta <= -0.005 else "NO CHANGE")
     arrow       = "↑" if delta >= 0.005 else ("↓" if delta <= -0.005 else "→")
 
     def _pos(p_pct: float) -> str:
