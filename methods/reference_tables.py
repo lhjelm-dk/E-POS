@@ -1054,9 +1054,12 @@ def render_reference_tables() -> None:
                 )
         st.markdown(
             "<p style='font-size:0.75rem;color:#6B7280;margin-top:8px;'>"
-            "Colour scale follows Milkov (2015) / GeoCos v2.0 convention. "
-            "Bar width is proportional to probability value; for CCOP ranges the "
-            "filled band shows the range and the solid marker shows the midpoint.</p>",
+            "Colours follow the Milkov (2015) / GeoCos v2.0 convention, but the band "
+            "<b>intervals are adjusted to be symmetric about 50%</b> "
+            "(0–10 / 10–25 / 25–40 / 40–60 / 60–75 / 75–90 / 90–100), rather than Milkov's "
+            "original asymmetric cut-offs. Bar width is proportional to probability value; "
+            "for CCOP ranges the filled band shows the range and the solid marker shows the "
+            "midpoint.</p>",
             unsafe_allow_html=True,
         )
 

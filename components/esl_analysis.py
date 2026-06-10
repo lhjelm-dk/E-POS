@@ -567,10 +567,10 @@ def _render_cam_scatter_plot(
             _up = _post_pos >= _pri_pos
             _post_col = "rgba(20,120,70,0.95)" if _up else "rgba(180,40,30,0.95)"
             fig.add_vline(x=_pri_pos, line=dict(color="rgba(80,80,90,0.85)", width=1.6, dash="dot"),
-                          annotation_text=f"prior {_pri_pos*100:.0f}%",
+                          annotation_text=f"prior P(G, ESL) {_pri_pos*100:.0f}%",
                           annotation_position="bottom", annotation_font_size=10)
             fig.add_vline(x=_post_pos, line=dict(color=_post_col, width=2.2),
-                          annotation_text=f"post-DFI {_post_pos*100:.0f}%",
+                          annotation_text=f"posterior P(G | DFI, ESL) {_post_pos*100:.0f}%",
                           annotation_position="top", annotation_font_size=10)
             # Arrow from prior to post at mid-height to read direction at a glance.
             fig.add_annotation(x=_post_pos, y=0.5, ax=_pri_pos, ay=0.5,
