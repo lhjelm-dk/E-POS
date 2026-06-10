@@ -442,6 +442,62 @@ computed from seismic amplitude statistics instead of a clinical trial.
 
 ➡️ *For the full geological derivation (how R comes from the likelihoods), see the
 **The maths** tab.*
+
+---
+
+#### A note for the Bayesian purist: are the prior and the likelihood independent?
+
+A fair objection is that the geological prior P(G) and the DFI likelihood P(DFI | HC)
+both describe the same rock, so they are not independent. The answer has two parts.
+
+**Bayes does not require them to be independent.** If the DHI were independent of whether
+hydrocarbons are present it would carry no information. The geology *creating* the seismic
+response is the very reason a DHI is diagnostic. What Bayes actually requires is
+**conditional independence given the true state**. Writing $S$ for the underlying state
+(hydrocarbons in an effective reservoir), updating the geological prior by a DHI likelihood
+is valid when
+
+$$P(\text{DFI}\mid S,\ \text{geological evidence}) = P(\text{DFI}\mid S),$$
+
+that is, once the true state is known the seismic and the geological evidence tell you
+nothing further about each other. This is the same naive-Bayes / conditional-independence
+assumption that governs the characteristic-attribute discount **ρ** and Blockley's
+dependence warning.
+
+**Two ways it can fail, and these are the real risks:**
+
+1. **Using the DHI twice (avoidable).** If a bright amplitude has already raised a
+   geological pillar (Charge or Reservoir), then applying the DHI again as a likelihood
+   counts the same observation twice and inflates the posterior. E-POS treats the DHI as
+   *Auxiliary evidence* held out of the geological pillars, and warns when DHI-type rows are
+   embedded inside a pillar. Use the DHI in the Bayesian update only.
+2. **A population-calibrated likelihood that is not transportable (subtle, partly
+   unavoidable).** The calibration gives a population-average P(DFI bright | HC), but
+   brightness within "HC" depends on reservoir quality, depth, lithology and tuning, the
+   same factors that drive the geological prior. A good-reservoir prospect tends to give a
+   brighter DHI when charged, so a bright DHI there is *less surprising* than the population
+   number implies. A flat likelihood then over-credits the evidence and the posterior is
+   mildly overconfident, the same direction of error as ρ double-counting.
+
+**What keeps it valid in practice:**
+
+- Build the geological prior from evidence orthogonal to amplitude (trap geometry, regional
+  charge and migration, source maturity) so the residual coupling is small.
+- Prefer the **case-conditioned** likelihood P(DFI | case) of the SAAM and Custom multi-case
+  methods. Conditioning on reservoir evaluability and fluid is exactly conditioning on the
+  covariates that couple the prior and the likelihood, which is the principled fix for
+  risk (2), rather than a flat P(DFI | HC).
+- Down-weight strong DHIs with the Volume Weight V, discernibility, and the R cap.
+
+**Standing caution:** when reservoir risk is low (so amplitude and reservoir co-vary), read a
+strong DFI posterior as a slight upper bound on confidence, and never let the bright spot
+leak back into the geological pillars.
+
+*Theoretical backing:* Pearl (causal Bayesian networks: the common-cause structure and
+conditional independence / d-separation); the naive-Bayes conditional-independence
+assumption and its tendency to overconfidence; likelihood transportability and external
+validity (Pearl and Bareinboim); Simm (2016) on amplitude reliability being rock and fluid
+dependent; Blockley (2013) on managing dependence.
 """)
 
     with _tab_concepts.expander("Chance Adequacy Matrix (CAM) — interpretation guide", expanded=False):
