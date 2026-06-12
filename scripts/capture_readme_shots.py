@@ -134,29 +134,29 @@ def main() -> int:
                 print("  ok", name)
 
             # ── Dashboard ──
-            scroll_to("E-POS"); shot("01_app_overview")
-            scroll_to("Direct Fluid Indicator"); shot("02_dashboard_dfi_toggle")
+            scroll_to("E-POS"); shot("02_app_overview")
+            scroll_to("Direct Fluid Indicator"); shot("24_dashboard_dfi_toggle")
             open_expander("Classic POS — source"); scroll_to("Classic POS — source")
-            shot("03_dashboard_classic_rose")
+            shot("25_dashboard_classic_rose")
             # Stance modes (neutral / custom / base rate) — select base rate to show it
             click_label("Base rate (revert")
-            scroll_to("Stance on unknowns"); shot("19_dashboard_stance_modes")
+            scroll_to("Stance on unknowns"); shot("26_dashboard_stance_modes")
             click_label("Neutral")    # reset so later shots use the neutral stance
 
             # ── Play / Conditional ──
-            tab("Play"); pg.evaluate("window.scrollTo(0,0)"); settle(); shot("04_play_tab")
-            tab("Conditional"); pg.evaluate("window.scrollTo(0,0)"); settle(); shot("05_conditional_tab")
+            tab("Play"); pg.evaluate("window.scrollTo(0,0)"); settle(); shot("27_play_tab")
+            tab("Conditional"); pg.evaluate("window.scrollTo(0,0)"); settle(); shot("28_conditional_tab")
 
             # ── Geological POS sub-tabs ──
             tab("Geological POS")
-            tab("Result"); scroll_to("Risk Overview"); shot("06_geo_result_overview")
-            scroll_to("Headline geological POS"); shot("07_geo_esl_vs_classic")
+            tab("Result"); scroll_to("Risk Overview"); shot("07_overview_flags")
+            scroll_to("Headline geological POS"); shot("08_esl_vs_classic")
             tab("Diagnostics")
-            scroll_to("Pillar fan"); shot("08_geo_pillar_fan")
-            scroll_to("Evidence Support Logic Ratio"); shot("09_geo_ratio_plot")
-            scroll_to("Chance Adequacy Matrix"); shot("10_geo_cam")
+            scroll_to("Pillar fan"); shot("29_geo_pillar_fan")
+            scroll_to("Evidence Support Logic Ratio"); shot("30_geo_ratio_plot")
+            scroll_to("Chance Adequacy Matrix"); shot("11_cam")
             tab("Detail")
-            scroll_to("Risk Element Hierarchy"); shot("11_geo_hierarchy")
+            scroll_to("Risk Element Hierarchy"); shot("31_geo_hierarchy")
 
             # ── Enable DFI, capture each evidence source ──
             tab("Dashboard"); set_dfi(True)
@@ -166,37 +166,37 @@ def main() -> int:
             click_label("Custom R tool")
             click_label("Multi-case")  # turn on multi-case if present
             scroll_to("Custom R tool"); shot("12_dfi_custom_setup")
-            scroll_to("GeoX hand-off"); shot("13_dfi_custom_geox")
+            scroll_to("GeoX hand-off"); shot("35_dfi_custom_geox_src")
 
             # Pillar-resolved attribution (Custom multi-case, DFI Results)
             tab("DFI Results")
-            scroll_to("DFI pillar attribution"); shot("21_dfi_pillar_attribution")
+            scroll_to("DFI pillar attribution"); shot("36_dfi_pillar_attribution_full")
             tab("DFI Setup")
 
             # Characteristic scoring
             click_label("Characteristic scoring")
             scroll_to("Where this prospect sits"); shot("14_dfi_char_density")
-            scroll_to("Per-attribute LR"); shot("15_dfi_char_lr_radar")
+            scroll_to("Per-attribute LR"); shot("32_dfi_char_lr_radar")
 
             # Modified DHI Index (SAAM)
             click_label("Modified DHI Index")
-            scroll_to("Modified DHI Index"); shot("16_dfi_modified_dhi")
+            scroll_to("Modified DHI Index"); shot("33_dfi_modified_dhi")
 
             # ── Final Prospect POS ──
             tab("Final Prospect POS"); settle()
-            scroll_to("Risk Overview"); shot("17_final_pos")
+            scroll_to("Risk Overview"); shot("19_final_pos")
 
             # ── CAM with the post-DFI headline-shift overlay (DFI still active) ──
             tab("Geological POS"); tab("Diagnostics")
-            scroll_to("Chance Adequacy Matrix"); shot("22_cam_post_dfi")
+            scroll_to("Chance Adequacy Matrix"); shot("20_cam_post_dfi")
 
             # ── Theory ──
             tab("Theory & Guide"); pg.evaluate("window.scrollTo(0,0)"); settle()
-            shot("18_theory_overview")
+            shot("23_theory_overview")
             # Risking-V schematic in the Concepts sub-tab
             tab("Concepts"); settle()
             open_expander("Risking V"); scroll_to("The Risking V")
-            shot("20_theory_risking_v")
+            shot("22_theory_risking_v")
 
             br.close()
         print("done - images in", IMG)

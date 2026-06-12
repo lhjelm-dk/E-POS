@@ -9,7 +9,7 @@ and the app reports three numbers side by side — **P(G, ESL)**, **P(G, Classic
 DFI-conditioned posterior **P(G | DFI)** — so the gap between methods becomes a data-quality
 signal rather than a hidden assumption.
 
-![E-POS overview](docs/img/01_app_overview.png)
+![E-POS overview](docs/img/02_app_overview.png)
 
 > All screenshots in this README are generated from the synthetic **`AlphaGammaFoxtrot`**
 > prospect using the **placeholder** calibration that ships with the repo (no proprietary
@@ -65,7 +65,7 @@ the prior in **either** direction.
 The **ESL − Classic gap** is a built-in diagnostic: a large divergence flags dependence between
 pillars or a data-quality issue, not an error.
 
-![P(G, ESL) vs P(G, Classic)](docs/img/07_geo_esl_vs_classic.png)
+![P(G, ESL) vs P(G, Classic)](docs/img/08_esl_vs_classic.png)
 
 ---
 
@@ -104,20 +104,20 @@ is scored: `0` = pessimistic, `0.5` = neutral/recommended, `1` = optimistic). Th
 where you switch on the **DFI-capable prospect?** toggle — the single most consequential
 control in the workflow.
 
-![DFI toggle](docs/img/02_dashboard_dfi_toggle.png)
+![DFI toggle](docs/img/24_dashboard_dfi_toggle.png)
 
 The Dashboard also hosts the **Classic POS** read-out, with an optional **ROSE override** for
 entering a pre-existing external estimate (documented for audit). By default Classic POS is
 ESL-derived and fully traceable.
 
-![Classic POS / ROSE override](docs/img/03_dashboard_classic_rose.png)
+![Classic POS / ROSE override](docs/img/25_dashboard_classic_rose.png)
 
 **Stance modes.** The white/unknown band can be scored three ways: **Neutral** (`w = 0.5`,
 split 50/50), **Custom w**, or **Base rate** — which reverts the unknowns to the prospect base
 rate rather than a coin (ExxonMobil 2018: *"geology is not a coin"*), `Policy P = S_for +
 base_rate · White`. A *Seed from Rose medians* button supplies an analogue base rate.
 
-![Stance modes](docs/img/19_dashboard_stance_modes.png)
+![Stance modes](docs/img/26_dashboard_stance_modes.png)
 
 ### 2 · Play
 
@@ -125,14 +125,14 @@ Assess the **play-level** chance of each pillar (Charge, Closure, Reservoir, Ret
 regional, shared-across-prospects component. Each element takes evidence **for** and
 **against**; the remainder is the white/unknown band.
 
-![Play tab](docs/img/04_play_tab.png)
+![Play tab](docs/img/27_play_tab.png)
 
 ### 3 · Conditional
 
 Assess the **prospect-given-play** chance — the prospect-specific component, broken into
 sub-elements and combined with the chosen ESL operator (weakest-link, product, etc.).
 
-![Conditional tab](docs/img/05_conditional_tab.png)
+![Conditional tab](docs/img/28_conditional_tab.png)
 
 ### 4 · Geological POS
 
@@ -141,7 +141,7 @@ The geological result, split into three sub-tabs.
 **Result** — the headline Italian-flag overview table and both P(G) numbers (ESL vs Classic)
 with their Bel–Pl envelopes and the gap.
 
-![Geological POS — Result](docs/img/06_geo_result_overview.png)
+![Geological POS — Result](docs/img/07_overview_flags.png)
 
 **Diagnostics** — how the number behaves and what drives it:
 
@@ -149,27 +149,27 @@ with their Bel–Pl envelopes and the gap.
   *w*. The total is a *straight line* (ESL combines masses first, applies Policy P once) — its
   geometric signature versus the curved Classic fan.
 
-  ![Pillar fan](docs/img/08_geo_pillar_fan.png)
+  ![Pillar fan](docs/img/29_geo_pillar_fan.png)
 
 - **ESL Ratio Plot** — evidence ratio (for ÷ against) versus residual uncertainty per element.
 
-  ![ESL ratio plot](docs/img/09_geo_ratio_plot.png)
+  ![ESL ratio plot](docs/img/30_geo_ratio_plot.png)
 
 - **Chance Adequacy Matrix (CAM)** — every element in POS × commitment space, with auto-set
   green/red boundaries.
 
-  ![Chance Adequacy Matrix](docs/img/10_geo_cam.png)
+  ![Chance Adequacy Matrix](docs/img/11_cam.png)
 
   When the DFI update is active, an opt-in overlay marks the prospect-level headline
   **before and after** the update (prior P(G, ESL) vs posterior P(G | DFI, ESL)) directly
   on the zone bands:
 
-  ![CAM with post-DFI overlay](docs/img/22_cam_post_dfi.png)
+  ![CAM with post-DFI overlay](docs/img/20_cam_post_dfi.png)
 
 **Detail** — the full risk-element hierarchy, per-element tables, agreement analysis, and the
 Classic POS detail.
 
-![Risk element hierarchy](docs/img/11_geo_hierarchy.png)
+![Risk element hierarchy](docs/img/31_geo_hierarchy.png)
 
 ### 5 · Bayesian DFI Update
 
@@ -191,7 +191,7 @@ DHI-strength slider:
 Every source can export a **GeoX hand-off** — the six `P(DFI | case)` likelihoods for SLB
 GeoX's DFI Assessment (the absolute scale is free; GeoX uses only their ratios):
 
-![GeoX hand-off](docs/img/13_dfi_custom_geox.png)
+![GeoX hand-off](docs/img/13_dfi_custom_curves_geox.png)
 
 **Pillar-resolved attribution (GeoX-style, single-segment)** — for the pillar-resolved
 sources (Custom multi-case and the Modified DHI Index) the update is resolved onto two
@@ -202,7 +202,7 @@ the Reservoir marginal, because part of the anomaly is explained by a possible
 non-reservoir cause. It is a parallel post-DFI view; the prior pillar inputs are never
 overwritten.
 
-![DFI pillar attribution](docs/img/21_dfi_pillar_attribution.png)
+![DFI pillar attribution](docs/img/17_dfi_pillar_attribution.png)
 
 **Characteristic scoring** — five verbal sliders; R is the product of per-attribute likelihood
 ratios from the Monigle 2025 database. E-POS also **reverse-engineers the success vs failure
@@ -211,14 +211,13 @@ model) so you can see where the prospect sits in the drilled population:
 
 ![Characteristic score density + GeoX](docs/img/14_dfi_char_density.png)
 
-![Characteristic per-attribute LR + radar](docs/img/15_dfi_char_lr_radar.png)
+![Characteristic per-attribute LR + radar](docs/img/32_dfi_char_lr_radar.png)
 
 **Modified DHI Index (SAAM)** — a conceptual model reverse-engineered from public SAAM
 presentation material. It carries a prominent warning: **do not enter a raw SAAM DHI Index** —
 that index bundles geology with the seismic signal, and the input here must be a *pure
 DFI-strength indicator*:
 
-![Modified DHI Index (SAAM)](docs/img/16_dfi_modified_dhi.png)
 
 ### 6 · Final Prospect POS
 
@@ -226,7 +225,7 @@ The reportable one-page view: the Italian-flag overview, the **before → after*
 (both P(G, ESL) and P(G, Classic), with the Δ in percentage points), and the single
 **Reportable POS** callout.
 
-![Final Prospect POS](docs/img/17_final_pos.png)
+![Final Prospect POS](docs/img/19_final_pos.png)
 
 ### 7 · Theory & Guide
 
@@ -236,7 +235,7 @@ derivation (including the pillar-resolved update and a note on prior/likelihood 
 independence), the characteristic-scoring math, the CAM interpretation guide, the Risking V,
 calibration anchors, a glossary, and the source papers.
 
-![Theory & Guide](docs/img/18_theory_overview.png)
+![Theory & Guide](docs/img/23_theory_overview.png)
 
 ---
 
@@ -262,7 +261,7 @@ separate *known-geology favourability* (green/red) from *confidence* (the white 
 chance against confidence produces a **V** — pinned to the base rate at low confidence, opening
 toward the failure (0) and success (1) corners as confidence rises.
 
-![The Risking V — schematic](docs/img/20_theory_risking_v.png)
+![The Risking V — schematic](docs/img/22_theory_risking_v.png)
 
 The classic **"no-go" zone** (confident-but-middling, upper-centre) is a *binary-state* artefact —
 ExxonMobil's 2018 review notes it is *"only applicable if the state of nature is 0 or 1,"* not for a
