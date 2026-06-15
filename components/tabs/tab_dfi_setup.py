@@ -130,24 +130,26 @@ def _render_dfi_setup(ctx) -> None:
     with col_inputs:
         st.markdown("##### Inputs")
 
+        # Key-only widgets: seed the default once, then let Streamlit own the
+        # widget state via `key`. Passing both `value=`/`index=` AND `key=` when the
+        # default is read from the *same* session key makes the widget snap back to
+        # the default on rerun (the DHI-Index "stuck at 19" desync) — so don't.
+        st.session_state.setdefault("dfi_index", 19)
         dhi = st.slider(
             "**DHI Index**",
             min_value=DHI_INDEX_MIN_INT,
             max_value=DHI_INDEX_MAX_INT,
-            value=int(st.session_state.get("dfi_index", 19)),
             step=1, key="dfi_index",
             help=(f"DHI Index from DHI scoring "
                   f"(range {DHI_INDEX_MIN_INT} to {DHI_INDEX_MAX_INT}). "
                   "Higher = stronger DFI signal supporting HC presence."),
         )
 
+        st.session_state.setdefault("dfi_fluid_type", "Success")
         fluid_type = st.selectbox(
             "**Expected HC fluid type**",
             options=list(SUCCESS_CLASSES),
             format_func=lambda x: CLASS_DISPLAY.get(x, x),
-            index=list(SUCCESS_CLASSES).index(
-                st.session_state.get("dfi_fluid_type", "Success")
-            ),
             key="dfi_fluid_type",
             help=("DHI class supplying the success-side likelihood. "
                   "'HC Success' is the aggregate (default); pick Oil/Gas/OilGas if "
@@ -166,21 +168,21 @@ def _render_dfi_setup(ctx) -> None:
             st.markdown("**Fluid failure probabilities**  *P(fluid | failure)*")
             col_w, col_l, col_o = st.columns(3)
             with col_w:
+                st.session_state.setdefault("dfi_fluid_water", 0.80)
                 water = st.number_input(
                     "Water", min_value=0.0, max_value=1.0,
-                    value=float(st.session_state.get("dfi_fluid_water", 0.80)),
                     step=0.05, format="%.2f", key="dfi_fluid_water",
                 )
             with col_l:
+                st.session_state.setdefault("dfi_fluid_lsg", 0.20)
                 lsg = st.number_input(
                     "LSG", min_value=0.0, max_value=1.0,
-                    value=float(st.session_state.get("dfi_fluid_lsg", 0.20)),
                     step=0.05, format="%.2f", key="dfi_fluid_lsg",
                 )
             with col_o:
+                st.session_state.setdefault("dfi_fluid_other", 0.00)
                 other = st.number_input(
                     "Other", min_value=0.0, max_value=1.0,
-                    value=float(st.session_state.get("dfi_fluid_other", 0.00)),
                     step=0.05, format="%.2f", key="dfi_fluid_other",
                 )
             total_w = water + lsg + other
@@ -196,13 +198,13 @@ def _render_dfi_setup(ctx) -> None:
             )
 
             st.markdown("**ESL per-pillar attribution method**")
+            st.session_state.setdefault("dfi_esl_attribution", "A")
             esl_attr = st.radio(
                 "Attribution",
                 options=["A", "B"],
                 format_func=lambda x: ("A: equal multiplicative (preserve commitment C)"
                                        if x == "A"
                                        else "B: Bel/Pl-preserving"),
-                index=0 if st.session_state.get("dfi_esl_attribution", "A") == "A" else 1,
                 key="dfi_esl_attribution",
                 label_visibility="collapsed",
                 help=("How the posterior P(G | DFI, ESL) is distributed back to per-pillar "
