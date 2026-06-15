@@ -225,18 +225,12 @@ def _render_dfi_setup(ctx) -> None:
 
             st.markdown("**ESL per-pillar attribution method**")
             st.session_state.setdefault("dfi_esl_attribution", "B")
-            esl_attr = st.radio(
-                "Attribution",
-                options=["A", "B"],
-                format_func=lambda x: ("A: equal multiplicative (preserve commitment C)"
-                                       if x == "A"
-                                       else "B: Bel/Pl-preserving"),
-                key="dfi_esl_attribution",
-                label_visibility="collapsed",
-                help=("How the posterior P(G | DFI, ESL) is distributed back to per-pillar "
-                      "(S_for, S_against) masses. A = simpler, scales each pillar Pg by "
-                      "ratio^(1/8) and round-trips the masses keeping commitment C fixed. "
-                      "B = computes posterior at w=0 and w=1 separately to update Bel/Pl."),
+            _attr_now = st.session_state.get("dfi_esl_attribution", "B")
+            _attr_lbl = ("A: equal multiplicative (preserve commitment C)"
+                         if _attr_now == "A" else "B: Bel/Pl update")
+            st.caption(
+                f"Current: **{_attr_lbl}**. Choose A or B — with the full explanation and the "
+                "math behind each — in **Dashboard → ⚙ Advanced — DFI → ESL per-pillar attribution**."
             )
 
         # Defaults so downstream code works whether or not the drawer was opened.

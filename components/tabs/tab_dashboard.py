@@ -386,6 +386,48 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
             st.metric("Stance (w)", f"{uncertainty_weight:.2f}")
             st.caption(_dash_w_label2(uncertainty_weight))
 
+    # ── DFI → ESL per-pillar attribution (only relevant when the DFI update is on) ──
+    if _dfi_on_now:
+        with st.expander("⚙ Advanced — DFI → ESL per-pillar attribution (A / B)", expanded=False):
+            st.markdown(
+                "When the DFI update moves the headline **P(G, ESL)**, this controls how that shift is "
+                "written back onto each pillar's Italian-flag masses **(S_for, S_against, White)** — the "
+                "prior/posterior flags shown in **Bayesian DFI Update → DFI Results**."
+            )
+            st.session_state.setdefault("dfi_esl_attribution", "B")
+            st.radio(
+                "Attribution method",
+                options=["A", "B"],
+                format_func=lambda x: ("A — equal multiplicative (hold White fixed, preserve C)"
+                                       if x == "A" else
+                                       "B — Bel/Pl interval update (recommended)"),
+                key="dfi_esl_attribution",
+                help="A only rebalances green/red and keeps incompleteness fixed. "
+                     "B updates the belief interval [Bel, Pl] itself.",
+            )
+            st.markdown(
+                "**A — hold White fixed (preserve commitment C = S_for + S_against).** The seismic only "
+                "rebalances green ↔ red within each pillar; incompleteness is untouched. Simple, "
+                "conservative, easy to narrate (*\"the DFI shifted belief within what we already know\"*). "
+                "It is a **heuristic**: it does not correspond to a coherent update of the belief interval, "
+                "and it refuses to let informative evidence reduce uncertainty.\n\n"
+                "**B — update the belief interval [Bel, Pl].** Bel = S_for (lower probability), "
+                "Pl = 1 − S_against (upper probability). B applies the **same** Bayesian update to **both** "
+                "bounds (the posterior at stance w = 0 and w = 1), so the whole interval moves and White "
+                "can legitimately change.\n\n"
+                "**Which is mathematically most correct? → B.** With a precise likelihood ratio R, the "
+                "coherent (generalised-Bayes) update of an interval probability [Bel, Pl] is exactly "
+                "[update(Bel), update(Pl)], which is what B computes. A is a defensible simplification, "
+                "not a coherent interval update.\n\n"
+                "**Recommended default: B** — it matches the interval-probability (Italian-Flag) foundation "
+                "the whole tool rests on. Pick **A** when you deliberately want incompleteness held constant "
+                "(a quick, conservative read where the seismic should not touch your data-coverage gaps).\n\n"
+                "*Caveat: a sharp Bayesian posterior has no intrinsic incompleteness, so any posterior White "
+                "is a modelling convention. Both A and B spread the headline move across all pillars by equal "
+                "log-share; the reservoir-vs-HC-system split that targets where the fluid evidence actually "
+                "applies is the channel-resolved table, not this one.*"
+            )
+
     st.divider()
 
     # Per-pillar P(pillar) — colour-coded by risk level
