@@ -164,15 +164,14 @@ def _render_dfi_results(ctx) -> None:
             prior_esl, esl_masses_keyed, dhi, calib, fw, sd_mode, fluid_type,
         )
 
-    col_esl, col_cls = st.columns(2)
-    with col_esl:
-        st.markdown(f"**ESL** *(attribution: option {esl_attr_mode})*")
-        _render_pillar_attribution_table_esl(
-            esl_masses_keyed, esl_attr_masses, w_cur, ctx,
-        )
-    with col_cls:
-        st.markdown("**Classic** *(workbook log-attribution, reservoir-aware)*")
-        _render_pillar_attribution_table_classic(prior_classic, classic_attr, ctx)
+    # ESL flag table is full-width (two flag bars per row need the room);
+    # the Classic table stacks beneath it.
+    st.markdown(f"**ESL — prior vs posterior flags** *(attribution: option {esl_attr_mode})*")
+    _render_pillar_attribution_table_esl(
+        esl_masses_keyed, esl_attr_masses, w_cur, ctx, esl_attr_mode,
+    )
+    st.markdown("**Classic** *(workbook log-attribution, reservoir-aware)*")
+    _render_pillar_attribution_table_classic(prior_classic, classic_attr, ctx)
 
     st.divider()
 
@@ -664,38 +663,70 @@ def _render_pillar_attribution_table_classic(prior, posterior, ctx) -> None:
     st.dataframe(df, hide_index=True, use_container_width=True)
 
 
-def _render_pillar_attribution_table_esl(masses_prior, masses_post, w, ctx) -> None:
-    """ESL per-pillar table showing (S_for, S_against, Policy P) before & after."""
-    import pandas as pd
-    rows = []
-    total_for_prior, total_against_prior = ctx.total_for, ctx.total_against
+def _render_pillar_attribution_table_esl(masses_prior, masses_post, w, ctx,
+                                         attr_mode: str = "A") -> None:
+    """ESL per-pillar table: prior & posterior **Italian flags** alongside the
+    (S_for, S_against, Policy P) masses, for all 8 play/cond slots.
+
+    The posterior flag is an *attribution* of the headline Bayesian update, not a
+    measurement: under Option A the incompleteness (White) is held fixed and only
+    green/red rebalance; under Option B the Bel and Pl edges move.
+    """
+    from components.render_helpers import small_flag_html
+
+    def _disp(pillar: str, scope: str) -> str:
+        name = ("Charge" if pillar == "charge" else
+                "Closure" if pillar == "trap" else
+                "Reservoir" if pillar == "reservoir" else "Retention")
+        return f"{name} / {'Play' if scope == 'play' else 'Cond'}"
+
+    hdr = (
+        "<tr style='background:#f3f4f6;'>"
+        "<th style='text-align:left;padding:4px 8px;'>Pillar / Scope</th>"
+        "<th style='padding:4px 8px;'>Prior flag</th>"
+        "<th style='padding:4px 8px;'>Posterior flag</th>"
+        "<th style='padding:4px 8px;'>S_for</th>"
+        "<th style='padding:4px 8px;'>S_against</th>"
+        "<th style='padding:4px 8px;'>Policy P</th>"
+        "<th style='padding:4px 8px;'>ΔP</th>"
+        "</tr>"
+    )
+    body = ""
     for pillar in ("charge", "trap", "reservoir", "retention"):
         for scope in ("play", "cond"):
             mp = masses_prior[pillar][scope]
             mn = masses_post[pillar][scope]
-            disp = (("Charge" if pillar == "charge" else
-                     "Closure" if pillar == "trap" else
-                     "Reservoir" if pillar == "reservoir" else
-                     "Retention")
-                    + " / " + ("Play" if scope == "play" else "Cond"))
             pri_p = mp.s_for + w * max(0.0, 1 - mp.s_for - mp.s_against)
             post_p = mn.s_for + w * max(0.0, 1 - mn.s_for - mn.s_against)
-            rows.append({
-                "Pillar / Scope": disp,
-                "S_for prior":     f"{mp.s_for:.3f}",
-                "S_for post":      f"{mn.s_for:.3f}",
-                "S_against prior": f"{mp.s_against:.3f}",
-                "S_against post":  f"{mn.s_against:.3f}",
-                "Policy P prior":  f"{pri_p*100:.1f}%",
-                "Policy P post":   f"{post_p*100:.1f}%",
-                "ΔP":              f"{(post_p - pri_p)*100:+.1f}%",
-            })
-    df = pd.DataFrame(rows)
-    st.dataframe(df, hide_index=True, use_container_width=True)
+            dP = (post_p - pri_p) * 100
+            dcol = "#16a34a" if dP > 0.05 else ("#dc2626" if dP < -0.05 else "#6b7280")
+            arr = "▲" if dP > 0.05 else ("▼" if dP < -0.05 else "■")
+            body += (
+                "<tr style='border-top:1px solid #e5e7eb;'>"
+                f"<td style='text-align:left;padding:4px 8px;white-space:nowrap;'>{_disp(pillar, scope)}</td>"
+                f"<td style='padding:4px 8px;'>{small_flag_html(mp.s_for, mp.s_against)}</td>"
+                f"<td style='padding:4px 8px;'>{small_flag_html(mn.s_for, mn.s_against)}</td>"
+                f"<td style='padding:4px 8px;text-align:center;'>{mp.s_for:.3f} → {mn.s_for:.3f}</td>"
+                f"<td style='padding:4px 8px;text-align:center;'>{mp.s_against:.3f} → {mn.s_against:.3f}</td>"
+                f"<td style='padding:4px 8px;text-align:center;'>{pri_p*100:.1f}% → {post_p*100:.1f}%</td>"
+                f"<td style='padding:4px 8px;text-align:center;color:{dcol};'>{arr} {dP:+.1f}</td>"
+                "</tr>"
+            )
+    st.markdown(
+        "<table style='width:100%;border-collapse:collapse;font-size:0.82rem;'>"
+        f"<thead>{hdr}</thead><tbody>{body}</tbody></table>",
+        unsafe_allow_html=True,
+    )
+    conv = ("Option A holds **White fixed** (preserve C = S_for + S_against); only green/red "
+            "rebalance to hit the posterior."
+            if attr_mode == "A" else
+            "Option B moves the **Bel and Pl** edges, so White can change between prior and posterior.")
     st.caption(
-        "ESL attribution updates each pillar's (S_for, S_against) masses. "
-        "Option A preserves commitment C = S_for + S_against per pillar; "
-        "Option B redistributes the Bel and Pl posterior shifts."
+        "Flag colours: green = S_for (support for), red = S_against (support against), "
+        "white = incompleteness (what you don't yet know). "
+        f"{conv} The posterior flag is an **attribution** of the Bayesian headline update, "
+        "not a measurement — a sharp Bayesian posterior has no intrinsic incompleteness, so the "
+        "posterior White is a modelling convention."
     )
 
 
