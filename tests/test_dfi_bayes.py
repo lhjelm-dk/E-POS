@@ -118,3 +118,30 @@ def test_attribute_classic_product_invariant():
         * attr.charge_cond * attr.trap_cond * attr.reservoir_cond * attr.retention_cond
     )
     assert product == pytest.approx(post.posterior_pg, rel=1e-6)
+
+
+def test_attribute_esl_optionB_r_interval_update():
+    from logic.dfi_bayes import attribute_esl_optionB_r, ESLMasses
+
+    def _masses():
+        return {p: {"play": ESLMasses(0.55, 0.15), "cond": ESLMasses(0.60, 0.10)}
+                for p in ("charge", "trap", "reservoir", "retention")}
+
+    # R = 1 is a no-op (no evidence -> no change).
+    out1 = attribute_esl_optionB_r(_masses(), 1.0)
+    m = _masses()["charge"]["play"]; o = out1["charge"]["play"]
+    assert abs(o.s_for - m.s_for) < 1e-9 and abs(o.s_against - m.s_against) < 1e-9
+
+    # R > 1 raises Bel (S_for up) and Pl (S_against down); R < 1 reverses.
+    up = attribute_esl_optionB_r(_masses(), 3.0)["charge"]["play"]
+    dn = attribute_esl_optionB_r(_masses(), 0.3)["charge"]["play"]
+    assert up.s_for > m.s_for and up.s_against < m.s_against
+    assert dn.s_for < m.s_for and dn.s_against > m.s_against
+
+    # Every slot stays a valid flag (S_for + S_against <= 1, both >= 0).
+    for r in (0.2, 0.8, 1.0, 2.5, 9.0):
+        out = attribute_esl_optionB_r(_masses(), r)
+        for scopes in out.values():
+            for o in scopes.values():
+                assert o.s_for >= 0.0 and o.s_against >= 0.0
+                assert o.s_for + o.s_against <= 1.0 + 1e-9

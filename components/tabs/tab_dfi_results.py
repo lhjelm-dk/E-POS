@@ -133,28 +133,8 @@ def _render_dfi_results(ctx) -> None:
     classic_attr = attribute_classic(prior_classic, post_classic)
 
     # ESL attribution: A (equal-multiplicative + mass round-trip) or B (Bel/Pl-preserving)
-    # Build per-pillar ESLMasses from ctx (play element + ESL-combined cond)
-    esl_masses_in: dict[str, dict[str, ESLMasses]] = {}
-    for pid in ("Charge", "Closure", "Reservoir", "Retention"):
-        play_el = ctx.play.get(pid, {})
-        cond_r  = ctx.conditional_results.get(pid, {"for": 0.5, "against": 0.1})
-        esl_masses_in[pid.lower()] = {
-            "play": ESLMasses(
-                s_for=float(play_el.get("support_for", 0.5)),
-                s_against=float(play_el.get("support_against", 0.1)),
-            ),
-            "cond": ESLMasses(
-                s_for=float(cond_r["for"]),
-                s_against=float(cond_r["against"]),
-            ),
-        }
-    # Map "trap" → "closure" mismatch: PriorPillars uses trap_*, we use closure key
-    esl_masses_keyed = {
-        "charge":    esl_masses_in["charge"],
-        "trap":      esl_masses_in["closure"],  # PriorPillars uses 'trap'
-        "reservoir": esl_masses_in["reservoir"],
-        "retention": esl_masses_in["retention"],
-    }
+    # Build per-pillar ESLMasses from ctx (shared helper, keyed Closure → trap)
+    esl_masses_keyed = _esl_masses_keyed_from_ctx(ctx)
     if esl_attr_mode == "A":
         esl_attr_masses = attribute_esl_optionA(
             prior_esl, esl_masses_keyed, post_esl.posterior_pg, w_cur,
@@ -255,11 +235,15 @@ def _render_dfi_results_characteristic(ctx) -> None:
 
     st.info(
         "In characteristic mode the posterior comes from Simm's 2-state Bayes "
-        "(R_eff applied to the geological prior). The conceptual specific views "
-        "(per-pillar attribution, fluid-mix sweep, iso-DHI plot, GeoX hand-off) "
-        "are not available because the 6-attribute characteristic scoring does not "
-        "decompose the failure modes into water/LSG/other × eval/non-eval reservoir."
+        "(R_eff applied to the geological prior). The **channel-resolved** views "
+        "(reservoir-vs-HC-system split, fluid-mix sweep, iso-DHI plot, GeoX hand-off) "
+        "are not available because the characteristic scoring does not decompose the "
+        "failure modes into water/LSG/other × eval/non-eval reservoir. The ESL per-pillar "
+        "flag attribution below spreads the single headline R across the pillars."
     )
+
+    _render_esl_flag_table_for_r(ctx, r_eff, w_cur)
+    st.divider()
 
     # ── Prior → Posterior trajectory across stance w (shared component) ──
     st.markdown("##### Posterior trajectory — P(G) vs stance w")
@@ -342,6 +326,9 @@ def _render_dfi_results_custom(ctx) -> None:
         "The **DHI-strength sweep** and **iso-R prior→posterior map** below are the custom-tool "
         "analogues of the conceptual DHI model sensitivity and iso-DHI plots."
     )
+
+    _render_esl_flag_table_for_r(ctx, r_val, w_cur)
+    st.divider()
 
     st.markdown("##### Posterior trajectory — P(G) vs stance w")
     from components.dfi_shared import render_simm_trajectory
@@ -727,6 +714,54 @@ def _render_pillar_attribution_table_esl(masses_prior, masses_post, w, ctx,
         f"{conv} The posterior flag is an **attribution** of the Bayesian headline update, "
         "not a measurement — a sharp Bayesian posterior has no intrinsic incompleteness, so the "
         "posterior White is a modelling convention."
+    )
+
+
+def _esl_masses_keyed_from_ctx(ctx):
+    """Per-pillar prior ESL masses from ctx, keyed the way the attribution
+    functions expect (Closure → ``trap`` to match ``PriorPillars``)."""
+    from logic.dfi_bayes import ESLMasses
+    by_pillar = {}
+    for pid in ("Charge", "Closure", "Reservoir", "Retention"):
+        play_el = ctx.play.get(pid, {})
+        cond_r = ctx.conditional_results.get(pid, {"for": 0.5, "against": 0.1})
+        by_pillar[pid.lower()] = {
+            "play": ESLMasses(s_for=float(play_el.get("support_for", 0.5)),
+                              s_against=float(play_el.get("support_against", 0.1))),
+            "cond": ESLMasses(s_for=float(cond_r["for"]),
+                              s_against=float(cond_r["against"])),
+        }
+    return {
+        "charge":    by_pillar["charge"],
+        "trap":      by_pillar["closure"],   # PriorPillars uses 'trap' for Closure
+        "reservoir": by_pillar["reservoir"],
+        "retention": by_pillar["retention"],
+    }
+
+
+def _render_esl_flag_table_for_r(ctx, r_val: float, w_cur: float) -> None:
+    """Prior/posterior ESL flag table for a single-R source (Custom R tool and
+    Characteristic). Uses the active A/B attribution: A via the generic
+    equal-multiplicative scaling, B via the scalar-R interval update."""
+    from logic.dfi_bayes import attribute_esl_optionA, attribute_esl_optionB_r
+    from logic.dfi_simm import simm_bayes_posterior
+
+    masses_prior = _esl_masses_keyed_from_ctx(ctx)
+    prior_pillars = _esl_prior_pillars_from_ctx_at_w(ctx, w_cur)
+    esl_prior_pg = _esl_rollup_prior_at_w(ctx, w_cur)
+    posterior_pg = simm_bayes_posterior(esl_prior_pg, r_val)
+    attr_mode = st.session_state.get("dfi_esl_attribution", "B")
+    if attr_mode == "A":
+        masses_post = attribute_esl_optionA(prior_pillars, masses_prior, posterior_pg, w_cur)
+    else:
+        masses_post = attribute_esl_optionB_r(masses_prior, r_val)
+
+    st.markdown("##### DFI-modified per-pillar values — mass-level detail (at current stance)")
+    st.markdown(f"**ESL — prior vs posterior flags** *(attribution: option {attr_mode})*")
+    _render_pillar_attribution_table_esl(masses_prior, masses_post, w_cur, ctx, attr_mode)
+    st.caption(
+        "Set the attribution method (A / B) in **Dashboard → ⚙ Advanced — DFI → ESL "
+        "per-pillar attribution**."
     )
 
 

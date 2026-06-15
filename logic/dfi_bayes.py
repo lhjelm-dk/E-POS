@@ -648,3 +648,53 @@ def attribute_esl_optionB(
         new_sa = max(0.0, min(1.0 - new_sf, 1.0 - new_pl))
         out.setdefault(pillar, {})[scope] = ESLMasses(s_for=new_sf, s_against=new_sa)
     return out
+
+
+def attribute_esl_optionB_r(
+    pillar_masses: dict[str, dict[str, ESLMasses]],
+    r: float,
+) -> dict[str, dict[str, ESLMasses]]:
+    """Bel/Pl interval update driven by a single Simm likelihood ratio ``R``.
+
+    The Custom R tool and the Characteristic sources update the headline through
+    one likelihood ratio (Simm two-state Bayes), not the 8-outcome DHI Bayes, so
+    they cannot use :func:`attribute_esl_optionB` (which needs a full
+    ``DFIPosterior``). This realises the same *intent* — update the belief
+    interval [Bel, Pl] rather than only rebalancing green/red — for a scalar R:
+
+    * Bel headline = product of the 8 per-pillar ``S_for`` (lower probabilities);
+      Pl headline = product of the 8 per-pillar ``(1 - S_against)`` (upper).
+    * Update each headline by the same ``R`` (``simm_bayes_posterior``), then
+      spread the endpoint change across the 8 slots by **equal log share**
+      (``ratio ** (1/8)`` per slot) — Option A's spreading rule applied to the
+      interval endpoints instead of Policy P.
+    * New ``S_for`` = updated Bel, new ``S_against`` = 1 - updated Pl.
+    """
+    from logic.dfi_simm import simm_bayes_posterior
+
+    slots = (("charge", "play"), ("trap", "play"), ("reservoir", "play"),
+             ("retention", "play"), ("charge", "cond"), ("trap", "cond"),
+             ("reservoir", "cond"), ("retention", "cond"))
+
+    bels = {s: max(1e-9, min(1.0, pillar_masses[s[0]][s[1]].s_for)) for s in slots}
+    pls  = {s: max(1e-9, min(1.0, 1.0 - pillar_masses[s[0]][s[1]].s_against)) for s in slots}
+
+    def _prod(vals) -> float:
+        p = 1.0
+        for v in vals:
+            p *= v
+        return p
+
+    bel_prior, pl_prior = _prod(bels.values()), _prod(pls.values())
+    bel_post = simm_bayes_posterior(bel_prior, r)
+    pl_post  = simm_bayes_posterior(pl_prior,  r)
+    bel_step = (bel_post / bel_prior) ** (1.0 / 8.0) if bel_prior > 0 else 1.0
+    pl_step  = (pl_post  / pl_prior)  ** (1.0 / 8.0) if pl_prior  > 0 else 1.0
+
+    out: dict[str, dict[str, ESLMasses]] = {}
+    for s in slots:
+        new_sf = max(0.0, min(1.0, bels[s] * bel_step))
+        new_pl = max(0.0, min(1.0, pls[s]  * pl_step))
+        new_sa = max(0.0, min(1.0 - new_sf, 1.0 - new_pl))
+        out.setdefault(s[0], {})[s[1]] = ESLMasses(s_for=new_sf, s_against=new_sa)
+    return out
