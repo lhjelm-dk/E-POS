@@ -11,7 +11,7 @@ from components.colors import cos_color, COS_SCALE
 # Grid: Confidence (row) × Geological News (col) → (low_pct, high_pct) or None (invalid)
 MATRIX_GRID = {
     ("High", "Bad News"): (0, 20),
-    ("High", "Coin Toss"): None,  # INVALID: excluded from heatmap (no fill)
+    ("High", "Coin Toss"): None,  # UNUSUAL: left uncoloured on heatmap (review, not forbidden)
     ("High", "Good News"): (80, 100),
     ("Medium", "Bad News"): (20, 40),
     ("Medium", "Coin Toss"): (40, 60),
@@ -60,8 +60,8 @@ def _adequacy_table_html() -> str:
         for news in NEWS_OPTIONS:
             val = MATRIX_GRID.get((conf, news))
             if val is None:
-                cells += ("<td style='border:1px solid #444; padding:8px; background:#ffffff; "
-                          "color:#374151; font-style:italic;'>N/A, not valid</td>")
+                cells += ("<td style='border:1px solid #444; padding:8px; background:#fef3c7; "
+                          "color:#92400e; font-style:italic;'>⚠ Unusual — review</td>")
             else:
                 lo, hi = val
                 bg = cos_color((lo + hi) / 200.0)
@@ -141,7 +141,7 @@ def render_adequacy_matrix_reference() -> None:
     st.markdown(_adequacy_table_html(), unsafe_allow_html=True)
     st.plotly_chart(_adequacy_heatmap_fig(10), use_container_width=True,
                     key="adequacy_matrix_ref_v3")
-    st.caption("Invalid cell (High confidence × Coin Toss) has no colour on the heatmap; see table above.")
+    st.caption("Unusual cell (High confidence × Coin Toss) is left uncoloured on the heatmap; see table above.")
 
 
 def render_adequacy_matrix() -> None:
@@ -191,8 +191,9 @@ def render_adequacy_matrix() -> None:
             val = MATRIX_GRID.get((conf, news))
             if val is None:
                 st.warning(
-                    "High confidence with a coin-toss geological outlook is not a valid combination. "
-                    "Please reassess — either confidence is lower, or the news is not truly balanced."
+                    "High confidence with a genuine coin-toss outlook is unusual: either the "
+                    "confidence is overstated, or the news is not truly balanced. It is permitted, "
+                    "but document why."
                 )
                 low, high = 40, 60  # fallback for slider
             else:
@@ -217,4 +218,4 @@ def render_adequacy_matrix() -> None:
     with st.expander("2D Adequacy Matrix Plot", expanded=False):
         st.plotly_chart(_adequacy_heatmap_fig(10), use_container_width=True,
                         key="adequacy_matrix_expander_v3")
-        st.caption("Invalid cell (High confidence × Coin Toss) has no colour on the heatmap; see table above.")
+        st.caption("Unusual cell (High confidence × Coin Toss) is left uncoloured on the heatmap; see table above.")

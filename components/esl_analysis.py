@@ -81,6 +81,30 @@ def render_sensitivity_analysis(
             cv = {c: (r["for"], r["against"]) for c, r in new_cond.items()}
         return _compute_total_pos_from_pillars(pv, cv, w)
 
+    # DFI leverage bar: prior P(G, ESL) → DFI posterior at the current R, if a DFI
+    # source is active. Computed here (the caller has ctx-equivalents) so the shared
+    # tornado helper stays DFI-free. Robust to a not-yet-configured DFI session.
+    dfi_swing = None
+    try:
+        import streamlit as st
+        from types import SimpleNamespace
+        from logic.dfi_context import dfi_post_pillars
+        if st.session_state.get("dfi_source"):
+            _ctx = SimpleNamespace(
+                play=play, conditional=conditional,
+                conditional_results=conditional_results,
+                uncertainty_weight=uncertainty_weight,
+            )
+            _pp = dfi_post_pillars(_ctx)
+            if _pp is not None and abs(_pp.pos_post - _pp.pos_prior) > 1e-6:
+                _pr, _po = _pp.pos_prior, _pp.pos_post
+                # Back out the headline-equivalent likelihood ratio R (Simm inverse).
+                _den = _pr * (1.0 - _po)
+                _r = (_po * (1.0 - _pr) / _den) if _den > 1e-12 else 1.0
+                dfi_swing = (_pr, _po, _r)
+    except Exception:
+        dfi_swing = None
+
     from components.risk_summary import render_sensitivity_tornado
     render_sensitivity_tornado(
         method_label="ESL",
@@ -89,6 +113,8 @@ def render_sensitivity_analysis(
         uncertainty_weight=uncertainty_weight,
         compute_total=_compute_total_esl,
         include_cond_aggregate_in_pillars=True,
+        stance_bar=True,
+        dfi_swing=dfi_swing,
     )
 
 

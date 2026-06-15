@@ -686,9 +686,11 @@ def render_pillar_attribution(pp, *, key: str, compact: bool = False) -> None:
 
     if not compact:
         st.caption(
-            "Reservoir-driven failure split (GeoX / Martinelli single-segment). "
-            "Parallel **post-DFI** view -- the per-pillar prior *inputs* are unchanged. "
-            "Single-segment prospect only; no multi-segment / correlation method is used "
+            "These post-DFI pillar values are a **decomposition** of the headline update; they "
+            "show *where* the seismic evidence moved the number (Reservoir vs the HC-system). "
+            "They do **not** replace your geological assessment: the per-pillar prior *inputs* "
+            "are unchanged. Reservoir-driven failure split (GeoX / Martinelli single-segment); "
+            "single-segment prospect only, no multi-segment / correlation method is used "
             "(no patent claim practised)."
         )
 

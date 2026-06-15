@@ -12,6 +12,11 @@ def render_volumetrics(pos: float, prospect_title: str = "Prospect", key_prefix:
     k = key_prefix or "vol"
     st.subheader("Volumetrics & Expected Resource")
     st.caption("Enter unrisked resource estimates to compute Expected Resource and EMV.")
+    st.caption(
+        "POS here is the probability of a discovery of **at least a minimum testable "
+        "prospect volume** (the smallest accumulation worth completing and testing), not "
+        "the probability of any hydrocarbons at all. State that minimum volume with the number."
+    )
 
     col1, col2 = st.columns(2)
     with col1:

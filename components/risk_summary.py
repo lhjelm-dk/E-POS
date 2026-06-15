@@ -450,6 +450,8 @@ def render_sensitivity_tornado(
     compute_total: "callable",
     pillar_display: "dict[str, str] | None" = None,
     include_cond_aggregate_in_pillars: bool = True,
+    stance_bar: bool = True,
+    dfi_swing: "tuple[float, float, float] | None" = None,
 ) -> None:
     """Shared scenario-analysis tornado for both ESL and Classic POS.
 
@@ -605,6 +607,24 @@ def render_sensitivity_tornado(
     widths = [h - l for l, h in zip(lows, highs)]
     bar_colors = [bar_color_for_label(lbl) for lbl in labels]
 
+    # ── Pinned reference bars (exempt from the top-20 truncation, drawn at top) ──
+    # Let the analyst compare how much the *stance* (white-band) and the *seismic*
+    # (DFI) move P(G) against the individual geological elements, on one axis.
+    if stance_bar:
+        labels.append("Stance (white-band, w 0→1)")
+        lows.append(base_cons * 100)
+        highs.append(base_opti * 100)
+        widths.append((base_opti - base_cons) * 100)
+        bar_colors.append("#7c3aed")
+    if dfi_swing is not None:
+        _d_prior, _d_post, _d_r = dfi_swing
+        _d_lo, _d_hi = sorted((_d_prior * 100, _d_post * 100))
+        labels.append(f"DFI seismic (R = {_d_r:.2f})")
+        lows.append(_d_lo)
+        highs.append(_d_hi)
+        widths.append(_d_hi - _d_lo)
+        bar_colors.append("#0891b2")
+
     # Method explanation moved to expander to reduce clutter
 
     # ── Plot ───────────────────────────────────────────────────────────────
@@ -683,7 +703,13 @@ def render_sensitivity_tornado(
             f"P(G, {method_label}) is then recomputed using the {method_label} aggregation rule.  \n"
             f"The bar shows the resulting range from low to high. Vertical reference lines: "
             f"**dashed** = current total at your stance, **dotted blue** = conservative (w=0), "
-            f"**dotted green** = optimistic (w=1)."
+            f"**dotted green** = optimistic (w=1).  \n"
+            f"**Pinned bars at the top** (always shown): the **purple** *Stance* bar is the full "
+            f"P(G) swing as the white-band stance goes w=0 → w=1, so a long purple bar means the "
+            f"number is driven by how you treat the unknown (White) rather than by evidence. "
+            f"The **teal** *DFI seismic* bar (when a DFI source is active) is the swing from the "
+            f"geological prior to the DFI posterior at the current R, so geological and "
+            f"geophysical leverage can be read on the same axis."
         )
 
 

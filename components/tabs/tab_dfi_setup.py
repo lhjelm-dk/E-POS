@@ -88,6 +88,29 @@ def _render_dfi_setup(ctx) -> None:
     else:
         st.session_state["dfi_source"] = "dhi_index"
 
+    # ── DFI prior provenance (documented in-app) ──
+    st.caption(
+        "**DFI prior = P(G, ESL)** — the stance-weighted ESL mass-rollup (your headline "
+        "geological number). The update always refines this ESL prior; switching the Classic "
+        "POS view does not change it."
+    )
+
+    # ── Triage: which source, when (all three converge on the same R → Simm update) ──
+    with st.expander("Which source should I use?", expanded=False):
+        st.markdown(
+            "All three pathways end in the **same R → Simm Bayesian update**; they differ only "
+            "in how R is *sourced and justified*.\n\n"
+            "| Source | You supply | Use when | Decision-grade? |\n"
+            "|---|---|---|---|\n"
+            "| **Conceptual DHI Index** | one DFI-strength slider vs illustrative curves | "
+            "teaching / quick-look, no real DHI work yet | No (curves uncalibrated) |\n"
+            "| **Characteristic scoring (Monigle 2025)** | scores for the DHI characteristics | "
+            "you have a qualitative QI / DHI interpretation | Yes (literature-calibrated R) |\n"
+            "| **Custom R tool** | your own strength→fluid curves (single or multi-case) | "
+            "you have a calibrated / bespoke view, or need full control | Yes (if curves are calibrated) |\n\n"
+            "Conceptual is **illustrative only**; use Characteristic or a calibrated Custom for decisions."
+        )
+
     # Branch — Characteristic / Custom modes handled by their own renderers.
     if st.session_state["dfi_source"] == "characteristic":
         _render_dfi_setup_characteristic(ctx)

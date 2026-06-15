@@ -657,6 +657,12 @@ $$P(G, \text{Classic}) = P(\text{Charge}) \times P(\text{Closure}) \times P(\tex
 Within each pillar, sub-elements are combined using the **minimum** (weakest link) or a product,
 depending on the Classic operator setting.
 
+> **What the probability is conditional on.** Throughout E-POS, P(G) is the probability of a
+> discovery of **at least a minimum testable prospect volume** (the smallest accumulation worth
+> completing and testing), not the probability of *any* hydrocarbons at all. Two prospects with
+> the same geology can carry a different P(G) if they set that minimum volume differently, so the
+> threshold should be stated alongside the number.
+
 ### Relationship to ESL
 
 E-POS derives P(G, Classic) **directly from your ESL evidence**; you do not enter separate
@@ -1875,8 +1881,7 @@ analogue prospect populations — for sense-checking each pillar against the lit
 ### Key references
 
 See the dedicated **📚 Key references & source papers** section below for the full,
-grouped list (ESL, Classic POS, DHI/DFI, characteristic scoring, and assurance) —
-including which papers are bundled as PDFs with the project.
+grouped list (ESL, Classic POS, DHI/DFI, characteristic scoring, and assurance).
 """)
         from components.adequacy_matrix import render_adequacy_matrix_reference
         render_adequacy_matrix_reference()
@@ -1887,19 +1892,18 @@ including which papers are bundled as PDFs with the project.
     with _tab_ref.expander("Key references & source papers", expanded=False):
         st.markdown("""
 The methods in E-POS are grounded in published literature. References are grouped
-by the part of the tool they underpin. Items marked **📄 in library** are bundled
-as PDFs with this project for direct consultation.
+by the part of the tool they underpin. Consult each source through its publisher
+or your own library.
 
 #### 1 · Evidence Support Logic (ESL) & the Italian Flag
 - **Quintessa (2022)** — *Evidence Support Logic Guide, v3.0.* Quintessa Ltd.
   The definitive technical reference for ESL, the Italian Flag, Bel/Pl intervals
-  and Policy P (the stance *w*). **📄 in library**
+  and Policy P (the stance *w*).
 - **Blockley, D.I. & Godfrey, P. (2000)** — *Doing It Differently: Systems for
   Rethinking Construction.* Thomas Telford, London. Origin of the interval-probability
   reasoning the Italian Flag is built on.
 - *Analysing Uncertainties: Bayes and Italian Flags* (2013) — links Italian-Flag
-  belief masses to Bayesian updating. **📄 in library**
-
+  belief masses to Bayesian updating.
 #### 2 · Geological probability of success (Classic / multiplicative POS)
 - **Rose, P.R. (2001)** — *Risk Analysis and Management of Petroleum Exploration
   Ventures.* AAPG Methods in Exploration 12. The industry-standard multiplicative
@@ -1913,12 +1917,12 @@ as PDFs with this project for direct consultation.
 #### 3 · DHI / DFI & seismic-amplitude risking (the Bayesian update)
 - **Simm, R. (2016)** — *Seismic Amplitude and Risk: A Sense Check.* FORCE seminar,
   *Underexplored Plays — Part II*, Nov 2016. Source of the **two-state Bayesian DFI
-  update** and the **R rule-of-thumb bands** used throughout the DFI tab. **📄 in library**
+  update** and the **R rule-of-thumb bands** used throughout the DFI tab.
 - **Nosjean, N. et al. (2020)** — *Geological probability of success assessment for
   amplitude-driven prospects: a Nile Delta case study.* A worked field example of
-  folding DHI evidence into POS. **📄 in library**
+  folding DHI evidence into POS.
 - *"DHIs work well for de-risking prospects"* — *GeoExpro* feature. Accessible
-  overview of DHI performance statistics. **📄 in library**
+  overview of DHI performance statistics.
 - **Martinelli, G., Stabell, C. & Langlie, E. (2019)** — *Direct Fluid Indicators in
   Multiple Segment Prospects*, US Patent 10,451,762 B2 (Schlumberger). The GeoX
   single-segment fluid×reservoir scenario Bayes and the **risk-factor (pillar)
@@ -1932,14 +1936,17 @@ as PDFs with this project for direct consultation.
 - **Monigle, P. et al. (2025)** — *Integrated and improved direct hydrocarbon
   indicators: a step forward in petroleum risk.* AAPG (Gold Open Access, CC-BY).
   Source of the per-characteristic success-rate statistics and discernibility
-  weighting behind the **characteristic-scoring** pathway. **📄 in library**
-
+  weighting behind the **characteristic-scoring** pathway.
 #### 5 · Calibration, assurance & general practice
 - **Bond, C.E. et al. (2022)** — *Recommended practices in exploration assurance.*
-  Guidance on independent review / QC of prospect risk assessments. **📄 in library**
+  Guidance on independent review / QC of prospect risk assessments.
 - **ExxonMobil (2018)** — *Risking V* (Risk Coordinator Meeting). Operator
-  perspective on consistent, calibrated risking. **📄 in library**
-
+  perspective on consistent, calibrated risking.
+- **MacKay, J.A. (1995)** — *Evaluating risk and checking consistency in exploration
+  portfolios.* Amoco Exploration Assurance / AAPG extended abstracts. Early operator
+  treatment of risk consistency and of the **uncertainty-index** idea (separating the
+  probability estimate from the analyst's confidence in it), conceptual kin to the
+  Italian-Flag **White (incompleteness)** band used in E-POS.
 ---
 
 *The **Conceptual DHI Index (experimental)** pathway is exactly that — conceptual. Its likelihood
