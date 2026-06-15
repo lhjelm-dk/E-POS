@@ -29,13 +29,13 @@ KEY_FLUID_OTHER = "dfi_fluid_other"
 KEY_ESL_ATTR    = "dfi_esl_attribution"
 
 # ── Default values (applied when the analyst has not set the widget yet) ──
-DEFAULT_DHI         = 19.0
+DEFAULT_DHI         = 8.0
 DEFAULT_SD_MODE     = "upper"
 DEFAULT_FLUID_TYPE  = "Success"
-DEFAULT_FLUID_WATER = 0.80
+DEFAULT_FLUID_WATER = 0.50
 DEFAULT_FLUID_LSG   = 0.20
-DEFAULT_FLUID_OTHER = 0.00
-DEFAULT_ESL_ATTR    = "A"
+DEFAULT_FLUID_OTHER = 0.30
+DEFAULT_ESL_ATTR    = "B"
 
 
 @dataclass(frozen=True)

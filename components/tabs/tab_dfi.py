@@ -11,13 +11,13 @@ exists but can't accidentally use stale/empty inputs.
 Session-state keys read/written by this tab:
 
   dfi_enabled            : bool   — master toggle (set on Dashboard)
-  dfi_index              : float  — DHI index (-23..+50), default 19
-  dfi_fluid_water        : float  — P(fluid=water | failure),    default 0.80
+  dfi_index              : float  — DHI index (-23..+50), default 8
+  dfi_fluid_water        : float  — P(fluid=water | failure),    default 0.50
   dfi_fluid_lsg          : float  — P(fluid=LSG   | failure),    default 0.20
-  dfi_fluid_other        : float  — P(fluid=other | failure),    default 0.00
+  dfi_fluid_other        : float  — P(fluid=other | failure),    default 0.30
   dfi_fluid_type         : str    — Success | Oil | OilGas | Gas, default Success
   dfi_sd_mode            : str    — upper | calculated,          default upper
-  dfi_esl_attribution    : str    — A | B,                       default A
+  dfi_esl_attribution    : str    — A | B,                       default B
   dfi_calibration_override : dict — in-UI edits to calibration, defaults to none
 """
 from __future__ import annotations
@@ -129,9 +129,10 @@ def _render_disabled_placeholder(sub_page_name: str) -> None:
         "Enable the **DFI-capable prospect?** toggle on the **Dashboard** (next to the "
         "Stance slider) to activate the DFI Bayesian update for this prospect.  \n\n"
         "When enabled, default values will be applied:  \n"
-        "• DHI Index = **19**  \n"
-        "• Fluid failure probabilities: water **80%**, LSG **20%**, other **0%**  \n"
+        "• DHI Index = **8**  \n"
+        "• Fluid failure probabilities: water **50%**, LSG **20%**, other **30%**  \n"
         "• HC fluid type = **Success** (aggregate)  \n"
+        "• ESL per-pillar attribution = **B (Bel/Pl-preserving)**  \n"
         "• Likelihood SD: a single conceptual sigma per class"
     )
 

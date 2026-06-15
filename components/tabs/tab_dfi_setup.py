@@ -160,7 +160,7 @@ def _render_dfi_setup(ctx) -> None:
         # widget state via `key`. Passing both `value=`/`index=` AND `key=` when the
         # default is read from the *same* session key makes the widget snap back to
         # the default on rerun (the DHI-Index "stuck at 19" desync) — so don't.
-        st.session_state.setdefault("dfi_index", 19)
+        st.session_state.setdefault("dfi_index", 8)
         dhi = st.slider(
             "**DHI Index**",
             min_value=DHI_INDEX_MIN_INT,
@@ -194,7 +194,7 @@ def _render_dfi_setup(ctx) -> None:
             st.markdown("**Fluid failure probabilities**  *P(fluid | failure)*")
             col_w, col_l, col_o = st.columns(3)
             with col_w:
-                st.session_state.setdefault("dfi_fluid_water", 0.80)
+                st.session_state.setdefault("dfi_fluid_water", 0.50)
                 water = st.number_input(
                     "Water", min_value=0.0, max_value=1.0,
                     step=0.05, format="%.2f", key="dfi_fluid_water",
@@ -206,7 +206,7 @@ def _render_dfi_setup(ctx) -> None:
                     step=0.05, format="%.2f", key="dfi_fluid_lsg",
                 )
             with col_o:
-                st.session_state.setdefault("dfi_fluid_other", 0.00)
+                st.session_state.setdefault("dfi_fluid_other", 0.30)
                 other = st.number_input(
                     "Other", min_value=0.0, max_value=1.0,
                     step=0.05, format="%.2f", key="dfi_fluid_other",
@@ -224,7 +224,7 @@ def _render_dfi_setup(ctx) -> None:
             )
 
             st.markdown("**ESL per-pillar attribution method**")
-            st.session_state.setdefault("dfi_esl_attribution", "A")
+            st.session_state.setdefault("dfi_esl_attribution", "B")
             esl_attr = st.radio(
                 "Attribution",
                 options=["A", "B"],
@@ -241,9 +241,9 @@ def _render_dfi_setup(ctx) -> None:
 
         # Defaults so downstream code works whether or not the drawer was opened.
         sd_mode = str(st.session_state.get("dfi_sd_mode", "upper"))
-        water = float(st.session_state.get("dfi_fluid_water", 0.80))
+        water = float(st.session_state.get("dfi_fluid_water", 0.50))
         lsg   = float(st.session_state.get("dfi_fluid_lsg",   0.20))
-        other = float(st.session_state.get("dfi_fluid_other", 0.00))
+        other = float(st.session_state.get("dfi_fluid_other", 0.30))
 
     # ─── Column B: 5 bell curves ─────────────────────────────────────────
     with col_viz:

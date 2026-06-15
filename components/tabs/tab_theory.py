@@ -1557,7 +1557,7 @@ Before opening the Bayesian DFI Update tab you should have:
 
 Find the **"DHI prospect?"** toggle just below the Stance slider. Default is OFF.
 
-When you toggle ON for the first time, E-POS sets defaults: DHI Index = 19, water = 0.80, LSG = 0.20, other = 0.00, fluid type = Success, SD mode = upper. These are **session-sticky** — your subsequent edits persist for this prospect.
+When you toggle ON for the first time, E-POS sets defaults: DHI Index = 8, water = 0.50, LSG = 0.20, other = 0.30, fluid type = Success, ESL attribution = B, SD mode = upper. These are **session-sticky** — your subsequent edits persist for this prospect.
 
 ---
 

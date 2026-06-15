@@ -281,11 +281,11 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
             initialise_dfi_session_defaults()
         if _dfi_new:
             st.caption(
-                f"DFI active — DHI index = **{st.session_state.get('dfi_index', 19):.0f}**, "
+                f"DFI active — DHI index = **{st.session_state.get('dfi_index', 8):.0f}**, "
                 f"water/LSG/other = "
-                f"{st.session_state.get('dfi_fluid_water', 0.8):.0%}/"
+                f"{st.session_state.get('dfi_fluid_water', 0.5):.0%}/"
                 f"{st.session_state.get('dfi_fluid_lsg',   0.2):.0%}/"
-                f"{st.session_state.get('dfi_fluid_other', 0.0):.0%}. "
+                f"{st.session_state.get('dfi_fluid_other', 0.3):.0%}. "
                 "Edit on the Bayesian DFI Update tab."
             )
         else:
