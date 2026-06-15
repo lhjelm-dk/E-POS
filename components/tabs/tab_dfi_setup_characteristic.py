@@ -455,6 +455,29 @@ def _render_dfi_setup_characteristic(ctx) -> None:
         "informative than the scalar score's own ratio."
     )
 
+    # ── R implied by the composite-score densities, across the score axis ──
+    import numpy as _np
+    _xn = _np.asarray(_x, float)
+    _ratio = _np.asarray(_ys, float) / _np.maximum(_np.asarray(_yf, float), 1e-12)
+    _ratio = _np.clip(_ratio, 0.02, 50.0)
+    _r_at_score = float(_np.interp(_s_mark, _xn, _ratio))
+    from components.dfi_shared import render_r_strength_plot as _render_r_plot
+    st.markdown("##### R vs DHI Characteristic Score")
+    _render_r_plot(
+        _xn.tolist(), _ratio.tolist(), _s_mark, _r_at_score,
+        x_label="DHI Characteristic Score",
+        y_label="R = success density / failure density",
+        ref_r=r_eff, ref_label=f"R_eff = {r_eff:.2f} (used by update)",
+        caption=(
+            "The **purple curve** is the likelihood ratio implied by the composite score "
+            "*alone* (success density ÷ failure density); the ★ marks this prospect's score. "
+            "The dashed teal line is **R_eff** — the per-attribute product the update actually "
+            "books, usually higher because it combines all five attributes (plus "
+            "discernibility). Same Simm rule-of-thumb bands as the other methods; capped to "
+            "[0.02, 50]."
+        ),
+    )
+
     # ── GeoX hand-off — six P(DFI | case) inputs (parity with the DHI-Index method) ──
     # Characteristic scoring is two-state, so all five failure cases share R_eff⁻¹.
     from components.dfi_shared import render_geox_pdfi_handoff

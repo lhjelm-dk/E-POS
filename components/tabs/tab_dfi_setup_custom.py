@@ -285,42 +285,15 @@ def _render_dfi_setup_custom(ctx) -> None:
     )
 
     # ── R across the strength axis (with Simm rule-of-thumb bands) ──
+    from components.dfi_shared import render_r_strength_plot
     r_curve = [_r_at(x) for x in xs]
-    figr = go.Figure()
-    # Shade the Simm strength bands behind the curve (shared band definitions).
-    # Shade only — labels are added separately, inside the plot on the right.
-    for _hi, _lo, _col, _lbl in SIMM_BAND_EDGES:
-        figr.add_hrect(y0=_lo, y1=_hi, fillcolor=_col, line_width=0, layer="below")
-    for _thr in SIMM_R_BANDS:
-        figr.add_hline(y=_thr, line_dash="dot", line_color="#cbd5e1", line_width=1)
-    figr.add_hline(y=1.0, line_dash="dot", line_color="#6b7280")
-    figr.add_trace(go.Scatter(x=xs, y=r_curve, mode="lines", name="R(strength)",
-                              line=dict(color="#7c3aed", width=2.5)))
-    figr.add_vline(x=slider, line_dash="dash", line_color="#6b7280")
-    figr.add_trace(go.Scatter(x=[slider], y=[r_val], mode="markers",
-                              marker=dict(symbol="star", size=15, color="#7c3aed",
-                                          line=dict(color="white", width=1.5)),
-                              name=f"R = {r_val:.2f} ({_simm_label})"))
-    # Band labels placed *inside* the plot, just inside the right edge and
-    # centred on each band (geometric-mean centre because the y-axis is log).
-    # NOTE: on a log axis Plotly expects annotation y as log10(value), unlike
-    # shapes which auto-convert, so we pass the log of the geometric-mean centre.
-    for _hi, _lo, _col, _lbl in SIMM_BAND_EDGES:
-        figr.add_annotation(xref="paper", x=0.99, xanchor="right",
-                            yref="y", y=float(0.5 * np.log10(_hi * _lo)),
-                            text=_lbl, showarrow=False, align="right",
-                            font=dict(size=10, color="#475569"))
-    figr.update_xaxes(title_text="DHI strength")
-    figr.update_yaxes(title_text="R = P(DFI|HC) / P(DFI|No-HC)", type="log",
-                      range=[np.log10(0.02), np.log10(50.0)],
-                      tickmode="array", tickvals=list(SIMM_R_TICKS),
-                      ticktext=[f"{t:.2f}" for t in SIMM_R_TICKS])
-    figr.update_layout(height=510, margin=dict(t=20, b=40, l=50, r=10),
-                       legend=dict(orientation="h", x=0.5, y=-0.18, xanchor="center"))
-    st.plotly_chart(figr, use_container_width=True)
-    st.caption(
-        "R on a **log** axis with the **Simm rule-of-thumb bands**: |R| ≈ 1.5 moderate, "
-        "≈ 3 strong (Simm's practical ceiling for a single DFI), ≥ 10 decisive (audit the "
-        "inputs). R is capped to [0.02, 50]. The posterior P(G | DFI) appears on the "
-        "**DFI Results** sub-tab."
+    render_r_strength_plot(
+        xs, r_curve, slider, r_val,
+        x_label="DHI strength", verdict_label=_simm_label,
+        caption=(
+            "R on a **log** axis with the **Simm rule-of-thumb bands**: |R| ≈ 1.5 moderate, "
+            "≈ 3 strong (Simm's practical ceiling for a single DFI), ≥ 10 decisive (audit the "
+            "inputs). R is capped to [0.02, 50]. The posterior P(G | DFI) appears on the "
+            "**DFI Results** sub-tab."
+        ),
     )

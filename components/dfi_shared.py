@@ -691,3 +691,53 @@ def render_pillar_attribution(pp, *, key: str, compact: bool = False) -> None:
             "Single-segment prospect only; no multi-segment / correlation method is used "
             "(no patent claim practised)."
         )
+
+
+def render_r_strength_plot(xs, r_curve, x_cur, r_cur, *, x_label, caption=None,
+                           y_label="R = P(DFI | HC) / P(DFI | No-HC)",
+                           verdict_label=None, ref_r=None, ref_label=None,
+                           height=510):
+    """Banded log-R panel shared by all three DFI pathways.
+
+    Draws R across a strength/score axis with the Simm rule-of-thumb bands, a
+    dashed line + ★ at the current reading, and an optional dashed horizontal
+    reference line (e.g. the R the update actually uses). ``xs``/``r_curve`` are
+    the swept axis and the R values; ``x_cur``/``r_cur`` the current point.
+    """
+    import numpy as np
+    import plotly.graph_objects as go
+    if verdict_label is None:
+        verdict_label = simm_rule_of_thumb(r_cur)[0]
+    figr = go.Figure()
+    for _hi, _lo, _col, _lbl in SIMM_BAND_EDGES:
+        figr.add_hrect(y0=_lo, y1=_hi, fillcolor=_col, line_width=0, layer="below")
+    for _thr in SIMM_R_BANDS:
+        figr.add_hline(y=_thr, line_dash="dot", line_color="#cbd5e1", line_width=1)
+    figr.add_hline(y=1.0, line_dash="dot", line_color="#6b7280")
+    figr.add_trace(go.Scatter(x=list(xs), y=list(r_curve), mode="lines", name="R",
+                              line=dict(color="#7c3aed", width=2.5)))
+    figr.add_vline(x=x_cur, line_dash="dash", line_color="#6b7280")
+    figr.add_trace(go.Scatter(x=[x_cur], y=[r_cur], mode="markers",
+                              marker=dict(symbol="star", size=15, color="#7c3aed",
+                                          line=dict(color="white", width=1.5)),
+                              name=f"R = {r_cur:.2f} ({verdict_label})"))
+    if ref_r is not None:
+        figr.add_hline(y=ref_r, line_dash="dash", line_color="#0f766e", line_width=1.8,
+                       annotation_text=(ref_label or f"R = {ref_r:.2f}"),
+                       annotation_position="top left",
+                       annotation_font=dict(size=10, color="#0f766e"))
+    for _hi, _lo, _col, _lbl in SIMM_BAND_EDGES:
+        figr.add_annotation(xref="paper", x=0.99, xanchor="right",
+                            yref="y", y=float(0.5 * np.log10(_hi * _lo)),
+                            text=_lbl, showarrow=False, align="right",
+                            font=dict(size=10, color="#475569"))
+    figr.update_xaxes(title_text=x_label)
+    figr.update_yaxes(title_text=y_label, type="log",
+                      range=[np.log10(0.02), np.log10(50.0)],
+                      tickmode="array", tickvals=list(SIMM_R_TICKS),
+                      ticktext=[f"{t:.2f}" for t in SIMM_R_TICKS])
+    figr.update_layout(height=height, margin=dict(t=20, b=40, l=50, r=10),
+                       legend=dict(orientation="h", x=0.5, y=-0.18, xanchor="center"))
+    st.plotly_chart(figr, use_container_width=True)
+    if caption:
+        st.caption(caption)

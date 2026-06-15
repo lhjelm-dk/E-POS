@@ -123,10 +123,13 @@ def _render_dfi_setup(ctx) -> None:
         st.caption(f"{src_text} (source: {calib.source}). "
                    f"Override active: {'yes' if st.session_state.get('dfi_calibration_override') else 'no'}")
 
-    # ── INPUTS (left) | LIKELIHOOD CURVES (right) ──
-    col_inputs, col_viz = st.columns([1, 2])
+    # ── Stacked full-width sections: Inputs (top) → Likelihood curves →
+    #    R(DHI) panel below. Containers (not columns) so each spans full width
+    #    and renders top-to-bottom, leaving room for the R-vs-DHI plot.
+    col_inputs = st.container()
+    col_viz = st.container()
 
-    # ─── Column A: Inputs ────────────────────────────────────────────────
+    # ─── Section A: Inputs ───────────────────────────────────────────────
     with col_inputs:
         st.markdown("##### Inputs")
 
@@ -266,6 +269,28 @@ def _render_dfi_setup(ctx) -> None:
             "distribution** (LSG/other failure column) — the dotted purple curve "
             "for Other overlays the yellow LSG curve. The Gaussian PDF is used "
             "rigorously (no frequency scaling)."
+        )
+
+        # ── R_DFI across the DHI-Index axis (Simm bands) — parallel to the custom tool ──
+        st.markdown("##### R_DFI vs DHI Index")
+        from components.dfi_shared import render_r_strength_plot as _render_r_plot
+        from logic.dfi_bayes import compute_dfi_posterior as _cdp, FluidWeights as _FW
+        _fw_sweep = _FW(water=water, lsg=lsg, other=other)
+        _prior_sweep = _esl_prior_pillars_from_ctx(ctx)
+        _xr = list(range(DHI_INDEX_MIN_INT, DHI_INDEX_MAX_INT + 1))
+        _rr = [_cdp(_prior_sweep, _xi, calib, _fw_sweep, sd_mode, fluid_type).r_dfi
+               for _xi in _xr]
+        _r_now = _cdp(_prior_sweep, dhi, calib, _fw_sweep, sd_mode, fluid_type).r_dfi
+        _render_r_plot(
+            _xr, _rr, dhi, _r_now,
+            x_label="DHI Index",
+            y_label="R_DFI = L(success) / E[L | failure]",
+            caption=(
+                "R_DFI across the DHI-Index axis with the **Simm rule-of-thumb bands**. "
+                "The ★ is your current DHI reading — the same R_DFI shown in the metrics "
+                "below. Holds the fluid mix fixed; only the DHI Index varies. Capped to "
+                "[0.02, 50]."
+            ),
         )
 
     # ── Posterior class panel (using ESL prior) ──
