@@ -68,7 +68,10 @@ def read_dfi_inputs(ss) -> DFIInputs:
     )
     return DFIInputs(
         dhi=float(ss.get(KEY_DHI, DEFAULT_DHI)),
-        sd_mode=str(ss.get(KEY_SD_MODE, DEFAULT_SD_MODE)),
+        # SD mode is fixed: each conceptual class carries a single sigma
+        # (the old upper/calculated toggle was removed), so this is a constant,
+        # not a session-read key.
+        sd_mode=DEFAULT_SD_MODE,
         fluid_type=str(ss.get(KEY_FLUID_TYPE, DEFAULT_FLUID_TYPE)),
         fluid_weights=fw,
         esl_attribution=str(ss.get(KEY_ESL_ATTR, DEFAULT_ESL_ATTR)),

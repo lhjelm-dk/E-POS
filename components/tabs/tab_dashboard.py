@@ -624,7 +624,7 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
                     classic_bel   = None if _rose_active else _esl_bel,
                     classic_pl    = None if _rose_active else _esl_pl,
                     dhi_index     = _dhi,
-                    dhi_strength  = _post_e.r_saam,
+                    dhi_strength  = _post_e.r_dfi,
                     dhi_volume    = _post_e.dhi_volume_weight,
                     prospect_title= prospect_title,
                 )

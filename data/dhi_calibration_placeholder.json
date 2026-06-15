@@ -1,0 +1,19 @@
+{
+  "version": "conceptual-v1",
+  "source": "Conceptual, illustrative model — not calibrated to any dataset.",
+  "description": "Illustrative Gaussian likelihood parameters for the conceptual DHI-Index Bayesian update. The DHI Index is expressed as a fraction (DHI/100). These are round, hand-set values chosen to demonstrate the method; they are not derived from any database or study.",
+  "units": {
+    "dhi_index_range_integer": [-23, 50],
+    "dhi_index_fraction_range": [-0.23, 0.50],
+    "mean_sd_in": "fraction (DHI/100)"
+  },
+  "classes": {
+    "Success":           {"mean": 0.20, "sd_calculated": 0.12, "sd_upper": 0.12, "comment": "HC success (aggregate, any oil/gas)"},
+    "Oil":               {"mean": 0.20, "sd_calculated": 0.12, "sd_upper": 0.12, "comment": "HC success"},
+    "OilGas":            {"mean": 0.20, "sd_calculated": 0.12, "sd_upper": 0.12, "comment": "HC success"},
+    "Gas":               {"mean": 0.20, "sd_calculated": 0.12, "sd_upper": 0.12, "comment": "HC success"},
+    "H2O_failure":       {"mean": 0.02, "sd_calculated": 0.12, "sd_upper": 0.12, "comment": "Water in an evaluable reservoir"},
+    "LSG_failure":       {"mean": 0.13, "sd_calculated": 0.12, "sd_upper": 0.12, "comment": "Low-saturation gas / other-fluid failure (shared with Other)"},
+    "Reservoir_failure": {"mean": 0.05, "sd_calculated": 0.15, "sd_upper": 0.15, "comment": "Reservoir failed / non-evaluable"}
+  }
+}

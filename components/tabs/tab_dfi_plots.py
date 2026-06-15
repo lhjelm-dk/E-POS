@@ -151,7 +151,7 @@ def _render_sensitivity_sweep(ctx, dhi_cur, calib, fw_cur, sd_mode, fluid_type) 
 
     y_outputs = st.multiselect(
         "Y outputs (stacked)",
-        ["Posterior P(G)", "R_SAAM", "DHI Volume Weight V"],
+        ["Posterior P(G)", "R_DFI", "DHI Volume Weight V"],
         default=["Posterior P(G)"],
         key="sens_y_outputs",
     )
@@ -240,7 +240,7 @@ def _render_sensitivity_sweep(ctx, dhi_cur, calib, fw_cur, sd_mode, fluid_type) 
             _apply(family_var, fam_val); _apply(x_var, x_val)
 
         post = compute_dfi_posterior(pillars, dhi_v, calib, fw_v, sd_mode, fluid_type)
-        return post.posterior_pg, post.r_saam, post.dhi_volume_weight
+        return post.posterior_pg, post.r_dfi, post.dhi_volume_weight
 
     # Build subplots — one row per selected Y
     fig = make_subplots(rows=len(y_outputs), cols=1, shared_xaxes=True,
@@ -261,7 +261,7 @@ def _render_sensitivity_sweep(ctx, dhi_cur, calib, fw_cur, sd_mode, fluid_type) 
     n_fam = len(fam_vals)
     y_keys = []
     for yo in y_outputs:
-        y_keys.append({"Posterior P(G)": 0, "R_SAAM": 1, "DHI Volume Weight V": 2}[yo])
+        y_keys.append({"Posterior P(G)": 0, "R_DFI": 1, "DHI Volume Weight V": 2}[yo])
 
     for i_fam, fv in enumerate(fam_vals):
         ys_per_y = [[] for _ in y_outputs]

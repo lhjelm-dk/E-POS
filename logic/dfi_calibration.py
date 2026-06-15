@@ -1,9 +1,9 @@
-"""DFI calibration loader — manages the SAAM-style likelihood parameters.
+"""DFI calibration loader — manages the conceptual likelihood parameters.
 
 Two files are recognised, in priority order:
 
-  1. ``data/saam_calibration.json``             (proprietary, gitignored)
-  2. ``data/saam_calibration_placeholder.json`` (synthetic, committed)
+  1. ``data/dhi_calibration.json``             (local override, gitignored)
+  2. ``data/dhi_calibration_placeholder.json`` (synthetic, committed)
 
 The app loads the first one that exists, with a clear warning when only the
 placeholder is available.
@@ -18,7 +18,7 @@ are::
     "Gas"               — gas specifically
     "H2O_failure"       — water in evaluable reservoir
     "LSG_failure"       — LSG / other-fluid failure in evaluable reservoir
-                          (Other-fluids share these stats — same SAAM column)
+                          (Other-fluids share these stats — same class)
     "Reservoir_failure" — reservoir failure / non-evaluable reservoir
                           (used for any fluid found in a non-evaluable reservoir)
 
@@ -89,8 +89,8 @@ class Calibration:
 # Loader
 # ─────────────────────────────────────────────────────────────────────────────
 
-_PROPRIETARY_PATH  = Path("data") / "saam_calibration.json"
-_PLACEHOLDER_PATH  = Path("data") / "saam_calibration_placeholder.json"
+_OVERRIDE_PATH  = Path("data") / "dhi_calibration.json"
+_PLACEHOLDER_PATH  = Path("data") / "dhi_calibration_placeholder.json"
 
 
 @lru_cache(maxsize=8)
@@ -141,13 +141,13 @@ def _calibration_from_dict(d: dict, file_path: Path, is_placeholder: bool) -> Ca
 
 
 def load_calibration(base_dir: "str | os.PathLike | None" = None) -> Calibration:
-    """Load the active calibration.  Proprietary file wins over placeholder.
+    """Load the active calibration.  Local override wins over placeholder.
 
     ``base_dir`` defaults to the current working directory, intended to be the
     project root.  Tests can pass an alternate path.
     """
     root = Path(base_dir) if base_dir is not None else Path.cwd()
-    propr = root / _PROPRIETARY_PATH
+    propr = root / _OVERRIDE_PATH
     place = root / _PLACEHOLDER_PATH
     if propr.is_file():
         return _calibration_from_dict(_load_json(propr), propr, is_placeholder=False)

@@ -26,7 +26,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 # The canonical session keys the reader depends on.
 CONTRACT_KEYS = [
     dfi_inputs.KEY_DHI,
-    dfi_inputs.KEY_SD_MODE,
+    # KEY_SD_MODE removed: SD mode is now a fixed constant (single sigma per
+    # conceptual class), no longer read from a widget.
     dfi_inputs.KEY_FLUID_TYPE,
     dfi_inputs.KEY_FLUID_WATER,
     dfi_inputs.KEY_FLUID_LSG,
@@ -83,7 +84,6 @@ def test_defaults_on_empty_session():
 def test_reads_analyst_values():
     ss = {
         "dfi_index": 42,
-        "dfi_sd_mode": "calculated",
         "dfi_fluid_type": "Oil",
         "dfi_fluid_water": 0.5,
         "dfi_fluid_lsg": 0.3,
@@ -93,7 +93,7 @@ def test_reads_analyst_values():
     inp = read_dfi_inputs(ss)
     assert isinstance(inp, DFIInputs)
     assert inp.dhi == 42.0 and isinstance(inp.dhi, float)
-    assert inp.sd_mode == "calculated"
+    assert inp.sd_mode == dfi_inputs.DEFAULT_SD_MODE  # SD mode is now a fixed constant
     assert inp.fluid_type == "Oil"
     assert inp.esl_attribution == "B"
     assert (inp.fluid_weights.water, inp.fluid_weights.lsg, inp.fluid_weights.other) == (0.5, 0.3, 0.2)

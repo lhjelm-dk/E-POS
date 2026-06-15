@@ -1,6 +1,6 @@
 """Shared Simm (2016) two-state Bayes primitives for the DFI evidence sources.
 
-All three DFI evidence sources (DHI Index / SAAM, Characteristic scoring /
+All three DFI evidence sources (DHI Index, Characteristic scoring /
 Monigle 2025, and the Custom R tool) ultimately express their evidence as a
 **likelihood ratio R** and read it through the same Simm two-state machinery.
 This module is the single home for that machinery so the three pathways stay
@@ -101,7 +101,7 @@ def geox_pdfi_cases(success: float, water: float, lsg: float,
     only uses their **ratios**, so the absolute scale is free; we normalise to the
     maximum purely so the six numbers are readable on entry. The three
     non-evaluable-reservoir cases all map to the ``reservoir`` (reservoir-failure)
-    likelihood, exactly like the SAAM/DHI-Index hand-off.
+    likelihood, exactly like the DHI-Index hand-off.
 
     Returns a list of ``(geox_case_label, value_pct, represents)`` rows.
     """

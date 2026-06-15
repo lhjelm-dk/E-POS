@@ -1,9 +1,9 @@
 """Custom DFI-strength tool — derive R from two user-defined Gaussians.
 
-This is the third DFI evidence source (alongside the DHI Index/SAAM pathway and
+This is the third DFI evidence source (alongside the DHI Index pathway and
 the Monigle-2025 characteristic scoring). It is a deliberately simple, stand-alone
 way to turn a single "DHI strength" reading into a likelihood ratio R, when neither
-a SAAM calibration nor a full characteristic score sheet is available.
+a calibrated DHI model nor a full characteristic score sheet is available.
 
 The user defines two probability-density curves over a common DHI-strength axis
 (default −100 … +100):

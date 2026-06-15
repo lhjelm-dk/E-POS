@@ -122,14 +122,14 @@ def render_comparison_dfi(
     # Build the 2×2 table HTML inline so we get tight visual control
     dhi_strip = ""
     if dhi_index is not None:
-        # SAAM / DHI Index pathway
+        # DHI Index pathway
         dhi_strip = (
             f"<div style='background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;"
             f"padding:6px 10px;margin-bottom:8px;font-size:0.82rem;color:#1e3a8a;'>"
             f"<b>DFI update active</b> &nbsp;·&nbsp; DHI Index = <b>{dhi_index:+.0f}</b>"
         )
         if dhi_strength is not None:
-            dhi_strip += f" &nbsp;·&nbsp; R_SAAM = <b>{dhi_strength:.2f}</b>"
+            dhi_strip += f" &nbsp;·&nbsp; R_DFI = <b>{dhi_strength:.2f}</b>"
         if dhi_volume is not None:
             dhi_strip += f" &nbsp;·&nbsp; DHI Volume Weight V = <b>{dhi_volume:.2f}</b>"
         dhi_strip += "</div>"

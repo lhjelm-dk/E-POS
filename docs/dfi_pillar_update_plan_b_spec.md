@@ -30,7 +30,7 @@ Reservoir / Charge / Closure / Retention plus the headline:
 
 - **Custom multi-case:** straight from `resolve_dfi_custom(ctx)` → `ResolvedDfi`
   (`p_res_prior/post`, `hc_pillars_prior/post`). *(already built in Plan A)*
-- **DHI-Index (SAAM):** derive from the **8-outcome** posterior (`compute_dfi_posterior`):
+- **DHI-Index :** derive from the **8-outcome** posterior (`compute_dfi_posterior`):
   - `P_res' =` Σ posterior over **reservoir-present** outcomes  (= the patent's exact
     `P(RP | DFI)` marginal — *more* correct than the 3-leaf reduction);
   - headline `POS' =` success-outcome posterior (unchanged — keep the richer 8-outcome);

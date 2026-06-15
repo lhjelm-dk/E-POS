@@ -193,7 +193,7 @@ def dfi_post_pillars(ctx):
         p_res_post = reservoir_present_marginal(post.posterior_outcomes)
         return build_post_pillars(esl_prior_pg, post.posterior_pg,
                                   p_res_prior, p_res_post, _hc_pillar_priors(pp),
-                                  "Modified DHI Index (SAAM)")
+                                  "Conceptual DHI Index (experimental)")
     if src == "characteristic":
         # Aggregate-only (single success/failure curve cannot resolve reservoir):
         # report just the headline shift so the CAM overlay still works.

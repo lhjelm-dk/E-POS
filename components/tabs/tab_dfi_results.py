@@ -24,10 +24,10 @@ def _render_dfi_results(ctx) -> None:
     """DFI Results sub-page — per-pillar updates, posterior trajectory.
 
     Branches by ``dfi_source``: characteristic-mode uses Simm 2-state Bayes,
-    DHI Index mode uses the full 8-outcome SAAM Bayes (with per-pillar attribution,
+    DHI Index mode uses the full 8-outcome Bayes (with per-pillar attribution,
     sensitivity sweep, iso-DHI plot, etc.).
     """
-    # Characteristic-mode dispatch — no SAAM math, simpler displays
+    # Characteristic-mode dispatch — no 8-outcome math, simpler displays
     if st.session_state.get("dfi_source") == "characteristic":
         _render_dfi_results_characteristic(ctx)
         return
@@ -87,18 +87,18 @@ def _render_dfi_results(ctx) -> None:
 
     d1, d2, d3, d4 = st.columns(4)
     with d1:
-        st.metric("R_SAAM (ESL)",      f"{post_esl.r_saam:.2f}",
+        st.metric("R_DFI (ESL)",      f"{post_esl.r_dfi:.2f}",
                   help="L_success / E[L | failure] using ESL prior.")
     with d2:
         st.metric("DHI Volume Weight V (ESL)",   f"{post_esl.dhi_volume_weight:.2f}",
                   help="V = L_success / (L_success + E[L|failure]). For the DHI-Index method "
-                       "this equals the DHI score, R_SAAM/(R_SAAM+1).")
+                       "this equals the DHI score, R_DFI/(R_DFI+1).")
     with d3:
-        st.metric("R_SAAM (Classic)",  f"{post_classic.r_saam:.2f}")
+        st.metric("R_DFI (Classic)",  f"{post_classic.r_dfi:.2f}")
     with d4:
         st.metric("DHI Volume Weight V (Classic)", f"{post_classic.dhi_volume_weight:.2f}",
                   help="V = L_success / (L_success + E[L|failure]). For the DHI-Index method "
-                       "this equals the DHI score, R_SAAM/(R_SAAM+1).")
+                       "this equals the DHI score, R_DFI/(R_DFI+1).")
 
     # ── ESL vs Classic gap, before AND after the DFI update (B4) ──
     _gap_pre = (esl_prior_pg - prior_classic.prior_pg) * 100
@@ -115,7 +115,7 @@ def _render_dfi_results(ctx) -> None:
     st.markdown("##### DFI pillar attribution (channel-resolved, GeoX-style)")
     from logic.dfi_context import dfi_post_pillars as _dfi_post_pillars
     from components.dfi_shared import render_pillar_attribution
-    render_pillar_attribution(_dfi_post_pillars(ctx), key="dfi_saam_chan_attr")
+    render_pillar_attribution(_dfi_post_pillars(ctx), key="dfi_dhi_chan_attr")
     st.caption(
         "Reservoir comes from the exact 8-outcome P(reservoir present | DFI); the "
         "HC-system (Charge·Closure·Retention) is split by log-proportion. This replaces "
@@ -197,17 +197,17 @@ def _render_dfi_results(ctx) -> None:
     from components.dfi_shared import render_volumetrics_recommendation
     from logic.dhi_characteristics import dhi_score_from_r as _dhi_score_from_r
     render_volumetrics_recommendation(
-        _dhi_score_from_r(post_esl.r_saam),
+        _dhi_score_from_r(post_esl.r_dfi),
         v_weight=post_esl.dhi_volume_weight,
         discernibility=None,
-        key="dfi_vol_saam",
+        key="dfi_vol_dhi",
     )
 
     st.divider()
     from components.dfi_shared import render_dempster_prototype
     render_dempster_prototype(
-        ctx, _dhi_score_from_r(post_esl.r_saam),
-        discernibility=None, simm_posterior=post_esl.posterior_pg, key="ds_saam",
+        ctx, _dhi_score_from_r(post_esl.r_dfi),
+        discernibility=None, simm_posterior=post_esl.posterior_pg, key="ds_dhi",
     )
 
 
@@ -256,7 +256,7 @@ def _render_dfi_results_characteristic(ctx) -> None:
 
     st.info(
         "In characteristic mode the posterior comes from Simm's 2-state Bayes "
-        "(R_eff applied to the geological prior). The SAAM-specific views "
+        "(R_eff applied to the geological prior). The conceptual specific views "
         "(per-pillar attribution, fluid-mix sweep, iso-DHI plot, GeoX hand-off) "
         "are not available because the 6-attribute characteristic scoring does not "
         "decompose the failure modes into water/LSG/other × eval/non-eval reservoir."
@@ -341,7 +341,7 @@ def _render_dfi_results_custom(ctx) -> None:
         "and the combined Charge·Closure·Retention (HC-system) — the headline ESL posterior "
         "above is the reservoir-driven joint update. **Dual-case** updates only the headline. "
         "The **DHI-strength sweep** and **iso-R prior→posterior map** below are the custom-tool "
-        "analogues of the SAAM sensitivity and iso-DHI plots."
+        "analogues of the conceptual DHI model sensitivity and iso-DHI plots."
     )
 
     st.markdown("##### Posterior trajectory — P(G) vs stance w")
@@ -358,7 +358,7 @@ def _render_dfi_results_custom(ctx) -> None:
     slider = _cfg.slider
     _R_at = _cfg.r_at
 
-    # ── Sensitivity sweep — posterior vs DHI strength (analogue of the SAAM sweep) ──
+    # ── Sensitivity sweep — posterior vs DHI strength (analogue of the conceptual DHI model sweep) ──
     st.divider()
     st.markdown("##### Sensitivity sweep — posterior vs DHI strength")
     xs = np.linspace(-100.0, 100.0, 201)
@@ -392,7 +392,7 @@ def _render_dfi_results_custom(ctx) -> None:
         "How the posterior would move if the **DHI-strength reading** were different, with "
         "your curves held fixed. Dotted lines = the unchanged ESL/Classic priors; the curves "
         "cross them where R = 1 (the strength at which the evidence is neutral). The ★ marks "
-        f"the current reading ({slider:+.0f}). This is the custom-tool analogue of the SAAM "
+        f"the current reading ({slider:+.0f}). This is the custom-tool analogue of the conceptual DHI model "
         "fluid-mix/strength sensitivity sweep."
     )
 
@@ -446,7 +446,7 @@ def _render_dfi_results_custom(ctx) -> None:
         "it. The violet curve is your **current R**; the ★ is this prospect at its ESL prior. "
         "Because R is a constant multiplicative shift in log-odds, every curve has the "
         "characteristic S-shape — the update bites hardest near a 50 % prior and vanishes at "
-        "the 0 %/100 % extremes. This is the custom-tool analogue of the SAAM iso-DHI map "
+        "the 0 %/100 % extremes. This is the custom-tool analogue of the conceptual DHI model iso-DHI map "
         "(R replaces the DHI Index as the family parameter)."
     )
 

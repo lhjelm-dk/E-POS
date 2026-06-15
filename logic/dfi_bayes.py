@@ -11,7 +11,7 @@ Public entry points
 ``compute_dfi_posterior(...)``
     Single-prior, single-method Bayes computation.  Returns the posterior
     P(G | DFI), the posterior probability of each of the 7 outcome classes,
-    and the diagnostic metrics R_SAAM (DHI-Index strength) and DHI-Volume-Weight.
+    and the diagnostic metrics R_DFI (DHI-Index strength) and DHI-Volume-Weight.
 
 ``attribute_classic(...)``
     Spreadsheet's log-attribution that distributes the posterior across the
@@ -191,7 +191,7 @@ def decompose_prior(p: PriorPillars, w: FluidWeights) -> PriorOutcomes:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Likelihood mapping, which SAAM class supplies P(DFI | outcome)
+# Likelihood mapping, which DHI class supplies P(DFI | outcome)
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _likelihood_per_outcome(dhi_index: float, calib: Calibration,
@@ -199,7 +199,7 @@ def _likelihood_per_outcome(dhi_index: float, calib: Calibration,
                             fluid_type: str = "Success") -> dict[str, float]:
     """Likelihood of the observed DHI for each of the 8 outcomes.
 
-    Outcome → SAAM class mapping (mirrors the workbook):
+    Outcome → DHI class mapping (mirrors the workbook):
       oil & eval-res success      → ``fluid_type``  (Success/Oil/OilGas/Gas)
       oil & non-eval-res failure  → Reservoir_failure
       water & eval-res failure    → H2O_failure
@@ -244,7 +244,7 @@ class DFIPosterior:
     fluid_type:          str
     fluid_weights:       FluidWeights
     # Auxiliary diagnostics
-    r_saam:              float              # R_SAAM = L_success / E[L|failure] (DHI-Index strength)
+    r_dfi:              float              # R_DFI = L_success / E[L|failure] (DHI-Index strength)
     dhi_volume_weight:   float              # = L_success / (L_success + L_failure_with_DFI)
     # Joint marginals (workbook AE/AF/AG/AH)
     joint_success_dfi:   float              # P(DFI ∧ success)
@@ -266,7 +266,7 @@ def compute_dfi_posterior(pillars: PriorPillars,
 
     ``prior_pg_override`` re-anchors the success prior to a supplied scalar (e.g. the
     ESL *mass-rollup* P(G, ESL)) while preserving the pillar-derived failure-mode mix.
-    R_SAAM and DHI Volume Weight are invariant to this re-anchoring (they are likelihood
+    R_DFI and DHI Volume Weight are invariant to this re-anchoring (they are likelihood
     ratios); only the prior→posterior anchor moves. When None, the native ∏-pillars
     Init Pg is used, exactly as before.
     """
@@ -299,8 +299,8 @@ def compute_dfi_posterior(pillars: PriorPillars,
     # The two metrics are then defined relative to this average.
     prior_failure_marginal = 1.0 - prior_outcomes.oil_eval_success
     avg_L_failure = (joint_failure / prior_failure_marginal) if prior_failure_marginal > 0 else 0.0
-    # R_SAAM (DHI-Index strength)  =  L_success / E[L|failure]   (workbook col 57: =N5/AG5)
-    r_saam = (L_success / avg_L_failure) if avg_L_failure > 0 else float("inf")
+    # R_DFI (DHI-Index strength)  =  L_success / E[L|failure]   (workbook col 57: =N5/AG5)
+    r_dfi = (L_success / avg_L_failure) if avg_L_failure > 0 else float("inf")
     # DHI Volume Weight =  L_success / (L_success + E[L|failure])  (workbook col 58: =N5/(N5+AG5))
     weight_denom = L_success + avg_L_failure
     dhi_volume = (L_success / weight_denom) if weight_denom > 0 else 0.0
@@ -314,7 +314,7 @@ def compute_dfi_posterior(pillars: PriorPillars,
         sd_mode            = sd_mode,
         fluid_type         = fluid_type,
         fluid_weights      = fluid_weights,
-        r_saam             = r_saam,
+        r_dfi             = r_dfi,
         dhi_volume_weight  = dhi_volume,
         joint_success_dfi  = joint_success,
         joint_failure_dfi  = joint_failure,

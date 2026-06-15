@@ -435,7 +435,7 @@ tiny prior. **The prior matters as much as the evidence.**
 |---|---|
 | Disease prevalence (prior) | Geological **P(G)** (ESL or Classic) |
 | Test result (evidence) | The **DHI / DFI** observation |
-| Likelihood ratio | **R** (= R_SAAM / R_char / custom R) |
+| Likelihood ratio | **R** (= R_DFI / R_char / custom R) |
 | Post-test probability | **P(G \| DFI)** posterior |
 
 This is *exactly* the engine behind the DFI update — only the likelihood ratio is
@@ -484,7 +484,7 @@ dependence warning.
 
 - Build the geological prior from evidence orthogonal to amplitude (trap geometry, regional
   charge and migration, source maturity) so the residual coupling is small.
-- Prefer the **case-conditioned** likelihood P(DFI | case) of the SAAM and Custom multi-case
+- Prefer the **case-conditioned** likelihood P(DFI | case) of the conceptual DHI model and Custom multi-case
   methods. Conditioning on reservoir evaluability and fluid is exactly conditioning on the
   covariates that couple the prior and the likelihood, which is the principled fix for
   risk (2), rather than a flat P(DFI | HC).
@@ -846,7 +846,7 @@ in the risk narrative, not hidden in a single number.
             unsafe_allow_html=True,
         )
         st.caption(
-            "🔎 All DFI abbreviations (DFI, DHI Index, SAAM, R, V, LSG, Eval-Res, …) "
+            "🔎 All DFI abbreviations (DFI, DHI Index, R, V, LSG, Eval-Res, …) "
             "are defined in the unified **📖 Glossary & Abbreviations** on the "
             "**📖 Reference** sub-tab."
         )
@@ -954,9 +954,9 @@ You can verify they sum to 1: factor out and the structure collapses to $1\cdot 
 
 ---
 
-### Step 4 — Likelihood per outcome (the SAAM Gaussians)
+### Step 4 — Likelihood per outcome (the conceptual DHI model Gaussians)
 
-Each of the 8 outcomes maps to one **SAAM calibration class**. Each class has a calibrated **mean** $\mu_k$
+Each of the 8 outcomes maps to one **DHI calibration class**. Each class has a calibrated **mean** $\mu_k$
 and **standard deviation** $\sigma_k$ for the DHI Index distribution. The likelihood of observing
 DHI Index $x$ given outcome $k$ is the Gaussian PDF:
 
@@ -966,7 +966,7 @@ $$
 
 The outcome-to-class mapping mirrors the workbook:
 
-| Outcome | SAAM class |
+| Outcome | DHI class |
 |---------|-----------|
 | Oil + Eval-Res (success) | `Success` (or `Oil` / `Oil+Gas` / `Gas` per analyst choice) |
 | Oil + Non-Eval-Res | `Reservoir_failure` |
@@ -981,9 +981,8 @@ Note that **Reservoir_failure** and **Non-Eval-Res** share one class — geophys
 because both produce a seismic signature dominated by the absence of producible reservoir, regardless of the
 pore fluid that *would* have been there.
 
-> **SD mode:** SAAM publishes two sigma values per class. `upper` uses the larger of the two
-> (wider, more conservative — preferred default). `calculated` uses the empirical sample sigma
-> (tighter). Always state which mode you used in your report.
+> **One sigma per class.** Each outcome class carries a single conceptual mean and sigma
+> (round, illustrative values, not fitted to any dataset). They are editable on the Setup page.
 
 ---
 
@@ -1012,7 +1011,7 @@ This is the headline number you see in the **DFI Results** tab.
 
 ---
 
-### Step 7 — R_SAAM (DHI-Index strength) and DHI Volume Weight V
+### Step 7 — R_DFI (DHI-Index strength) and DHI Volume Weight V
 
 We define two diagnostic ratios that summarise *how strong the DFI evidence is*, independently of the prior:
 
@@ -1022,25 +1021,24 @@ E[L \mid \text{failure}] \;=\; \frac{\sum_{k\ne 1} L_k\cdot \pi_k}{\sum_{k\ne 1}
 $$
 
 $$
-\boxed{\;R_\text{SAAM} \;=\; \frac{L_\text{succ}}{E[L \mid \text{failure}]}\;}
+\boxed{\;R_\text{DFI} \;=\; \frac{L_\text{succ}}{E[L \mid \text{failure}]}\;}
 \qquad
 \boxed{\;V \;=\; \frac{L_\text{succ}}{L_\text{succ}+E[L\mid\text{failure}]}\;}
 $$
 
-**R_SAAM** (DHI-Index strength) is a likelihood ratio:
-- **R_SAAM > 1** → observation favours success (uplift expected)
-- **R_SAAM = 1** → neutral
-- **R_SAAM < 1** → observation favours failure (downgrade expected)
-- **R_SAAM ≫ 1** (e.g. 5+) → strong evidence; large uplift even with weak priors
+**R_DFI** (DHI-Index strength) is a likelihood ratio:
+- **R_DFI > 1** → observation favours success (uplift expected)
+- **R_DFI = 1** → neutral
+- **R_DFI < 1** → observation favours failure (downgrade expected)
+- **R_DFI ≫ 1** (e.g. 5+) → strong evidence; large uplift even with weak priors
 
-> **Two different R's — don't conflate them.** `R_SAAM` here is the likelihood ratio from the
-> **Modified DHI Index (SAAM)** Gaussian calibration — a conceptual model reverse-engineered
-> from public SAAM presentation material; it expects a *pure DFI-strength* input, not a raw
-> SAAM score (see the warning on that Setup page). The
+> **Two different R's — don't conflate them.** `R_DFI` here is the likelihood ratio from the
+> **Conceptual DHI Index (experimental)** Gaussian calibration — a conceptual model reverse-engineered
+> from public public presentation material; it expects a *pure DFI-strength* input, not a raw
+> raw composite DHI score (see the warning on that Setup page). The
 > **characteristic-scoring** pathway computes a *different* ratio, `R_char` = ∏ LRᵢ, as a naive
 > product of per-attribute likelihood ratios (Monigle 2025). Both feed the same Simm 2-state
 > Bayes update, but they are computed on different scales and are **not** interchangeable.
-> *(Note for external write-ups: "SAAM" is an internal database name; alias it before publishing.)*
 
 **V** (DHI Volume Weight) is R squashed into [0, 1]:
 - **V > 0.5** → success-aligned
@@ -1193,7 +1191,7 @@ white mass. After the DFI update, that envelope is gone — the posterior is a *
 Why? The Bayes update conditions on observed evidence: *given this DFI, the answer is one number*.
 Carrying the white uncertainty through Bayes would require defining a likelihood over the white mass
 itself (a prior on the prior — possible but adds another layer of subjective input). E-POS adopts the
-pragmatic convention used in the SAAM workbook: update the point-estimate prior, report the posterior
+pragmatic convention used in the conceptual DHI model workbook: update the point-estimate prior, report the posterior
 as a point estimate, and report the prior's Bel/Pl alongside so the reader sees the *original*
 defensible envelope.
 
@@ -1276,7 +1274,7 @@ pillar-resolved panel can.
   and **Final Prospect POS** pages (prior→posterior per channel/pillar). It is a *parallel*
   post-DFI view: the per-pillar **prior inputs are never overwritten**, so the geological
   prior the analyst books stays intact.
-- **DHI-Index (SAAM)** keeps its richer **8-outcome** headline, and its per-pillar
+- **DHI-Index ** keeps its richer **8-outcome** headline, and its per-pillar
   attribution is now the **channel-resolved** split too — the Reservoir marginal is the
   exact `P(reservoir present | DFI)` from the 8 outcomes, replacing the earlier
   *equal-spread* attribution (which moved every pillar the same way and could not show a
@@ -1293,7 +1291,7 @@ GeoX term; E-POS is single-segment only. **No patent claim is practised.**
 
     with _tab_maths.expander("Alternative: Characteristic scoring (Simm 2016 + Monigle 2025)", expanded=False):
         st.markdown(
-            "The 8-outcome SAAM Bayes above is one of **two** pathways the app supports "
+            "The 8-outcome Bayes above is one of **two** pathways the app supports "
             "for deriving the DHI strength R. The second pathway — **characteristic "
             "scoring** — is grounded in two foundational papers:"
         )
@@ -1515,16 +1513,16 @@ GeoX term; E-POS is single-segment only. **No patent claim is practised.**
             "synthetic split. A larger filled polygon = a stronger DHI profile."
         )
         st.markdown("---")
-        st.markdown("#### When to use this path vs Modified DHI Index (SAAM)")
+        st.markdown("#### When to use this path vs Conceptual DHI Index (experimental)")
         st.markdown(
             "| Use case | Choose | Why |\n"
             "|---|---|---|\n"
             "| You have a **pure DFI-strength index** (geology neutralised) | **Modified DHI "
-            "Index (SAAM)** | 8-outcome decomposition gives per-pillar attribution + fluid-class "
-            "diagnostics. *Do not feed a raw SAAM DHI Index; see the warning on that page.* |\n"
-            "| You don't have SAAM access or want a stand-alone assessment | **Characteristic scoring** | "
+            "Index ** | 8-outcome decomposition gives per-pillar attribution + fluid-class "
+            "diagnostics. *Do not feed a raw composite DHI index; see the warning on that page.* |\n"
+            "| You don't have a calibrated DHI database or want a stand-alone assessment | **Characteristic scoring** | "
             "Six verbal sliders + public Monigle 2025 calibration; no external tool required. |\n"
-            "| You want a sanity check on a SAAM-derived R | Run both; compare | The two R values "
+            "| You want a sanity check on a conceptual R | Run both; compare | The two R values "
             "should be of similar magnitude. Large disagreement = investigate which attributes / "
             "fluid mix is driving the gap. |\n"
             "| Reservoir-presence is the dominant risk (e.g. wildcat sub-salt) | Either | Both "
@@ -1540,7 +1538,7 @@ GeoX term; E-POS is single-segment only. **No patent claim is practised.**
 Before opening the Bayesian DFI Update tab you should have:
 
 1. **A complete ESL assessment** — Play and Conditional tabs filled in, P(G, ESL) showing on the Dashboard.
-2. **A DHI Index value** for the prospect, computed from the SAAM/SaRA scoring rubric (typically a single integer in the range −23 to +50).
+2. **A DHI Index value** for the prospect, computed from the DHI/amplitude scoring workflow (typically a single integer in the range −23 to +50).
 3. **A view on the fluid-failure split** — what fraction of failed-prospect outcomes (in your basin/play) is water vs LSG vs other fluids? Defaults are 80/20/0 if you have no calibration.
 4. **A fluid type** — does the prospect target oil, gas, oil+gas, or generic hydrocarbons?
 
@@ -1562,7 +1560,7 @@ When you toggle ON for the first time, E-POS sets defaults: DHI Index = 19, wate
 Navigate to the **Bayesian DFI Update** tab → **DFI Setup**. You'll see four panels:
 
 **A. DHI Index input**
-> Enter the integer score from your SAAM/SaRA scoring sheet. Hover the help icon for the typical reference table.
+> Enter the integer score from your your DHI-scoring workflow scoring sheet. Hover the help icon for the typical reference table.
 
 **B. Fluid mix**
 > Three sliders summing to 100%. Set:
@@ -1572,7 +1570,7 @@ Navigate to the **Bayesian DFI Update** tab → **DFI Setup**. You'll see four p
 > If unsure, leave defaults. Document your choice in the audit trail.
 
 **C. Fluid type & SD mode**
-> - Fluid type: `Success` (pooled), `Oil`, `Oil+Gas`, `Gas` — pick the closest match to your prospect's primary target. The Bayes update uses the corresponding SAAM class for the success-likelihood Gaussian.
+> - Fluid type: `Success` (pooled), `Oil`, `Oil+Gas`, `Gas` — pick the closest match to your prospect's primary target. The Bayes update uses the corresponding DHI class for the success-likelihood Gaussian.
 > - SD mode: leave `upper` unless you have a specific reason to tighten the likelihoods.
 
 **D. Bell-curve preview**
@@ -1602,7 +1600,7 @@ This is the **reportable view**, now its own **top-level tab** (no longer under 
 ### Step 5 — Document and sign off
 
 In the Audit Trail:
-- DHI Index value and source (SAAM version, date, who scored it).
+- DHI Index value and source (scoring method, calibration version, date, who scored it).
 - Fluid mix percentages and their justification.
 - Stance w and SD mode used.
 - Final P(G | DFI, ESL) and P(G | DFI, Classic), plus the spread between them.
@@ -1620,11 +1618,11 @@ Q1.  Do you have seismic coverage of the prospect with adequate
         │
         └─ Yes ─────────────────────────────────────────────────────────
               │
-              Q2.  Has someone scored the prospect using the SAAM/SaRA
+              Q2.  Has someone scored the prospect using the your DHI-scoring workflow
                    rubric to produce a numeric DHI Index?
                     │
                     ├─ No  → Either (a) score it yourself using the
-                    │        SAAM checklist, or (b) skip DFI Bayes.
+                    │        DHI-scoring checklist, or (b) skip DFI Bayes.
                     │        Don't guess a DHI Index from a screenshot.
                     │
                     └─ Yes ─────────────────────────────────────────────
@@ -1658,7 +1656,7 @@ Q1.  Do you have seismic coverage of the prospect with adequate
 
 ### What to do when the decision tree says "skip DFI"
 
-You can still use E-POS — just **leave the toggle OFF**. The dashboard will show only the ESL and Classic priors. The audit trail should record *why* DFI was not applied (no seismic, no SAAM score, or judgement that it is uninformative).
+You can still use E-POS — just **leave the toggle OFF**. The dashboard will show only the ESL and Classic priors. The audit trail should record *why* DFI was not applied (no seismic, no DHI score, or judgement that it is uninformative).
 """)
 
     with _tab_practice.expander("DFI pitfalls & calibration tips", expanded=False):
@@ -1705,7 +1703,7 @@ If the prospect's main risk is reservoir presence (e.g., wildcat in a poorly-ima
 
 ### Pitfall 6 — Calibration drift
 
-SAAM/SaRA updates its database periodically. v.16a (used here by default) is one snapshot. If you're working in a basin not well-represented in the consortium dataset (e.g., new frontier), the Gaussians are extrapolations. **Document the calibration version** in every report.
+A conceptual calibration is bundled by default. If you are working in a basin not well represented by your own calibration (e.g. a new frontier), the Gaussians are extrapolations. **Document the calibration source and version** in every report.
 
 ---
 
@@ -1717,7 +1715,7 @@ After computing the posterior, ask: *does this number match what I'd expect from
 
 ### Calibration tip — invert R for sanity
 
-R = 3 means *the observation is 3× more likely under success than under failure*. Ask: *is this seismic anomaly really 3× more diagnostic than my prior suggests?* If you can't articulate the answer in geophysical terms, R is probably overstated and the SAAM class assignment may be wrong.
+R = 3 means *the observation is 3× more likely under success than under failure*. Ask: *is this seismic anomaly really 3× more diagnostic than my prior suggests?* If you can't articulate the answer in geophysical terms, R is probably overstated and the DHI class assignment may be wrong.
 """)
 
     with _tab_practice.expander("DFI reporting — what to include in a prospect write-up", expanded=False):
@@ -1733,7 +1731,7 @@ For a DFI-updated prospect, every write-up should contain — at minimum; these 
 | 3 | Posterior, ESL | P(G \| DFI, ESL) |
 | 4 | Posterior, Classic | P(G \| DFI, Classic) |
 | 5 | DHI Index | (integer) |
-| 6 | DHI-Index strength | R_SAAM |
+| 6 | DHI-Index strength | R_DFI |
 | 7 | DHI Volume Weight | V |
 | 8 | Prior Bel–Pl envelope | [bel%, pl%] |
 
@@ -1749,13 +1747,13 @@ Plus three plots:
 > *"The geological prior for {prospect_name} was assessed at **P(G, ESL) = {prior_esl}%**
 > (defensible range {bel}%–{pl}%) and P(G, Classic) = {prior_classic}%.*
 >
-> *A SAAM-scored DHI Index of **{dhi_index}** was applied as a Bayesian update, with fluid failure mix
+> *A conceptual scored DHI Index of **{dhi_index}** was applied as a Bayesian update, with fluid failure mix
 > Water {wat}% / LSG {lsg}% / Other {oth}%, fluid type {hc_type}, SD mode {sd}, calibration {cal_version}.*
 >
 > *The resulting posterior is **P(G | DFI, ESL) = {post_esl}%** (Δ {delta_esl:+} pp vs prior), with
 > the Classic method posterior at **{post_classic}%** (Δ {delta_classic:+} pp).*
 >
-> *Diagnostic values: R_SAAM = {R}, DHI Volume Weight V = {V}. The Bayesian update is
+> *Diagnostic values: R_DFI = {R}, DHI Volume Weight V = {V}. The Bayesian update is
 > [robust / sensitive] to fluid-mix assumptions — sensitivity sweep showed posterior variation of
 > {sweep_pp} pp across 100%–0% water fraction.*
 >
@@ -1770,7 +1768,7 @@ If any of the following are true, lead with the **prior** and present the poster
 
 - The spread between ESL and Classic posteriors > 10 pp (methodological disagreement).
 - The fluid-mix sensitivity sweep > 5 pp (input-driven, not data-driven uplift).
-- R_SAAM < 1.2 (very weak DFI evidence — uplift is mostly prior-driven).
+- R_DFI < 1.2 (very weak DFI evidence — uplift is mostly prior-driven).
 - The prospect failed Q1/Q2/Q3 of the decision tree (the update shouldn't have been applied at all).
 
 In these cases the audit trail must state: *"Posterior shown for completeness; risk decision is based on the geological prior."*
@@ -1787,8 +1785,8 @@ In these cases the audit trail must state: *"Posterior shown for completeness; r
 | Stance w | from dashboard |
 | ESL prior, Bel, Pl | from Geological POS tab |
 | Classic prior | from Geological POS tab |
-| DHI Index, scorer, scoring date | manual + SAAM sheet |
-| SAAM calibration version | from app (e.g. v.16a) |
+| DHI Index, scorer, scoring date | manual + DHI scoring sheet |
+| calibration version | from app |
 | SD mode | from app |
 | Fluid mix (water/LSG/other) | from app |
 | Fluid type | from app |
@@ -1813,11 +1811,11 @@ DHI can be trusted**. E-POS surfaces *two* trust measures, then recommends a ble
 
 | | What it is | Input | Availability |
 |---|---|---|---|
-| **DHI Volume Weight (V)** | SAAM byproduct $V = L_\text{success} / (L_\text{success} + E[L\mid\text{failure}])$ — the calibrated probability the anomaly is a *true HC response* | SAAM likelihoods | DHI-Index pathway only |
+| **DHI Volume Weight (V)** | DHI-Index byproduct $V = L_\text{success} / (L_\text{success} + E[L\mid\text{failure}])$ — the calibrated probability the anomaly is a *true HC response* | conceptual DHI likelihoods | DHI-Index pathway only |
 | **Column-height weight ($w_{ch}$)** | Monigle 2025, Fig. 8 — fraction of volumetric trials placing the HCWC at the DFI-rated elevation | 0–1 DHI score | every pathway |
 
 Both answer the same operational question from different inputs, so the app shows them
-side by side. When both are available, a large divergence is a flag to reconcile the SAAM
+side by side. When both are available, a large divergence is a flag to reconcile the DHI-Index
 likelihoods against the DHI score before committing the volume distribution.
 
 ### The column-height weighting rule (Monigle Fig. 8)
@@ -1944,10 +1942,11 @@ as PDFs with this project for direct consultation.
 
 ---
 
-*The SAAM calibration behind the **Modified DHI Index (SAAM)** pathway is a proprietary
-internal database and is **not** a public reference; only a synthetic placeholder
-ships with E-POS. The shipped pathway is a conceptual model reverse-engineered from
-public presentation material and expects a pure DFI-strength input, not a raw SAAM score.*
+*The **Conceptual DHI Index (experimental)** pathway is exactly that — conceptual. Its likelihood
+curves are round, hand-set illustrative values, **not calibrated to any dataset or study**, and
+are editable on the Setup page. It expects a **pure DFI-strength input**, not a raw composite DHI
+index that bundles geology with the seismic signal (see the warning on that Setup page). For a
+decision-grade update, replace the conceptual curves with your own calibrated likelihoods.*
 
 #### Scope & intellectual-property note (single-segment only)
 E-POS models a **single-segment** prospect. *"Segment"* is a **GeoX** term for one
@@ -2016,11 +2015,9 @@ A single reference for every term in E-POS — the ESL/Classic core and the Baye
 |---------|-----------|---------|
 | **DFI** | Direct Fluid Indicator | Any seismic attribute that responds directly to hydrocarbons (AVO, flat spot, dim/bright spot, etc.). Umbrella term. |
 | **DHI** | Direct Hydrocarbon Indicator | Synonym for DFI, more common in older literature. |
-| **DHI Index** | Composite DHI score | A single scalar (typical range −23 … +50) summarising the strength and consistency of all observed DFIs for one prospect. Computed by the SAAM/SaRA scoring rubric. |
-| **SAAM** | Seismic Amplitude Analysis Module | Rose & Associates DHI consortium database (now **SaRA** — *Seismic Amplitude Risk Assessment*) of drilled prospects with calibrated DHI Index → outcome statistics. |
-| **SaRA** | Seismic Amplitude Risk Assessment | Renamed/successor to SAAM. Same database lineage. |
+| **DHI Index** | Composite DHI score | A single scalar (typical range −23 … +50) summarising the strength and consistency of all observed DFIs for one prospect. Computed by the DHI/amplitude scoring workflow. |
 | **DFI update** | Bayesian update | Conditioning the prior on the DFI observation. Can **raise or lower** P(G) — a strong DFI lifts it; an absent/weak DFI where one was expected lowers it. |
-| **R_SAAM** | DHI-Index strength | Likelihood ratio = $L_\text{success} / E[L \mid \text{failure}]$. R_SAAM > 1 favours success; R_SAAM < 1 against. |
+| **R_DFI** | DHI-Index strength | Likelihood ratio = $L_\text{success} / E[L \mid \text{failure}]$. R_DFI > 1 favours success; R_DFI < 1 against. |
 | **V** | DHI Volume Weight | Bounded version of R = $L_\text{success}/(L_\text{success}+E[L\mid\text{failure}])$. Range 0..1; 0.5 = neutral. Also the weight on a DFI-derived volume constraint. |
 | **L** | Likelihood | Probability *density* of observing the DHI Index given a specific outcome class (a Gaussian PDF value, not a probability; can exceed 1). |
 | **π** (pi) | Outcome prior | Prior probability of one of the 8 mutually-exclusive outcomes (categorical-prior convention, kept distinct from P(·) and pillar Pgs). |
@@ -2031,8 +2028,8 @@ A single reference for every term in E-POS — the ESL/Classic core and the Baye
 | **Non-Eval-Res** | Non-Evaluable Reservoir | Reservoir failure (absent / sub-resolution / wrong facies). The DFI is uninformative — defaults to a failure-class likelihood. |
 | **SD mode** | Standard-deviation mode | Gaussian width: `upper` (conservative, wider) or `calculated` (tighter). E-POS defaults to `upper`. |
 | **Fluid weights** | Water / LSG / Other failure fractions | How failure mass is partitioned among the three non-HC outcomes. Must sum to 1. |
-| **Fluid type** | HC class selector | Which SAAM success class supplies the success likelihood: *Success* (pooled), *Oil*, *Oil+Gas*, *Gas*. |
-| **Calibration version** | SAAM/SaRA release | Versioned snapshot of the database statistics. Current: v.16a. |
+| **Fluid type** | HC class selector | Which DHI success class supplies the success likelihood: *Success* (pooled), *Oil*, *Oil+Gas*, *Gas*. |
+| **Calibration version** | your DHI-scoring workflow release | Versioned snapshot of the database statistics. Current: v.16a. |
 
 ### Other terms
 

@@ -73,8 +73,8 @@ def _render_dfi_setup_custom(ctx) -> None:
         "how strong/positive your DFI looks; it carries no physical units. It is read against "
         "the equally **uncalibrated** Success and Failure P(DFI | case) distributions you define "
         "below. Only the *shape and separation* of the two curves matters (R is scale-invariant), "
-        "so the −100…100 numbers are arbitrary — unlike the Modified DHI Index (SAAM) pathway, "
-        "which reads against a SAAM-derived calibration."))
+        "so the −100…100 numbers are arbitrary — unlike the Conceptual DHI Index (experimental) pathway, "
+        "which reads against a conceptual calibration."))
 
     # ── Build the case set ──
     cases: dict = {}
@@ -231,7 +231,7 @@ def _render_dfi_setup_custom(ctx) -> None:
     _success_cell = (sum(_w_succ[k] * _pdf_succ[k] for k in SUCCESS_KEYS) / _w_succ_tot
                      if _w_succ_tot > 0 else sum(_pdf_succ.values()) / len(SUCCESS_KEYS))
     # GeoX has a single "LSG/other" failure cell, so blend the LSG and Other cases
-    # by their weights (mirrors SAAM, where Other shares the LSG_failure class).
+    # by their weights (mirrors the conceptual model, where Other shares the LSG_failure class).
     _w_lsg, _w_oth = weights.get("lsg", 0.0), weights.get("other", 0.0)
     _lsg_pdf, _oth_pdf = cases["lsg"].pdf(slider), cases["other"].pdf(slider)
     _lsg_cell = ((_w_lsg * _lsg_pdf + _w_oth * _oth_pdf) / (_w_lsg + _w_oth)

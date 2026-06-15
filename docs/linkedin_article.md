@@ -18,9 +18,21 @@ That is roughly how risking was introduced to me, and during my career I have ha
 
 I have been particularly interested in the "math" of prospect POS: play analysis, well POS vs Pg, DHI modification, multi-segment dependency, and how we end up with numbers that are defendable and will, in the end, actually match the success rate of the portfolio. There are of course other fascinating sides to risking, like how group knowledge improves assessments, biases, political pressure, the peer-review process, evaluation consistency, look-back analysis and the psychology of the whole thing. But my itch has always been the mechanics. How do you actually derive a probability value? How do you communicate the uncertainty, and quantify the fuzziness, the incomplete data, the assumptions and the unknowns? And how do you incorporate auxiliary knowledge from seismic DHIs, seeps or EM responses?
 
-Eventually these thoughts turned into a side project, built with Python and a lot of AI discussions to capture ideas and test new assessment methods. The current result is **E-POS**, an open tool for evidence-supported prospect probability assessment. This article is about how I currently view probability assessment, what I built to cope with it, and hopefully you will find it interesting or educational. Or, more likely, conclude that I have over-engineered a simple exploration task.
+Eventually these thoughts turned into a side project, built with Python and a lot of AI discussions to capture ideas and test new assessment methods. The current result is an open source tool called **E-POS** (Evidence-supported Probability Of Success"), for prospect probability assessment. This article is about how I currently view where probability assessment could be going, what I built to cope with it, and hopefully you will find it interesting or educational. Or, more likely, conclude that I have over-engineered an easy and simple exploration task.
 
 And yes, the name. An *epos* is a Greek heroic poem. Leaving the comfort of certainty to face complex data, financial stakes and the steady pain of failed predictions, while confronting my own biases along the way, felt like a journey worthy of the pun.
+
+---
+
+## Why this one number runs the whole show
+
+Before defending why the POS is hard, it is worth saying why it matters that it is right.
+
+The prospect POS is not an academic score. It is the multiplier in nearly every economic decision exploration makes. A prospect's expected value is, roughly, its chance of success times the value if it works, minus its chance of failure times the cost of a dry hole. POS sits right at the front of that expression, so a few percentage points swing the chance-weighted NPV by real money, and often decide whether the well clears the hurdle at all. The "below 25%, go back and revisit the numbers" rule from the opening is simply an economic cut-off wearing a geological costume.
+
+And it does not stop at one well. The same numbers rank prospects against each other, set the drilling sequence, and allocate next year's budget. They underpin the biggest calls of all: whether to enter a play, bid in a licence round, or walk away from a basin. Those decisions only work if the POS numbers are *comparable* across the portfolio, which is why consistency matters as much as any single estimate (and why challenge 2, calibration, is so painful).
+
+So a biased or falsely precise POS does not just mislead one drilling decision. It quietly misallocates capital across the whole portfolio: funding the confident-but-wrong and starving the genuinely good. That is the prize for getting this number a little less wrong, and the reason I kept pulling on the thread.
 
 ---
 
@@ -28,8 +40,8 @@ And yes, the name. An *epos* is a Greek heroic poem. Leaving the comfort of cert
 
 **1. We are biased, and we know it.** Bond and co-workers have documented how anchoring, availability and motivated reasoning shape interpretation and risk assessment, and why independent assurance processes exist (Bond et al., 2022). The uncomfortable part is that knowing about bias does not remove it. Structure and documentation help more than good intentions: if the evidence behind a number is written down, someone can at least challenge it.
 
-**2. You rarely live long enough to be calibrated.** The honest test of a risking process is hindsight: did the prospects you called 20% come in about one time in five? That requires a large drilled portfolio, a stable method, and assessors who stay put. Most of us learn on moving targets, with portfolios too small for the statistics to bite. Rose built a whole discipline around this problem, and the large companies run assurance teams to enforce consistency; it remains the hardest problem in risking.
-
+**2. You rarely live long enough to be calibrated.** The honest test of a risking process is hindsight: did the prospects you called 20% come in about one time in five? That requires a large drilled portfolio, a stable method, and assessors who stay put. Most of us learn on moving targets, with portfolios too small for the statistics to bite. Rose built a whole discipline around this problem, suggestive risk lookup-tables has been published and the large companies run assurance teams to enforce consistency; it remains the hardest problem in risking.
+ 
 **3. The arithmetic stops being innocent the moment risk elements are dependent.** Multiplying probabilities assumes independence. But is reservoir presence independent of seal presence in the same depositional system? Is the migration pathway independent of our reservoir? If you risk "migration" in one factor and "charge timing" in another, have you counted the same uncertainty twice? Double-counting dependent evidence systematically *understates* POS. The worst part is that we often cannot say, geologically, which elements are dependent, and it probably varies from basin to basin. Which would suggest different risk models for different basins, except nobody wants that in the company procedures.
 
 **4. Putting a number on deep uncertainty is its own problem.** How do you know that 40% rather than 50% of reservoir units in this setting, at these depths, will have sufficient permeability? Often you don't. A single number like 0.4 silently claims more knowledge than you have. There is a real difference between "the evidence is split" and "we have no evidence", and classical probability has no way to write that difference down. And a related practical question follows: which risk element would actually respond to mitigation effort, and which would not?

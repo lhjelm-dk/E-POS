@@ -12,7 +12,7 @@ def _render_geox_pdfi_panel(dhi, calib, sd_mode, fluid_type) -> None:
     """Pin out the six P(DFI|case) likelihoods that SLB GeoX's DFI Assessment needs.
 
     GeoX's DFI Assessment tab takes six conditional probabilities P(DFI | case),
-    one per (fluid × reservoir-evaluability) outcome. They map onto the SAAM
+    one per (fluid × reservoir-evaluability) outcome. They map onto the DHI
     calibration classes as below; the three non-evaluable-reservoir cases all share
     the Reservoir_failure class, so they take the same value.
     """
@@ -34,7 +34,7 @@ def _render_geox_pdfi_panel(dhi, calib, sd_mode, fluid_type) -> None:
         ("Low Sat. Gas & Eval. Res.", f"{v_lsg*100:.1f}%", "LSG_failure"),
         ("Low Sat. Gas & Non. Eval. Res.", f"{v_res*100:.1f}%", "Reservoir_failure"),
     ]
-    df = pd.DataFrame(rows, columns=["GeoX case label", "P(DFI | case)", "SAAM class used"])
+    df = pd.DataFrame(rows, columns=["GeoX case label", "P(DFI | case)", "DHI class used"])
 
     st.markdown("##### 📤 GeoX hand-off — the 6 P(DFI | case) inputs")
     st.caption(
@@ -70,7 +70,7 @@ def _render_geox_pdfi_panel(dhi, calib, sd_mode, fluid_type) -> None:
             "non-evaluable, which is why the three Non. Eval. Res. rows share one likelihood.  \n\n"
             "---\n"
             "**What is P(DFI | case)?**  \n"
-            "For each possible outcome (\"case\"), the SAAM database gives a bell curve (Gaussian) "
+            "For each possible outcome (\"case\"), the conceptual DHI model database gives a bell curve (Gaussian) "
             "describing *what DHI Index that kind of prospect tends to produce*. **P(DFI | case)** is "
             "simply the **height of that bell curve at your observed DHI Index** — how well your DHI "
             "score \"fits\" each case. A high value means *\"a prospect of this type would readily "
@@ -81,7 +81,7 @@ def _render_geox_pdfi_panel(dhi, calib, sd_mode, fluid_type) -> None:
         st.markdown(
             "**Why aren't these just the raw Gaussian PDF heights?**  \n"
             "The raw Gaussian PDF is a *probability density*, not a probability — its units are "
-            "\"per unit DHI\", it peaks around 3–4 and can exceed 1. GeoX (and the SAAM workbook) "
+            "\"per unit DHI\", it peaks around 3–4 and can exceed 1. GeoX (and the conceptual DHI model workbook) "
             "rescale it into a percentage-like number by multiplying by **20**:"
         )
         st.latex(r"P(\text{DFI} \mid \text{case}) \;=\; \text{Gaussian density} \times 20")
@@ -184,9 +184,9 @@ def _render_posterior_class_panel(post, fluid_weights) -> None:
     col_a.metric("Prior P(G, ESL)",  f"{post.prior_outcomes.oil_eval_success*100:.2f}%")
     col_b.metric("Posterior P(G | DFI, ESL)", f"{post.posterior_pg*100:.2f}%",
                  delta=f"{(post.posterior_pg - post.prior_outcomes.oil_eval_success)*100:+.2f}%")
-    col_c.metric("R_SAAM", f"{post.r_saam:.2f}",
-                 help="R_SAAM (DHI-Index strength) = L_success / E[L | failure] — the "
-                      "likelihood ratio from the Modified DHI Index (SAAM) calibration. How much the "
+    col_c.metric("R_DFI", f"{post.r_dfi:.2f}",
+                 help="R_DFI (DHI-Index strength) = L_success / E[L | failure] — the "
+                      "likelihood ratio from the Conceptual DHI Index (experimental) calibration. How much the "
                       "DFI evidence shifts the odds. Distinct from R_char on the "
                       "characteristic-scoring pathway.")
 
@@ -256,7 +256,7 @@ def _render_calibration_editor(calib) -> None:
         uploaded = st.file_uploader(
             "Upload calibration JSON (replaces in-UI edits)",
             type=["json"], key="dfi_calibration_upload",
-            help="JSON schema: see data/saam_calibration_placeholder.json",
+            help="JSON schema: see data/dhi_calibration_placeholder.json",
         )
         if uploaded is not None:
             try:

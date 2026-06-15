@@ -5,7 +5,7 @@ README gallery after a UI change::
 
     python scripts/capture_readme_shots.py
 
-IP safety: the real ``data/saam_calibration.json`` (if present) is temporarily
+IP safety: the real ``data/dhi_calibration.json`` (if present) is temporarily
 moved aside so the synthetic *placeholder* calibration is used for every shot —
 no proprietary numbers ever land in a committed image. The default synthetic
 ``AlphaGammaFoxtrot`` prospect supplies all the evidence.
@@ -22,8 +22,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 IMG = ROOT / "docs" / "img"
 PORT = 8765
-REAL_CALIB = ROOT / "data" / "saam_calibration.json"
-HIDDEN_CALIB = ROOT / "data" / "_saam_calibration.hidden"
+OVERRIDE_CALIB = ROOT / "data" / "dhi_calibration.json"
+HIDDEN_CALIB = ROOT / "data" / "_dhi_calibration.hidden"
 
 
 def _free(port: int) -> bool:
@@ -38,10 +38,10 @@ def main() -> int:
     moved = False
     proc = None
     try:
-        if REAL_CALIB.exists():
-            REAL_CALIB.rename(HIDDEN_CALIB)
+        if OVERRIDE_CALIB.exists():
+            OVERRIDE_CALIB.rename(HIDDEN_CALIB)
             moved = True
-            print("- hid real calibration; placeholder will be used")
+            print("- moved local calibration override aside; placeholder will be used")
 
         proc = subprocess.Popen(
             [sys.executable, "-m", "streamlit", "run", "app.py",
@@ -178,7 +178,7 @@ def main() -> int:
             scroll_to("Where this prospect sits"); shot("14_dfi_char_density")
             scroll_to("Per-attribute LR"); shot("32_dfi_char_lr_radar")
 
-            # Modified DHI Index (SAAM)
+            # Conceptual DHI Index (experimental)
             click_label("Modified DHI Index")
             scroll_to("Modified DHI Index"); shot("33_dfi_modified_dhi")
 
@@ -209,8 +209,8 @@ def main() -> int:
             except Exception:
                 proc.kill()
         if moved and HIDDEN_CALIB.exists():
-            HIDDEN_CALIB.rename(REAL_CALIB)
-            print("- restored real calibration")
+            HIDDEN_CALIB.rename(OVERRIDE_CALIB)
+            print("- restored local calibration override")
 
 
 if __name__ == "__main__":

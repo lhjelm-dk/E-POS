@@ -197,7 +197,7 @@ def test_characteristic_is_aggregate_only():
     assert "Characteristic" in ch.method_label
 
 
-# ── DHI-Index (SAAM) adapter ─────────────────────────────────────────────────
+# ── DHI-Index  adapter ─────────────────────────────────────────────────
 class _StubClass:
     def __init__(self, mean, sd):
         self.mean = mean
@@ -207,7 +207,7 @@ class _StubClass:
 
 
 class _StubCalib:
-    """Minimal calibration carrying the SAAM class schema for adapter tests."""
+    """Minimal calibration carrying the DHI class schema for adapter tests."""
     def __init__(self):
         self.classes = {
             "Success": _StubClass(0.30, 0.25),
@@ -235,7 +235,7 @@ def test_dhi_index_adapter_is_pillar_resolved_and_maps_reservoir():
     v_wat = geox_pdfi_value(7.0, calib, "H2O_failure", "sd_calculated")
     v_lsg = geox_pdfi_value(7.0, calib, "LSG_failure", "sd_calculated")
     assert ch.l_fluidfail == pytest.approx(0.80 * v_wat + 0.20 * v_lsg)
-    assert ch.method_label == "Modified DHI Index (SAAM)"
+    assert ch.method_label == "Conceptual DHI Index (experimental)"
 
 
 def test_dhi_index_other_weight_shares_lsg():

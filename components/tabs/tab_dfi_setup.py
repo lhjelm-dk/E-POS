@@ -51,7 +51,7 @@ def _render_dfi_setup(ctx) -> None:
     with st.container(border=True):
         st.markdown("### DFI evidence source")
         _src_options = ["Custom R tool", "Characteristic scoring (Monigle 2025)",
-                        "Modified DHI Index (SAAM)"]
+                        "Conceptual DHI Index (experimental)"]
         # Migrate any persisted selection (old labels / order) onto the new option
         # list so st.radio never sees a stored value that isn't in `options`.
         _src_map = {"custom": _src_options[0], "characteristic": _src_options[1],
@@ -73,11 +73,11 @@ def _render_dfi_setup(ctx) -> None:
                 "• **Characteristic scoring (Monigle 2025)** — score the prospect on five DHI "
                 "attributes using a 5-step verbal scale; R is the product of per-attribute "
                 "likelihood ratios from the Monigle 2025 drilled-prospect database. Simpler "
-                "two-state Bayes; no per-pillar attribution. Stand-alone — no SAAM needed.\n\n"
-                "• **Modified DHI Index (SAAM)** — a *conceptual* DFI-strength model reverse-"
-                "engineered from public SAAM presentation material (not the proprietary SAAM "
-                "score). Enter a **pure DFI-strength index**, not a raw SAAM DHI Index; see the "
-                "warning on that page. 8-outcome Bayes, per-pillar attribution available."
+                "two-state Bayes; no per-pillar attribution. Stand-alone — no calibration needed.\n\n"
+                "• **Conceptual DHI Index (experimental)** — a *conceptual*, illustrative DFI-strength "
+                "model with editable likelihood curves (not calibrated to any dataset). Enter a "
+                "**pure DFI-strength index**, not a raw composite DHI index that bundles geology; "
+                "see the warning on that page. 8-outcome Bayes, per-pillar attribution available."
             ),
         )
     # Persist for downstream pages
@@ -96,20 +96,20 @@ def _render_dfi_setup(ctx) -> None:
         _render_dfi_setup_custom(ctx)
         return
 
-    # ── Modified-method warning: this is NOT the raw SAAM DHI Index ──
-    st.markdown("### Modified DHI Index (SAAM)")
+    # ── Method warning: conceptual model; needs a *pure* DFI-strength input ──
+    st.markdown("### Conceptual DHI Index (experimental)")
     st.error(
-        "⚠️ **Modified method — do not enter a raw SAAM DHI Index here.**\n\n"
-        "This pathway is a **conceptual representation**, reverse-engineered from "
-        "publicly available SAAM presentation material; it is **not** the proprietary "
-        "SAAM model. The DHI Index booked in the original SAAM database **cannot be used "
-        "directly** in this Bayesian update: that index bundles the *geological* chance "
-        "together with the seismic signal, and all non-DHI (geology) contributions must be "
-        "**neutralised** in SAAM before the number is valid here — otherwise the geology is "
-        "double-counted against the ESL prior, which already carries it.\n\n"
-        "The input below must therefore be a **pure DFI-strength indicator** (seismic "
-        "amplitude evidence only). Treat it as an *illustrative* DFI strength, not a booked "
-        "SAAM score. **Entering a raw SAAM DHI Index here will give the wrong posterior.**"
+        "⚠️ **Conceptual model — and do not enter a raw composite DHI index here.**\n\n"
+        "This pathway is an **illustrative, conceptual representation**: its likelihood "
+        "curves are round, hand-set values, **not calibrated to any dataset**, and are "
+        "editable below. A raw composite DHI index (the kind a scoring workflow books for a "
+        "prospect) **cannot be used directly** in this Bayesian update, because such an index "
+        "bundles the *geological* chance together with the seismic signal. The geology must be "
+        "**stripped out** before the number is valid here — otherwise it is double-counted "
+        "against the ESL prior, which already carries it.\n\n"
+        "The input below must therefore be a **pure DFI-strength indicator** (seismic amplitude "
+        "evidence only). Treat it as an *illustrative* strength. **For a decision-grade update, "
+        "replace the conceptual curves with your own calibrated likelihoods.**"
     )
 
     # ── Header strip: calibration source + override status ──
@@ -117,7 +117,7 @@ def _render_dfi_setup(ctx) -> None:
     if calib.is_placeholder:
         st.warning(
             f"{src_text} — ⚠️ **placeholder values in use**. "
-            "Replace with proprietary calibration at `data/saam_calibration.json` for production use."
+            "Replace with your own calibrated likelihoods at `data/dhi_calibration.json` for production use."
         )
     else:
         st.caption(f"{src_text} (source: {calib.source}). "
@@ -136,7 +136,7 @@ def _render_dfi_setup(ctx) -> None:
             max_value=DHI_INDEX_MAX_INT,
             value=int(st.session_state.get("dfi_index", 19)),
             step=1, key="dfi_index",
-            help=(f"DHI Index from SAAM scoring "
+            help=(f"DHI Index from DHI scoring "
                   f"(range {DHI_INDEX_MIN_INT} to {DHI_INDEX_MAX_INT}). "
                   "Higher = stronger DFI signal supporting HC presence."),
         )
@@ -149,7 +149,7 @@ def _render_dfi_setup(ctx) -> None:
                 st.session_state.get("dfi_fluid_type", "Success")
             ),
             key="dfi_fluid_type",
-            help=("SAAM class supplying the success-side likelihood. "
+            help=("DHI class supplying the success-side likelihood. "
                   "'HC Success' is the aggregate (default); pick Oil/Gas/OilGas if "
                   "the prospect has a specific expected fluid type."),
         )
@@ -157,22 +157,11 @@ def _render_dfi_setup(ctx) -> None:
         # ── Advanced / Research controls (demoted — sensible defaults apply) ──
         st.caption(
             "Standard inputs above drive the update. The defaults below "
-            "(conservative SD, water-dominated failure mix, attribution A) suit "
+            "(water-dominated failure mix, attribution A) suit "
             "most prospects — open **Advanced** only to override them."
         )
-        with st.expander("Advanced / Research inputs — SD mode · fluid mix · attribution",
+        with st.expander("Advanced / Research inputs — fluid mix · attribution",
                          expanded=False):
-            sd_mode = st.radio(
-                "**SD mode**",
-                options=["upper", "calculated"],
-                format_func=lambda x: ("Upper (conservative)" if x == "upper"
-                                       else "Calculated (sample SD)"),
-                index=0 if st.session_state.get("dfi_sd_mode", "upper") == "upper" else 1,
-                key="dfi_sd_mode",
-                horizontal=True,
-                help=("Upper = chi-squared upper-confidence-bound SD (default — widens "
-                      "the likelihoods and is conservative). Calculated = the raw sample SD."),
-            )
 
             st.markdown("**Fluid failure probabilities**  *P(fluid | failure)*")
             col_w, col_l, col_o = st.columns(3)
@@ -271,7 +260,7 @@ def _render_dfi_setup(ctx) -> None:
         )
         st.plotly_chart(fig, use_container_width=True)
         st.caption(
-            "Five outcome-class likelihoods. **LSG and Other share the same SAAM "
+            "Five outcome-class likelihoods. **LSG and Other share the same class "
             "distribution** (LSG/other failure column) — the dotted purple curve "
             "for Other overlays the yellow LSG curve. The Gaussian PDF is used "
             "rigorously (no frequency scaling)."
@@ -288,21 +277,21 @@ def _render_dfi_setup(ctx) -> None:
     _render_posterior_class_panel(post_esl, fluid_weights)
 
     # ── DHI strength R — shared verdict + Simm band strip (parity with the other
-    #    two evidence sources). R_SAAM is the SAAM 8-outcome likelihood ratio. ──
+    #    two evidence sources). R_DFI is the 8-outcome likelihood ratio. ──
     from components.dfi_shared import (
         render_rscore_metrics, render_simm_verdict_banner, render_simm_band_strip,
     )
     from logic.dfi_simm import dhi_score_from_r as _dhi_score_from_r
     st.divider()
     st.markdown("##### DHI strength R — Simm rule-of-thumb verdict")
-    _r_saam = float(post_esl.r_saam)
+    _r_dfi = float(post_esl.r_dfi)
     render_rscore_metrics(
-        _r_saam, _dhi_score_from_r(_r_saam) * 100.0,
-        r_label="R_SAAM",
-        r_help="L_success / E[L | failure] from the SAAM 8-outcome likelihoods (ESL prior).",
+        _r_dfi, _dhi_score_from_r(_r_dfi) * 100.0,
+        r_label="R_DFI",
+        r_help="L_success / E[L | failure] from the 8-outcome likelihoods (ESL prior).",
     )
-    render_simm_verdict_banner(_r_saam)
-    render_simm_band_strip(_r_saam, key="dfi_dhiindex_band_strip")
+    render_simm_verdict_banner(_r_dfi)
+    render_simm_band_strip(_r_dfi, key="dfi_dhiindex_band_strip")
 
     # ── GeoX hand-off: the 6 P(DFI|case) values to type into SLB GeoX ──
     st.divider()
@@ -314,7 +303,7 @@ def _render_dfi_setup(ctx) -> None:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Characteristic-scoring DFI Setup (Monigle 2025 — alternative to SAAM DHI Index)
+# Characteristic-scoring DFI Setup (Monigle 2025 — alternative to the conceptual DHI Index)
 # ─────────────────────────────────────────────────────────────────────────────
 
 

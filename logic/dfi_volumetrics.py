@@ -9,11 +9,11 @@ Monte-Carlo engine).
 
 Two complementary "trust" measures are surfaced in the app:
 
-1. **DHI Volume Weight (V)** — E-POS's SAAM byproduct,
+1. **DHI Volume Weight (V)** — E-POS's DHI-Index byproduct,
    ``V = L_success / (L_success + E[L | failure])``: the probability the observed
    DHI Index arises from a true HC (success) response rather than a failure mode.
    A calibrated 0–1 confidence in the anomaly *as a volume-defining observation*.
-   Available only in the DHI-Index (SAAM) pathway.
+   Available only in the DHI-Index  pathway.
 
 2. **Column-height weighting (w_ch)** — Monigle 2025, Figure 8: the fraction of
    volumetric trials that should place the HC–water contact (HCWC) at the
@@ -69,7 +69,7 @@ def hcwc_mixture(
         combined = (1 − w) · Geo  +  w · DFI
 
     where ``w = dfi_weight`` is the weight on the DFI-defined volume, i.e. the DHI
-    score / SAAM DHI Volume Weight V (Monigle 2025 use the DHI rating directly as the
+    score / DHI Volume Weight V (Monigle 2025 use the DHI rating directly as the
     blend weight; this is the 68%/32% split in their HCWC figure). A higher V → the
     combined contact follows the (narrow) DFI distribution; a lower V → it reverts to
     the (broad) geological/structural estimate bounded by apex and spill.
@@ -103,7 +103,7 @@ class VolumetricsRecommendation:
 
     dhi_score: float                      # 0–1 DHI score
     w_ch: float                           # Monigle column-height trial weight (0–0.95)
-    v_weight: float | None                # SAAM DHI Volume Weight, if available
+    v_weight: float | None                # DHI Volume Weight, if available
     discernibility: str | None            # high / moderate / low / absent
     headline: str                         # one-line recommendation
     consistency_notes: list[str] = field(default_factory=list)
@@ -135,7 +135,7 @@ def volumetrics_recommendation(
 ) -> VolumetricsRecommendation:
     """Build a DHI→volumetrics blend recommendation (Monigle 2025).
 
-    ``dhi_score`` is the 0–1 DHI score (all pathways). ``v_weight`` is the SAAM DHI
+    ``dhi_score`` is the 0–1 DHI score (all pathways). ``v_weight`` is the conceptual DHI model DHI
     Volume Weight when available. ``discernibility`` ∈ {high, moderate, low, absent}.
     ``fcr_present`` toggles the fluid-contact-reflection → NTG note.
     """

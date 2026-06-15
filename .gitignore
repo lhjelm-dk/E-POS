@@ -27,8 +27,8 @@ Thumbs.db
 # Backup
 *.bak
 
-# Proprietary calibration — local-only override, never commit
-data/saam_calibration.json
+# Local calibration override — never commit
+data/dhi_calibration.json
 
 # Open Office lock files
 ~$*

@@ -6,7 +6,7 @@ attribution all carry invariants that were previously only verified by hand.
 These tests encode them as regressions.
 
 A *synthetic* Calibration is built in-test so the suite never depends on the
-proprietary ``data/saam_calibration.json`` and stays deterministic.
+local override ``data/dhi_calibration.json`` and stays deterministic.
 """
 from __future__ import annotations
 
@@ -74,12 +74,12 @@ def test_posterior_in_unit_interval_and_outcomes_sum_to_one():
 
 # ── prior_pg_override re-anchoring ───────────────────────────────────────────
 def test_override_moves_prior_but_not_likelihood_ratios():
-    """R_SAAM and DHI Volume Weight are likelihood ratios → invariant to the
+    """R_DFI and DHI Volume Weight are likelihood ratios → invariant to the
     prior anchor.  Only the prior→posterior anchor should move."""
     base = compute_dfi_posterior(_pillars(), 19.0, _calib())
     over = compute_dfi_posterior(_pillars(), 19.0, _calib(), prior_pg_override=0.42)
 
-    assert over.r_saam == pytest.approx(base.r_saam, rel=1e-9)
+    assert over.r_dfi == pytest.approx(base.r_dfi, rel=1e-9)
     assert over.dhi_volume_weight == pytest.approx(base.dhi_volume_weight, rel=1e-9)
     # The override anchors the success prior to 0.42 exactly.
     assert over.prior_outcomes.oil_eval_success == pytest.approx(0.42)

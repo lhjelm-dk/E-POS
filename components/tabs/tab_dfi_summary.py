@@ -143,14 +143,14 @@ def _render_dfi_summary(ctx) -> None:
         _post_pl = compute_dfi_posterior(prior_esl, dhi, calib, fw, sd_mode, fluid_type,
                                          prior_pg_override=_pl).posterior_pg
         _ov_data["dfi"] = {
-            "method_label": "Modified DHI Index (SAAM) · 8-outcome Bayes",
+            "method_label": "Conceptual DHI Index (experimental) · 8-outcome Bayes",
             "esl_prior": esl_prior_pg, "esl_post": post_esl.posterior_pg,
             "esl_delta_pp": delta_esl * 100,
             "classic_prior": prior_classic.prior_pg, "classic_post": post_classic.posterior_pg,
             "classic_delta_pp": delta_classic * 100,
             "bel": _bel, "pl": _pl,
             "esl_post_bel": _post_bel, "esl_post_pl": _post_pl,
-            "diagnostics": f"DHI Index={dhi:+.0f} · R_SAAM={post_esl.r_saam:.2f} · "
+            "diagnostics": f"DHI Index={dhi:+.0f} · R_DFI={post_esl.r_dfi:.2f} · "
                            f"V={post_esl.dhi_volume_weight:.2f} · "
                            f"∏-pillars Init Pg={prior_esl.prior_pg*100:.1f}% "
                            f"(independent-pillars reference)",
@@ -160,7 +160,7 @@ def _render_dfi_summary(ctx) -> None:
         _reportable_pos_callout(_ov_data["dfi"]["esl_post"] * 100, after_dfi=True)
 
     # ── DFI Diagnostic Strip (inputs + R + V in one consolidated block) ──
-    interp_txt     = _dhi_strength_interpretation(post_esl.r_saam,
+    interp_txt     = _dhi_strength_interpretation(post_esl.r_dfi,
                                                   post_esl.dhi_volume_weight)
     st.markdown(
         f"<div style='background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;"
@@ -178,7 +178,7 @@ def _render_dfi_summary(ctx) -> None:
         f"{' (placeholder)' if calib.is_placeholder else ''}"
         f"</span></div>"
         f"<div style='display:flex;gap:18px;margin-top:8px;font-size:0.86rem;color:#1e3a8a;'>"
-        f"<div><b>R_SAAM</b> = {post_esl.r_saam:.2f}</div>"
+        f"<div><b>R_DFI</b> = {post_esl.r_dfi:.2f}</div>"
         f"<div><b>DHI Volume Weight V</b> = {post_esl.dhi_volume_weight:.2f}</div>"
         f"<div style='flex:1;text-align:right;color:#374151;font-style:italic;'>{interp_txt}</div>"
         f"</div></div>",
@@ -249,7 +249,7 @@ def _render_dfi_summary(ctx) -> None:
     narrative = _build_decision_narrative(
         esl_prior_pg, post_esl.posterior_pg,
         prior_classic.prior_pg, post_classic.posterior_pg,
-        post_esl.r_saam, post_esl.dhi_volume_weight, dhi,
+        post_esl.r_dfi, post_esl.dhi_volume_weight, dhi,
     )
     st.markdown(narrative)
 

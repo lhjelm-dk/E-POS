@@ -446,7 +446,7 @@ def _render_dfi_setup_characteristic(ctx) -> None:
     st.caption(
         f"Success/failure distributions of the composite DHI score across the Monigle "
         f"drilled population, reverse-engineered from the per-attribute stats — the "
-        f"characteristic-method twin of the Custom/SAAM P(DFI | class) bells. This view "
+        f"characteristic-method twin of the Custom / conceptual-DHI P(DFI | class) bells. This view "
         f"follows the **{'Inferred' if inferred else 'Raw'}** toggle: {_model_txt}"
         + (f", ρ={corr_rho:.2f} discount" if corr_rho > 0 else "")
         + ". The dashed line is this prospect's score. *Note:* a **population / "

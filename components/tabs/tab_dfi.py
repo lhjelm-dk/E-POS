@@ -132,7 +132,7 @@ def _render_disabled_placeholder(sub_page_name: str) -> None:
         "• DHI Index = **19**  \n"
         "• Fluid failure probabilities: water **80%**, LSG **20%**, other **0%**  \n"
         "• HC fluid type = **Success** (aggregate)  \n"
-        "• SD mode = **Upper** (chi-square upper-confidence-bound SD from SAAM)"
+        "• Likelihood SD: a single conceptual sigma per class"
     )
 
 

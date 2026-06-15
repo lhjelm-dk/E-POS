@@ -860,7 +860,7 @@ def _render_milkov_factor(factor_name: str, rows: list[tuple]) -> None:
                 "directly into the probability value. This conflates geological and "
                 "geophysical evidence. For rigorous assessment, DHI should be handled "
                 "via a formal Bayesian likelihood update (e.g. ExxonMobil iCOS / "
-                "Rose DHI Consortium SAAM approach), not absorbed into a single CoS "
+                "a dedicated DHI consortium tool), not absorbed into a single CoS "
                 "factor. These rows are marked ⚠️ DHI / Geophysical below.",
                 icon=None,
             )
@@ -1016,7 +1016,7 @@ def render_reference_tables() -> None:
         "AVO) evidence directly into a probability value. **This is methodologically "
         "problematic**: geophysical evidence is Auxiliary and should be handled via a "
         "formal Bayesian likelihood update (e.g. ExxonMobil iCOS / Rose DHI Consortium "
-        "SAAM/SaRA, calibrated from 400+ drilled wells), not folded into geological "
+        "a dedicated DHI consortium tool calibrated from drilled wells), not folded into geological "
         "CoS factors. All DHI-related rows are marked with ⚠️ DHI / Geophysical "
         "and highlighted in yellow.\n\n"
         "3. **Final CoS** — All three methods combine factor CoS values by **multiplication** "
@@ -1148,10 +1148,10 @@ def render_reference_tables() -> None:
         "[GitHub](https://github.com/Ayberk-Uyanik/GeoCos-v2.0)\n"
         "- Rose, P.R. (2001). *Risk Analysis and Management of Petroleum Exploration Ventures*. "
         "AAPG Methods in Exploration 12.\n"
-        "- **DHI empirical calibration — Rose & Associates DHI Consortium / SaRA:** "
+        "- **DHI empirical calibration — Rose & Associates DHI Consortium:** "
         "[roseassoc.com/dhi-consortium](https://www.roseassoc.com/dhi-consortium/) — "
         "over 400 drilled prospects in a shared calibration database; "
-        "SaRA (Seismic Amplitude Risk Analysis) software applies a formal Bayesian "
+        "dedicated consortium software applies a formal Bayesian "
         "likelihood ratio P(DHI|HC) / P(DHI|no HC).\n"
         "- Forrest, M., Roden, R., & Holeywell, R. (2010). Risking seismic amplitude "
         "anomaly prospects based on database trends. "

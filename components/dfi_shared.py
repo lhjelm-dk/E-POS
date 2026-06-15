@@ -6,7 +6,7 @@ Bayes:
 
   • Custom R tool                  — uncalibrated user-defined Gaussians
   • Characteristic (Monigle 2025)  — uncalibrated naive-independence product
-  • Modified DHI Index (SAAM)      — SAAM-derived conceptual 8-outcome model
+  • Conceptual DHI Index (experimental)      — conceptual 8-outcome model
 
 This module holds the **method-agnostic** render blocks so all three present R,
 its Simm verdict, the prior→posterior move, and the stance trajectory the same
@@ -71,7 +71,7 @@ def render_geox_pdfi_handoff(success: float, water: float, lsg: float, reservoir
                              fluid_agnostic: bool = False) -> None:
     """Method-agnostic GeoX hand-off — the six P(DFI | case) inputs for SLB GeoX.
 
-    Mirrors the SAAM/DHI-Index hand-off, but works from any pathway's four per-case
+    Mirrors the DHI-Index hand-off, but works from any pathway's four per-case
     DFI likelihoods (``success``, ``water``, ``lsg``, ``reservoir``). Values are
     relative, scaled so the strongest case = 100 %; GeoX uses only their ratios.
     Set ``fluid_agnostic=True`` for two-state methods (characteristic / single-curve
@@ -137,7 +137,7 @@ def render_simm_band_strip(r: float, *, height: int = 120, key: str | None = Non
     """Compact horizontal strip showing a single ``R`` against the Simm bands.
 
     Method-agnostic: any pathway with one scalar R (characteristic, custom, or
-    DHI-Index R_SAAM) can show where it sits. The R axis is log-scaled and the
+    DHI-Index R_DFI) can show where it sits. The R axis is log-scaled and the
     seven shaded bands match :data:`SIMM_BAND_EDGES`; band names sit horizontally
     above the strip and a star marks the current R (the value/verdict are in the
     banner above and the caption below, so the marker carries no text).
@@ -337,12 +337,12 @@ def render_volumetrics_recommendation(
 ) -> None:
     """Recommend how to join geological vs DFI-defined volumes (Monigle 2025).
 
-    Shows the two "trust" measures side by side — E-POS's SAAM **DHI Volume Weight
+    Shows the two "trust" measures side by side — E-POS's **DHI Volume Weight
     V** (when available) and Monigle's **column-height trial weight** — then a
     concrete blend recommendation, the Fig. 8 weighting curve, and the paper's
     volumetric consistency gates (discernibility, FCR→NTG, porosity floor).
 
-    ``dhi_score`` is the 0–1 DHI score (all pathways). ``v_weight`` is the SAAM
+    ``dhi_score`` is the 0–1 DHI score (all pathways). ``v_weight`` is the DHI-Index
     DHI Volume Weight (DHI-Index pathway only). ``discernibility`` ∈
     {high, moderate, low, absent}.
     """
@@ -374,14 +374,14 @@ def render_volumetrics_recommendation(
     )
 
     # ── Strength vs operational weight (two *different* quantities) ──
-    _is_saam = v_weight is not None
+    _is_dhi_index = v_weight is not None
     c1, c2 = st.columns(2)
-    _strength_label = "DHI score  (= Volume Weight V, SAAM)" if _is_saam else "DHI score"
+    _strength_label = "DHI score  (= Volume Weight V)" if _is_dhi_index else "DHI score"
     c1.metric(_strength_label, f"{rec.dhi_score*100:.0f}%",
-              help=("DHI-Index pathway: the DHI score and the SAAM **DHI Volume Weight V** "
+              help=("DHI-Index pathway: the DHI score and the conceptual DHI model **DHI Volume Weight V** "
                     "are the *same number* — both equal R/(R+1) = "
                     "L_success / (L_success + E[L|failure]). It measures the 0–1 *strength* "
-                    "of the DHI." if _is_saam else
+                    "of the DHI." if _is_dhi_index else
                     "0–1 DHI score = R / (R + 1) — the *strength* of the DHI."))
     c2.metric("Column-height trial weight (Monigle)", f"{rec.w_ch*100:.0f}%",
               help="Monigle 2025 (Fig. 8): w = min(95%, 2 × DHI score). The *operational* "
@@ -390,7 +390,7 @@ def render_volumetrics_recommendation(
 
     st.caption(
         "⚠️ **These are two different things.** The **DHI score"
-        + (" / Volume Weight V**" if _is_saam else "**")
+        + (" / Volume Weight V**" if _is_dhi_index else "**")
         + " (left) is *how strong the DHI is* (0–1). The **column-height trial weight** "
         "(right) is *how to use that strength in the volume Monte-Carlo* (Monigle's "
         f"transform), so a {rec.dhi_score*100:.0f}% score maps to a {rec.w_ch*100:.0f}% "
@@ -560,7 +560,7 @@ def render_dempster_prototype(
             "Discernibility d (unknown mass = 1 − d)", 0.0, 1.0, _d_default, 0.05,
             key=f"{key}_disc",
             help=("How much the DFI can be trusted. In the characteristic pathway this is "
-                  "Monigle's discernibility bucket; for SAAM/custom set it by hand."),
+                  "Monigle's discernibility bucket; for the DHI-Index/custom methods set it by hand."),
         )
         w_stance = float(getattr(ctx, "uncertainty_weight", 0.5))
         esl, dfi, post, K = fuse_dfi_into_esl(

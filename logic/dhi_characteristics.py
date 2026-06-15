@@ -1,4 +1,4 @@
-"""DHI characteristic scoring — Monigle 2025 alternative to the SAAM DHI Index.
+"""DHI characteristic scoring — Monigle 2025 alternative to the conceptual DHI model DHI Index.
 
 The five current DHI quality attributes (Monigle 2025, post-2021 iCOS) are each
 scored on a 5-category scale (verbal). Per-category likelihood ratios are looked
@@ -33,7 +33,7 @@ from pathlib import Path
 # Defensible bounds (Simm 2016 empirical)
 # ─────────────────────────────────────────────────────────────────────────────
 
-R_HARD_CAP: float = 3.0          # Simm's empirical SAAM maximum (10–90% SR range)
+R_HARD_CAP: float = 3.0          # Simm's empirical maximum (10–90% SR range)
 R_FLOOR:    float = 1.0 / 3.0    # Symmetric lower bound (strong negative DHI)
 LAPLACE_ADD: float = 0.5         # Smoothing prior — avoids zero-cell LR
 

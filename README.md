@@ -80,8 +80,8 @@ streamlit run app.py
 ```
 
 The app opens in your browser. It ships with a **synthetic placeholder** calibration
-(`data/saam_calibration_placeholder.json`) so it runs out of the box. Drop a proprietary
-calibration at `data/saam_calibration.json` to override it (that path is git-ignored).
+(`data/dhi_calibration_placeholder.json`) so it runs out of the box. Drop your own
+calibration at `data/dhi_calibration.json` to override it (that path is git-ignored).
 
 To regenerate the README screenshots after a UI change:
 
@@ -179,8 +179,8 @@ Three **mutually-exclusive evidence sources** derive the DFI strength as a likel
 | Source | Engine | When to use |
 |---|---|---|
 | **Custom R tool** | Simm 2-state Bayes | You define your own P(DFI \| HC) / P(DFI \| No-HC) bell curves — fully transparent, no external calibration |
-| **Characteristic scoring (Monigle 2025)** | naive-Bayes product → Simm 2-state | Score the prospect on 5 DHI attributes; R from a published drilled-prospect database. Stand-alone, no SAAM needed |
-| **Modified DHI Index (SAAM)** | 8-outcome Bayes | A conceptual DFI-strength model with channel-resolved per-pillar attribution & fluid-class diagnostics |
+| **Characteristic scoring (Monigle 2025)** | naive-Bayes product → Simm 2-state | Score the prospect on 5 DHI attributes; R from a published drilled-prospect database. Stand-alone, no calibration needed |
+| **Conceptual DHI Index (experimental)** | 8-outcome Bayes | A conceptual DFI-strength model with channel-resolved per-pillar attribution & fluid-class diagnostics |
 
 **Custom R tool** — define the success/failure curves (multi-case: oil/gas/oil+gas vs
 water/LSG/other + non-reservoir, with a DHI-style `P(fluid | failure)` mix), read R off a
@@ -213,10 +213,10 @@ model) so you can see where the prospect sits in the drilled population:
 
 ![Characteristic per-attribute LR + radar](docs/img/32_dfi_char_lr_radar.png)
 
-**Modified DHI Index (SAAM)** — a conceptual model reverse-engineered from public SAAM
-presentation material. It carries a prominent warning: **do not enter a raw SAAM DHI Index** —
-that index bundles geology with the seismic signal, and the input here must be a *pure
-DFI-strength indicator*:
+**Conceptual DHI Index (experimental)** — a conceptual, illustrative model with editable
+likelihood curves (not calibrated to any dataset). It carries a prominent warning: **do not
+enter a raw composite DHI index** — such an index bundles geology with the seismic signal, and
+the input here must be a *pure DFI-strength indicator*:
 
 
 ### 6 · Final Prospect POS
@@ -284,7 +284,7 @@ posterior_odds = R · prior_odds      ⇔      posterior = R·p / (R·p + (1 −
 ```
 
 - **Custom / Characteristic** use this Simm (2016) two-state update directly.
-- **Modified DHI Index (SAAM)** uses a full **8-outcome** decomposition (fluid × reservoir
+- **Conceptual DHI Index (experimental)** uses a full **8-outcome** decomposition (fluid × reservoir
   evaluability) with Gaussian likelihoods over the calibration classes, re-anchored to the same
   P(G, ESL); it additionally produces per-pillar attribution.
 
@@ -346,12 +346,11 @@ effective ceiling `cap^d`:
 
 ## Data, calibration & privacy
 
-- The app loads `data/saam_calibration.json` if present, otherwise the committed
-  `data/saam_calibration_placeholder.json`. **The real calibration is git-ignored** — only the
+- The app loads `data/dhi_calibration.json` if present, otherwise the committed
+  `data/dhi_calibration_placeholder.json`. **The real calibration is git-ignored** — only the
   synthetic placeholder ships.
 - Saved prospects (`data/prospects/*.csv`) and reference documents (`*.pdf`, `*.xlsx`, …) are
   git-ignored and never tracked.
-- **"SAAM" is an internal database name** — alias it before any external publication.
 - The README screenshots are generated against the placeholder calibration + the synthetic
   `AlphaGammaFoxtrot` prospect, so no proprietary numbers appear in any image.
 
@@ -365,11 +364,11 @@ logic/                     # pure math (no Streamlit): ESL, Policy P, Bayes, cal
   esl_logic.py             #   AND/OR/product mass operators
   esl_pipeline.py          #   play × conditional mass rollup
   pos_policy.py            #   Policy P = green + w·white
-  dfi_bayes.py             #   8-outcome SAAM Bayesian update + per-pillar attribution
+  dfi_bayes.py             #   8-outcome Bayesian update + per-pillar attribution
   dfi_simm.py              #   Simm 2-state update, DHI score, GeoX hand-off mapping
   dhi_characteristics.py   #   Monigle naive-Bayes product, ρ discount, score densities
   dfi_custom.py            #   user-defined Gaussian likelihoods
-  dfi_calibration.py       #   calibration loader (proprietary > placeholder)
+  dfi_calibration.py       #   calibration loader (local override > placeholder)
 components/                # UI building blocks (Streamlit)
   tabs/                    #   one module per tab / sub-page
   overview_table.py        #   the Italian-flag overview table
@@ -414,6 +413,5 @@ Full citations and the bundled-PDF list are in the in-app **Theory & Guide → R
 E-POS — by **Lars Hjelm** (`lhjelm`). Evidence-supported probability of success for oil & gas
 prospects.
 
-> **Before any public release:** scrub the proprietary documents from git history, alias the
-> internal "SAAM" name, and confirm only the placeholder calibration ships. See
-> `data/` and `.gitignore`.
+> **Before any public release:** scrub the reference documents from git history and confirm
+> only the placeholder (conceptual) calibration ships. See `data/` and `.gitignore`.
