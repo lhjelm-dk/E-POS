@@ -60,23 +60,26 @@ def simm_rule_of_thumb(r: float) -> tuple[str, str, str]:
 
     Returns ``(label, comment, color)``. The bands follow Simm (2016) "Sense
     Check" guidance and the standard Bayes-factor convention; they are symmetric
-    in log-odds, so an uplift of R and a downgrade of 1/R carry equal strength.
-    Simm cautions that for a *single* DFI line of evidence an honest R rarely
-    exceeds ~3 either way; treat |R| ≳ 10 as exceptional and audit the inputs.
+    in log-odds, so an R that raises P(G) and a 1/R that lowers it carry equal
+    strength. Simm cautions that for a *single* DFI line of evidence an honest R
+    rarely exceeds ~3 either way; treat |R| ≳ 10 as exceptional and audit the inputs.
+
+    Labels use the same ↑ (raises P(G)) / ↓ (lowers P(G)) convention as the
+    rule-of-thumb band shading, for consistency across the DFI plots.
     """
     if r >= 10.0:
-        return ("Decisive uplift", "Very rarely justified for one DFI — re-check the curves.", "#15803d")
+        return ("Decisive ↑", "Very rarely justified for one DFI — re-check the curves.", "#15803d")
     if r >= 3.0:
-        return ("Strong uplift", "About the practical ceiling Simm suggests for a single DFI.", "#16a34a")
+        return ("Strong ↑", "About the practical ceiling Simm suggests for a single DFI.", "#16a34a")
     if r >= 1.5:
-        return ("Moderate uplift", "Credible supportive DFI evidence.", "#65a30d")
+        return ("Moderate ↑", "Credible supportive DFI evidence.", "#65a30d")
     if r > 1.0 / 1.5:
         return ("Negligible", "R ≈ 1 — the DFI barely shifts the prior.", "#6b7280")
     if r > 1.0 / 3.0:
-        return ("Moderate downgrade", "Credible evidence the DFI is anomalous against HC.", "#d97706")
+        return ("Moderate ↓", "Credible evidence the DFI is anomalous against HC.", "#d97706")
     if r > 1.0 / 10.0:
-        return ("Strong downgrade", "About the practical floor Simm suggests for a single DFI.", "#dc2626")
-    return ("Decisive downgrade", "Very rarely justified for one DFI — re-check the curves.", "#991b1b")
+        return ("Strong ↓", "About the practical floor Simm suggests for a single DFI.", "#dc2626")
+    return ("Decisive ↓", "Very rarely justified for one DFI — re-check the curves.", "#991b1b")
 
 
 # R thresholds (and reciprocals) for plotting the Simm rule-of-thumb bands.

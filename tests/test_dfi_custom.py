@@ -69,17 +69,17 @@ def test_failure_keys_dhi_structure():
 
 def test_simm_rule_of_thumb_bands():
     from logic.dfi_custom import simm_rule_of_thumb
-    assert simm_rule_of_thumb(20.0)[0] == "Decisive uplift"
-    assert simm_rule_of_thumb(4.0)[0] == "Strong uplift"
-    assert simm_rule_of_thumb(2.0)[0] == "Moderate uplift"
+    assert simm_rule_of_thumb(20.0)[0] == "Decisive ↑"
+    assert simm_rule_of_thumb(4.0)[0] == "Strong ↑"
+    assert simm_rule_of_thumb(2.0)[0] == "Moderate ↑"
     assert simm_rule_of_thumb(1.0)[0] == "Negligible"
-    assert simm_rule_of_thumb(0.5)[0] == "Moderate downgrade"
-    assert simm_rule_of_thumb(0.2)[0] == "Strong downgrade"
-    assert simm_rule_of_thumb(0.02)[0] == "Decisive downgrade"
+    assert simm_rule_of_thumb(0.5)[0] == "Moderate ↓"
+    assert simm_rule_of_thumb(0.2)[0] == "Strong ↓"
+    assert simm_rule_of_thumb(0.02)[0] == "Decisive ↓"
     # symmetry in log-odds: R and 1/R land in mirror bands
-    assert simm_rule_of_thumb(3.0)[0] == "Strong uplift"
-    assert simm_rule_of_thumb(1 / 3.0)[0] == "Strong downgrade"
-    assert simm_rule_of_thumb(0.34)[0] == "Moderate downgrade"
+    assert simm_rule_of_thumb(3.0)[0] == "Strong ↑"
+    assert simm_rule_of_thumb(1 / 3.0)[0] == "Strong ↓"
+    assert simm_rule_of_thumb(0.34)[0] == "Moderate ↓"
 
 
 def test_custom_config_from_state_linked_matches_custom_r():
