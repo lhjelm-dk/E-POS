@@ -156,8 +156,11 @@ def test_resolve_dfi_pillar_resolved_is_consistent():
     assert res.pillar_resolved is True
     # Headline equals the engine's joint success leaf (reservoir-driven).
     assert res.pos_post == pytest.approx(res.update.pos_post, abs=1e-12)
-    # Product of redistributed HC pillars == HC-system marginal.
+    # Product of redistributed HC pillars == HC-system marginal (posterior).
     assert math.prod(res.hc_pillars_post.values()) == pytest.approx(res.update.p_hc_post, abs=1e-9)
+    # Prior HC pillars are split the same way, so they reconcile to the prior
+    # HC-system marginal too (symmetric, apples-to-apples per-pillar deltas).
+    assert math.prod(res.hc_pillars_prior.values()) == pytest.approx(res.update.p_hc_prior, abs=1e-9)
     # Reservoir * HC-system == headline.
     assert res.p_res_post * res.update.p_hc_post == pytest.approx(res.pos_post, abs=1e-12)
 
@@ -269,6 +272,9 @@ def test_build_post_pillars_product_and_keys():
     # HC pillars' product == HC-system posterior == pos_post / p_res_post.
     hc_prod = pp.pillars_post["Charge"] * pp.pillars_post["Closure"] * pp.pillars_post["Retention"]
     assert hc_prod == pytest.approx(0.132 / 0.43, abs=1e-9)
+    # Prior HC pillars reconcile to the prior HC-system == pos_prior / p_res_prior.
+    hc_prod_prior = pp.pillars_prior["Charge"] * pp.pillars_prior["Closure"] * pp.pillars_prior["Retention"]
+    assert hc_prod_prior == pytest.approx(0.072 / 0.50, abs=1e-9)
     # COS up while Reservoir down → opposes_headline.
     assert pp.opposes_headline is True
 

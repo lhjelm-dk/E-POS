@@ -280,12 +280,20 @@ def resolve_dfi(
             hc_pillars_prior=dict(hc_pillar_priors), hc_pillars_post=dict(hc_pillar_priors),
         )
     upd = pillar_resolved_update(pos, p_res, channels.l_hc, channels.l_fluidfail, channels.l_nonres)
+    # Split BOTH the prior and the posterior HC-system marginal across the member
+    # pillars by the same log-proportion rule, using the raw per-pillar marginals
+    # only as the proportional basis. This keeps the table self-consistent: the
+    # prior sub-pillars multiply to the prior HC-system (POS/P_res) just as the
+    # posterior sub-pillars multiply to the posterior HC-system, so the per-pillar
+    # deltas are an apples-to-apples decomposition of the headline move.
+    prior_pillars = (redistribute_log_proportion(upd.p_hc_prior, hc_pillar_priors)
+                     if hc_pillar_priors else {})
     post_pillars = (redistribute_log_proportion(upd.p_hc_post, hc_pillar_priors)
                     if hc_pillar_priors else {})
     return ResolvedDfi(
         channels=channels, pos_prior=upd.pos_prior, pos_post=upd.pos_post,
         update=upd, p_res_prior=upd.p_res_prior, p_res_post=upd.p_res_post,
-        hc_pillars_prior=dict(hc_pillar_priors), hc_pillars_post=post_pillars,
+        hc_pillars_prior=prior_pillars, hc_pillars_post=post_pillars,
     )
 
 
@@ -325,9 +333,14 @@ def build_post_pillars(pos_prior: float, pos_post: float,
     marginals and the prior HC-system pillar marginals. The HC-system posterior is
     ``pos_post / p_res_post`` (residual) and is split across the HC pillars by
     log-proportion. Shared by the Custom and DHI-Index paths so they produce one shape."""
+    p_hc_prior = (pos_prior / p_res_prior) if p_res_prior > _EPS else 0.0
     p_hc_post = (pos_post / p_res_post) if p_res_post > _EPS else 0.0
+    # Split prior and posterior HC-system the same way (raw marginals = basis only)
+    # so the prior sub-pillars reconcile to the prior HC-system, matching the
+    # posterior treatment and making the per-pillar deltas consistent.
+    hc_prior = redistribute_log_proportion(_clamp01(p_hc_prior), hc_pillar_priors) if hc_pillar_priors else {}
     hc_post = redistribute_log_proportion(_clamp01(p_hc_post), hc_pillar_priors) if hc_pillar_priors else {}
-    pillars_prior = {"Reservoir": _clamp01(p_res_prior), **{k: _clamp01(v) for k, v in hc_pillar_priors.items()}}
+    pillars_prior = {"Reservoir": _clamp01(p_res_prior), **hc_prior}
     pillars_post = {"Reservoir": _clamp01(p_res_post), **hc_post}
     return PostDfiPillars(True, _clamp01(pos_prior), _clamp01(pos_post),
                           pillars_prior, pillars_post, method_label)
