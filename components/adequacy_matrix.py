@@ -25,18 +25,23 @@ CONFIDENCE_OPTIONS = ["High", "Medium", "Low"]
 NEWS_OPTIONS = ["Bad News", "Coin Toss", "Good News"]
 
 
-def _cos_colorscale_discrete(step_pct: int = 10) -> list:
-    """Stepped plotly colorscale built from the shared CoS palette, banded at
-    ``step_pct`` intervals (default 10 pp) so the heatmap reads as discrete
-    probability bands consistent with the reference tables."""
-    bounds = list(range(0, 101, step_pct))
+def _cos_colorscale() -> list:
+    """Stepped plotly colorscale aligned to the **shared CoS band edges**, so the
+    heatmap reproduces ``cos_color()`` exactly and therefore matches the table
+    cells and the legend. The CoS bands are asymmetric (0, 10, 25, 40, 60, 75,
+    90, 100 %); banding at a fixed 10 pp instead would split a band and
+    mis-colour part of it (e.g. the 70–75 % slice of Moderately-High rendering as
+    High green), which is what made the old heatmap disagree with the table."""
     scale = []
-    for i in range(len(bounds) - 1):
-        lo, hi = bounds[i] / 100.0, bounds[i + 1] / 100.0
-        col = cos_color((bounds[i] + bounds[i + 1]) / 200.0)
+    for lo, hi, col, _ in sorted(COS_SCALE, key=lambda b: b[0]):
         scale.append([lo, col])
         scale.append([hi, col])
     return scale
+
+
+# CoS band edges (%) — used for the heatmap colourbar ticks so they sit on the
+# real band boundaries rather than an arbitrary 10 pp grid.
+_COS_EDGES_PCT = [0, 10, 25, 40, 60, 75, 90, 100]
 
 
 def _text_on(bg_hex: str) -> str:
@@ -91,9 +96,9 @@ def _adequacy_table_html() -> str:
     """
 
 
-def _adequacy_heatmap_fig(step_pct: int = 10) -> go.Figure:
-    """Continuous heatmap of the matrix, coloured with the shared CoS palette
-    banded at ``step_pct`` intervals."""
+def _adequacy_heatmap_fig() -> go.Figure:
+    """Heatmap of the 3×3 matrix, coloured with the shared CoS scale on its own
+    (asymmetric) band edges so each cell matches its table colour exactly."""
     xs = np.linspace(0, 100, 100)
     ys = np.linspace(0, 100, 100)
     Z = np.full((len(ys), len(xs)), np.nan)
@@ -106,24 +111,26 @@ def _adequacy_heatmap_fig(step_pct: int = 10) -> go.Figure:
     fig_2d = go.Figure(
         go.Heatmap(
             z=Z, x=xs, y=ys,
-            colorscale=_cos_colorscale_discrete(step_pct),
+            colorscale=_cos_colorscale(),
             zmin=0, zmax=100,
-            colorbar=dict(title="Recommended P (%)", tickvals=list(range(0, 101, step_pct))),
+            colorbar=dict(title="Recommended P (%)", tickvals=_COS_EDGES_PCT),
             hovertemplate="News: %{x:.0f}%<br>Confidence: %{y:.0f}%<br>P: %{z:.0f}%<extra></extra>",
         )
     )
     fig_2d.update_layout(
         template="plotly_white", plot_bgcolor="#ffffff", paper_bgcolor="#ffffff",
-        title=f"Chance Factor Adequacy Matrix — {step_pct} pp bands (shared probability scale)",
+        title="Chance Factor Adequacy Matrix — shared probability scale",
         xaxis=dict(
             title="Geological News (0%=Bad → 100%=Good)",
-            tickmode="linear", tick0=0, dtick=step_pct, range=[0, 100],
-            ticksuffix="%", showgrid=True, gridcolor="rgba(0,0,0,0.08)",
+            tickmode="array", tickvals=[0, 33, 66, 100],
+            ticktext=["0%", "Bad|Coin", "Coin|Good", "100%"], range=[0, 100],
+            showgrid=True, gridcolor="rgba(0,0,0,0.15)",
         ),
         yaxis=dict(
             title="Confidence (0%=Low → 100%=High)",
-            tickmode="linear", tick0=0, dtick=step_pct, range=[0, 100],
-            ticksuffix="%", showgrid=True, gridcolor="rgba(0,0,0,0.08)",
+            tickmode="array", tickvals=[0, 33, 66, 100],
+            ticktext=["0%", "Low|Med", "Med|High", "100%"], range=[0, 100],
+            showgrid=True, gridcolor="rgba(0,0,0,0.15)",
         ),
         height=400, margin=dict(t=50, b=50),
     )
@@ -135,11 +142,12 @@ def render_adequacy_matrix_reference() -> None:
     st.caption(
         "Reference: Map geological evidence quality to a recommended probability range. "
         "Cells and heatmap use the **shared Probability colour scale** (same as the "
-        "Reference Tables and DFI views); the heatmap is banded at 10 pp. "
+        "Reference Tables and DFI views), banded on its own probability boundaries so the "
+        "heatmap matches the table cell-for-cell. "
         "Values are now derived from ESL; use this as calibration guidance."
     )
     st.markdown(_adequacy_table_html(), unsafe_allow_html=True)
-    st.plotly_chart(_adequacy_heatmap_fig(10), use_container_width=True,
+    st.plotly_chart(_adequacy_heatmap_fig(), use_container_width=True,
                     key="adequacy_matrix_ref_v3")
     st.caption("Unusual cell (High confidence × Coin Toss) is left uncoloured on the heatmap; see table above.")
 
@@ -216,6 +224,6 @@ def render_adequacy_matrix() -> None:
             )
 
     with st.expander("2D Adequacy Matrix Plot", expanded=False):
-        st.plotly_chart(_adequacy_heatmap_fig(10), use_container_width=True,
+        st.plotly_chart(_adequacy_heatmap_fig(), use_container_width=True,
                         key="adequacy_matrix_expander_v3")
         st.caption("Unusual cell (High confidence × Coin Toss) is left uncoloured on the heatmap; see table above.")
