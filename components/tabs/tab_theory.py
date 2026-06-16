@@ -1221,11 +1221,27 @@ then the non-reservoir share is divided equally (in log-space) across the 6 non-
 This **preserves the multiplicative product** ($\prod$ posterior Pgs = posterior P(G)) and matches
 the spreadsheet exactly.
 
-For **ESL attribution** there are two modes:
-- **Option A** (default) preserves each pillar's commitment $C = S_\text{for}+S_\text{against}$ and shifts
-  the mass split to match the new pillar Pg.
-- **Option B** preserves the Bel/Pl envelope by recomputing the posterior separately at w=0 and w=1,
-  then redistributing — useful when you want each pillar's defensible range to remain meaningful after the update.
+For **ESL attribution** — the prior vs posterior **Italian-flag** view shown on every DFI source —
+there are two modes, chosen in **Dashboard → ⚙ Advanced — DFI → ESL per-pillar attribution**:
+
+- **Option A** preserves each pillar's commitment $C = S_\text{for}+S_\text{against}$ (the **White is
+  held fixed**) and only rebalances green/red to hit the new pillar Pg. Simple and conservative, but a
+  *heuristic*: it does not correspond to a coherent update of the belief interval.
+- **Option B** (default) updates the belief interval $[\text{Bel},\text{Pl}]$ itself — it recomputes the
+  posterior separately at $w=0$ (Bel side) and $w=1$ (Pl side), so the whole interval moves and the
+  White can legitimately change.
+
+**Which is mathematically most correct? → B.** The Italian Flag is an *interval* (imprecise) probability
+with $\text{Bel}=S_\text{for}$ and $\text{Pl}=1-S_\text{against}$. With a precise likelihood ratio $R$,
+the coherent (generalised-Bayes) update of an interval is exactly
+$[\,\text{update}(\text{Bel}),\ \text{update}(\text{Pl})\,]$ — which is what B computes. A is a defensible
+simplification, not a coherent interval update. *(Caveat: a sharp Bayesian posterior has no intrinsic
+incompleteness, so any posterior White is a modelling convention — see Step 8.)*
+
+The flags are shown for **all** DFI sources. The DHI-Index path uses the 8-outcome posterior; the
+single-R sources (**Custom R tool** and **Characteristic**) update through one likelihood ratio, so
+Option B for them updates the Bel and Pl headline products by $R$ and spreads each endpoint change across
+the 8 pillar slots by equal log-share (the scalar-R interval update).
 """)
 
     with _tab_maths.expander("Pillar-resolved DFI, which pillar does the anomaly move? (GeoX / Martinelli)", expanded=False):
@@ -1286,7 +1302,9 @@ pillar-resolved panel can.
   *equal-spread* attribution (which moved every pillar the same way and could not show a
   reservoir falling while POS rose). The mass-level play/cond Italian-flag tables remain
   below it for detail.
-- **Characteristic / Custom dual-case** are single-curve models → aggregate headline only.
+- **Characteristic / Custom dual-case** are single-curve models, so they have **no channel-resolved**
+  (reservoir vs HC-system) split — the headline updates as one number. The mass-level ESL **flag**
+  attribution is still shown for them (the single $R$ spread across the 8 pillars, Option A or B).
 
 #### Scope (single segment) & IP
 This is the **single-segment** case of US 10,451,762 B2 (Martinelli, Stabell, Langlie;
@@ -1580,7 +1598,7 @@ Navigate to the **Bayesian DFI Update** tab → **DFI Setup**. You'll see four p
 > - SD mode: leave `upper` unless you have a specific reason to tighten the likelihoods.
 
 **D. Bell-curve preview**
-> Visual check of the five Gaussian likelihoods overlaid with your DHI Index as a vertical line. **Sanity check:** is your DHI Index in a region where the Success curve is meaningfully above the failure curves? If not, the uplift will be small.
+> Visual check of the five Gaussian likelihoods overlaid with your DHI Index as a vertical line. **Sanity check:** is your DHI Index in a region where the Success curve is meaningfully above the failure curves? If not, the update will be small.
 
 > 🛈 **Tip:** if you don't know what to put for fluid mix, just toggle the **Sensitivity Sweep** on the DFI Results tab and look at how much the posterior moves across the 100%/0% water family. If the family is tight, your choice doesn't matter much.
 
@@ -1591,7 +1609,8 @@ Navigate to the **Bayesian DFI Update** tab → **DFI Setup**. You'll see four p
 Four blocks, top to bottom:
 
 1. **Headline tiles** — prior vs posterior, ESL and Classic.
-2. **Per-pillar attribution tables**, which pillar absorbed the most uplift/downgrade.
+2. **Per-pillar attribution**, which pillar the update raised or lowered the most — including the
+   prior vs posterior **Italian-flag** table (S_for / S_against / Policy P per pillar, Option A or B).
 3. **Posterior trajectory plot** — 4 curves: P(G, ESL) prior/posterior and P(G, Classic) prior/posterior, swept across stance w. The vertical dashed line is your current stance.
 4. **Sensitivity sweep** — configurable: pick X-axis variable (DHI Index, Reservoir Pg, stance w, etc.) and curve family (water fraction, LSG fraction, etc.). Use this to *stress-test* the posterior against assumptions.
 

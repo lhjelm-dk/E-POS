@@ -119,6 +119,12 @@ base_rate · White`. A *Seed from Rose medians* button supplies an analogue base
 
 ![Stance modes](docs/img/26_dashboard_stance_modes.png)
 
+When the DFI update is on, a second expander under the stance control — **⚙ Advanced — DFI →
+ESL per-pillar attribution** — sets how the DFI update is written back onto each pillar's flag
+masses (**Option A** holds the White fixed; **Option B**, the default, updates the belief
+interval [Bel, Pl]). It carries the full argument for why B is the mathematically coherent
+choice.
+
 ### 2 · Play
 
 Assess the **play-level** chance of each pillar (Charge, Closure, Reservoir, Retention) — the
@@ -194,15 +200,24 @@ GeoX's DFI Assessment (the absolute scale is free; GeoX uses only their ratios):
 ![GeoX hand-off](docs/img/13_dfi_custom_curves_geox.png)
 
 **Pillar-resolved attribution (GeoX-style, single-segment)** — for the pillar-resolved
-sources (Custom multi-case and the Modified DHI Index) the update is resolved onto two
+sources (Custom multi-case and the Conceptual DHI Index) the update is resolved onto two
 geological channels: the **Reservoir** pillar and the combined **HC-system**
-(Charge·Closure·Retention, split by log-proportion). This exposes the key insight an
-aggregate likelihood ratio hides: a supportive anomaly can *raise* P(G) while *lowering*
-the Reservoir marginal, because part of the anomaly is explained by a possible
-non-reservoir cause. It is a parallel post-DFI view; the prior pillar inputs are never
-overwritten.
+(Charge·Closure·Retention, split by log-proportion and reconciling to the headline on both
+the prior and the posterior). This exposes the key insight an aggregate likelihood ratio
+hides: a supportive anomaly can *raise* P(G) while *lowering* the Reservoir marginal, because
+part of the anomaly is explained by a possible non-reservoir cause. It is a parallel post-DFI
+view; the prior pillar inputs are never overwritten.
 
 ![DFI pillar attribution](docs/img/17_dfi_pillar_attribution.png)
+
+**Prior vs posterior Italian flags (all sources).** Every DFI source also shows the per-pillar
+ESL masses as **prior and posterior flags** (S_for / S_against / White, across the 8 play/cond
+slots). How the headline update is written back onto the masses is chosen in **Dashboard → ⚙
+Advanced — DFI → ESL per-pillar attribution**: **Option A** holds the White (incompleteness)
+fixed and only rebalances green/red; **Option B** (default, recommended) updates the belief
+interval [Bel, Pl] itself. With a precise likelihood ratio R, B is the mathematically coherent
+interval update; A is a conservative simplification (a sharp Bayesian posterior has no intrinsic
+incompleteness, so any posterior White is a modelling convention).
 
 **Characteristic scoring** — five verbal sliders; R is the product of per-attribute likelihood
 ratios from the Monigle 2025 database. E-POS also **reverse-engineers the success vs failure
@@ -214,9 +229,10 @@ model) so you can see where the prospect sits in the drilled population:
 ![Characteristic per-attribute LR + radar](docs/img/32_dfi_char_lr_radar.png)
 
 **Conceptual DHI Index (experimental)** — a conceptual, illustrative model with editable
-likelihood curves (not calibrated to any dataset). It carries a prominent warning: **do not
-enter a raw composite DHI index** — such an index bundles geology with the seismic signal, and
-the input here must be a *pure DFI-strength indicator*:
+likelihood curves (not calibrated to any dataset). Toggling DFI on seeds illustrative defaults
+(DHI Index = 8; fluid-failure mix water/LSG/other = 0.50/0.20/0.30; attribution = B). It carries
+a prominent warning: **do not enter a raw composite DHI index** — such an index bundles geology
+with the seismic signal, and the input here must be a *pure DFI-strength indicator*:
 
 
 ### 6 · Final Prospect POS
