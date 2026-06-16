@@ -1923,6 +1923,21 @@ or your own library.
   reasoning the Italian Flag is built on.
 - *Analysing Uncertainties: Bayes and Italian Flags* (2013) — links Italian-Flag
   belief masses to Bayesian updating.
+- **Hall, J.W., Blockley, D.I. & Davis, J.P. (1998)** — *Uncertain inference using
+  interval probability theory.* Int. J. Approximate Reasoning 19(3–4):247–264.
+  DOI 10.1016/S0888-613X(98)10010-5. The interval-probability inference rule behind
+  the Italian-Flag combination.
+- **Dempster, A.P. (1967)** — *Upper and lower probabilities induced by a multivalued
+  mapping.* Annals of Mathematical Statistics 38(2):325–339. Origin of the Bel/Pl
+  (lower/upper probability) pair.
+- **Shafer, G. (1976)** — *A Mathematical Theory of Evidence.* Princeton University
+  Press. Dempster–Shafer belief functions and Dempster's rule (used in the
+  experimental DFI-fusion prototype).
+- **Walley, P. (1991)** — *Statistical Reasoning with Imprecise Probabilities.*
+  Chapman & Hall. Imprecise-probability foundation of the Bel/Pl envelope.
+- **Smets, P. (1990, 2005)** — the Transferable Belief Model and the pignistic
+  transformation (kin to the stance *w*). Smets (1990), IEEE Trans. PAMI 12(5):447–458;
+  Smets (2005), Int. J. Approximate Reasoning 38(2):133–147.
 #### 2 · Geological probability of success (Classic / multiplicative POS)
 - **Rose, P.R. (2001)** — *Risk Analysis and Management of Petroleum Exploration
   Ventures.* AAPG Methods in Exploration 12. The industry-standard multiplicative
@@ -1932,14 +1947,26 @@ or your own library.
   Basis of the Milkov reference-table scheme on the **Reference Tables** tab.
 - Reference-table schemes also implemented in E-POS: **Malvić (2009)** and the
   **CCOP (2000)** guidelines; see the **Reference Tables** tab.
+- **Otis, R.M. & Schneidermann, N. (1997)** — *A process for evaluating exploration
+  prospects.* AAPG Bulletin 81(7):1087–1109. Basis of the chance-of-adequacy
+  (confidence × geological-news) matrix.
+- **SPE/WPC/AAPG/SPEE (2018)** — *Petroleum Resources Management System (PRMS),*
+  revised June 2018. Source of the verbal probability scale.
 
 #### 3 · DHI / DFI & seismic-amplitude risking (the Bayesian update)
 - **Simm, R. (2016)** — *Seismic Amplitude and Risk: A Sense Check.* FORCE seminar,
   *Underexplored Plays — Part II*, Nov 2016. Source of the **two-state Bayesian DFI
   update** and the **R rule-of-thumb bands** used throughout the DFI tab.
-- **Nosjean, N. et al. (2020)** — *Geological probability of success assessment for
-  amplitude-driven prospects: a Nile Delta case study.* A worked field example of
+- **Nosjean, N. et al. (2021)** — *Geological probability of success assessment for
+  amplitude-driven prospects: a Nile Delta case study.* J. Petroleum Science &
+  Engineering 202:108515. DOI 10.1016/j.petrol.2021.108515. A worked field example of
   folding DHI evidence into POS.
+- **Forrest, M., Roden, R. & Holeywell, R. (2010)** — *Risking seismic amplitude
+  anomaly prospects based on database trends.* The Leading Edge 29(5):570–574.
+  DOI 10.1190/1.3422455. The Rose & Associates DHI-consortium database trends.
+- **Pettingill, H.S. & Roden, R. (2022)** — *Integrated DHI Prospect Evaluation:
+  lessons learned from 3 generations of explorers.* Discovery Thinking Forum,
+  IMAGE 2022 (SEG/AAPG), Houston.
 - *"DHIs work well for de-risking prospects"* — *GeoExpro* feature. Accessible
   overview of DHI performance statistics.
 - **Martinelli, G., Stabell, C. & Langlie, E. (2019)** — *Direct Fluid Indicators in
@@ -1948,14 +1975,16 @@ or your own library.
   marginalisation** behind the **Custom multi-case pillar-attribution** view. Its
   novel *multi-segment* DFI-dependency / reference-DFI correlation method is **not**
   implemented (see scope note below).
-- **Martinelli, G. et al. (2012)** — *Dynamic Decision Making for Graphical Models
-  Applied to Oil Exploration* (arXiv). Graphical-model basis cited by the patent.
+- **Martinelli, G., Eidsvik, J. & Hauge, R. (2012)** — *Dynamic Decision Making for
+  Graphical Models Applied to Oil Exploration* (arXiv:1201.4239; later in Eur. J.
+  Operational Research, 2013). Graphical-model basis cited by the patent.
 
 #### 4 · Characteristic / direct-hydrocarbon-indicator scoring
-- **Monigle, P. et al. (2025)** — *Integrated and improved direct hydrocarbon
-  indicators: a step forward in petroleum risk.* AAPG (Gold Open Access, CC-BY).
-  Source of the per-characteristic success-rate statistics and discernibility
-  weighting behind the **characteristic-scoring** pathway.
+- **Monigle, P.W., Hedayati, T.S. & Goulding, F.J. (2025)** — *Integrated and improved
+  direct hydrocarbon indicators: a step forward in petroleum risk discrimination.*
+  AAPG Bulletin 109(5):617–636. DOI 10.1306/04042524030. Source of the
+  per-characteristic success-rate statistics and discernibility weighting behind the
+  **characteristic-scoring** pathway.
 #### 5 · Calibration, assurance & general practice
 - **Bond, C.E. et al. (2022)** — *Recommended practices in exploration assurance.*
   Guidance on independent review / QC of prospect risk assessments.

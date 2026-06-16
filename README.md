@@ -418,9 +418,9 @@ round-trips.
   formulation, the R rule-of-thumb).
 - **Monigle et al. (2025)** — *Integrated and Improved Direct Hydrocarbon Indicators*, AAPG
   Bulletin 109/5 (characteristic scoring, discernibility weighting).
-- Supporting work: Nosjean et al. (2020), Bond et al. (2022), ExxonMobil *Risking V* (2018).
+- Supporting work: Nosjean et al. (2021), Bond et al. (2022), ExxonMobil *Risking V* (2018).
 
-Full citations and the bundled-PDF list are in the in-app **Theory & Guide → Reference** tab.
+Full citations are in the in-app **Theory & Guide → Reference** tab.
 
 ---
 
