@@ -213,10 +213,10 @@ def _render_dfi_setup_characteristic(ctx) -> None:
 
         st.markdown("---")
         _cap_lo, _cap_hi = cap_for_bucket(bucket_name, enabled=True)
+        st.session_state.setdefault("dhi_char_apply_cap", True)
         apply_cap = st.checkbox(
             f"Apply discernibility-aware cap on R  "
             f"[{_cap_lo:.2f}, {_cap_hi:.1f}] at **{bucket_name}** discernibility",
-            value=bool(st.session_state.get("dhi_char_apply_cap", True)),
             key="dhi_char_apply_cap",
             help=(
                 "Clamps the naive-product R into a defensible band. **The band now widens "
@@ -241,9 +241,9 @@ def _render_dfi_setup_characteristic(ctx) -> None:
             )
 
         st.markdown("---")
+        st.session_state.setdefault("dhi_char_rel_middle", False)
         rel_middle = st.checkbox(
             "Anchor R to the scale-middle category (legacy)",
-            value=bool(st.session_state.get("dhi_char_rel_middle", False)),
             key="dhi_char_rel_middle",
             help=(
                 "**Default OFF — base-rate-relative (recommended).** Each attribute's "
@@ -268,10 +268,10 @@ def _render_dfi_setup_characteristic(ctx) -> None:
             )
 
         st.markdown("---")
+        st.session_state.setdefault("dhi_char_corr_rho", 0.3)
         corr_rho = st.slider(
             "Assumed attribute correlation ρ (independence discount)",
             min_value=0.0, max_value=0.8, step=0.05,
-            value=float(st.session_state.get("dhi_char_corr_rho", 0.3)),
             key="dhi_char_corr_rho",
             help=(
                 "**Corrects the naive-Bayes independence assumption.** R = ∏ LRᵢ "

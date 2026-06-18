@@ -149,9 +149,9 @@ def render_adequacy_matrix() -> None:
                 0.01,
                 key=key_prob,
             )
+            st.session_state.setdefault(key_just, "")
             st.text_area(
                 "Justification (required for audit trail)",
-                value=st.session_state[key_just],
                 key=key_just,
                 placeholder="Document evidence quality and geological news...",
             )

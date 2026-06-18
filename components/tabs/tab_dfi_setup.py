@@ -5,6 +5,10 @@ from __future__ import annotations
 
 import streamlit as st
 
+from logic.dfi_inputs import (
+    DEFAULT_DHI, DEFAULT_FLUID_TYPE, DEFAULT_FLUID_WATER,
+    DEFAULT_FLUID_LSG, DEFAULT_FLUID_OTHER, DEFAULT_ESL_ATTR,
+)
 from logic.dfi_context import (
     esl_prior_pillars_from_ctx        as _esl_prior_pillars_from_ctx,
     esl_rollup_prior_at_w             as _esl_rollup_prior_at_w,
@@ -160,7 +164,7 @@ def _render_dfi_setup(ctx) -> None:
         # widget state via `key`. Passing both `value=`/`index=` AND `key=` when the
         # default is read from the *same* session key makes the widget snap back to
         # the default on rerun (the DHI-Index "stuck at 19" desync) — so don't.
-        st.session_state.setdefault("dfi_index", 8)
+        st.session_state.setdefault("dfi_index", int(DEFAULT_DHI))
         dhi = st.slider(
             "**DHI Index**",
             min_value=DHI_INDEX_MIN_INT,
@@ -171,7 +175,7 @@ def _render_dfi_setup(ctx) -> None:
                   "Higher = stronger DFI signal supporting HC presence."),
         )
 
-        st.session_state.setdefault("dfi_fluid_type", "Success")
+        st.session_state.setdefault("dfi_fluid_type", DEFAULT_FLUID_TYPE)
         fluid_type = st.selectbox(
             "**Expected HC fluid type**",
             options=list(SUCCESS_CLASSES),
@@ -194,19 +198,19 @@ def _render_dfi_setup(ctx) -> None:
             st.markdown("**Fluid failure probabilities**  *P(fluid | failure)*")
             col_w, col_l, col_o = st.columns(3)
             with col_w:
-                st.session_state.setdefault("dfi_fluid_water", 0.50)
+                st.session_state.setdefault("dfi_fluid_water", DEFAULT_FLUID_WATER)
                 water = st.number_input(
                     "Water", min_value=0.0, max_value=1.0,
                     step=0.05, format="%.2f", key="dfi_fluid_water",
                 )
             with col_l:
-                st.session_state.setdefault("dfi_fluid_lsg", 0.20)
+                st.session_state.setdefault("dfi_fluid_lsg", DEFAULT_FLUID_LSG)
                 lsg = st.number_input(
                     "LSG", min_value=0.0, max_value=1.0,
                     step=0.05, format="%.2f", key="dfi_fluid_lsg",
                 )
             with col_o:
-                st.session_state.setdefault("dfi_fluid_other", 0.30)
+                st.session_state.setdefault("dfi_fluid_other", DEFAULT_FLUID_OTHER)
                 other = st.number_input(
                     "Other", min_value=0.0, max_value=1.0,
                     step=0.05, format="%.2f", key="dfi_fluid_other",
@@ -224,7 +228,7 @@ def _render_dfi_setup(ctx) -> None:
             )
 
             st.markdown("**ESL per-pillar attribution method**")
-            st.session_state.setdefault("dfi_esl_attribution", "B")
+            st.session_state.setdefault("dfi_esl_attribution", DEFAULT_ESL_ATTR)
             _attr_now = st.session_state.get("dfi_esl_attribution", "B")
             _attr_lbl = ("A: equal multiplicative (preserve commitment C)"
                          if _attr_now == "A" else "B: Bel/Pl update")

@@ -359,9 +359,9 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
             elif _sel == "base_rate":
                 _bc1, _bc2 = st.columns([2, 1])
                 with _bc1:
+                    st.session_state.setdefault("stance_base_rate", DEFAULT_BASE_RATE)
                     st.number_input(
                         "Prospect base rate", min_value=0.0, max_value=1.0,
-                        value=float(st.session_state.get("stance_base_rate", DEFAULT_BASE_RATE)),
                         step=0.05, key="stance_base_rate",
                         help="Policy P = S_for + base_rate × White. 'Knowing nothing' "
                              "reverts the unknowns to this base rate, not a 50/50 coin.")

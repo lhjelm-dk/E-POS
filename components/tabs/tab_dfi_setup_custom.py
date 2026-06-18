@@ -48,9 +48,9 @@ def _render_dfi_setup_custom(ctx) -> None:
     def _f(key, default):
         return float(st.session_state.get(key, default))
 
+    st.session_state.setdefault("dfi_custom_multicase", False)
     multicase = st.checkbox(
         "**Multi-case mode** — define each fluid / failure case separately",
-        value=bool(st.session_state.get("dfi_custom_multicase", False)),
         key="dfi_custom_multicase",
         help="OFF: one success curve P(DFI|HC) vs one failure curve P(DFI|No-HC).  \n"
              "ON: set Oil / Gas / Oil+Gas and Water / LSG / Non-reservoir individually, "
