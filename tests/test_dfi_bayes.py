@@ -145,3 +145,29 @@ def test_attribute_esl_optionB_r_interval_update():
             for o in scopes.values():
                 assert o.s_for >= 0.0 and o.s_against >= 0.0
                 assert o.s_for + o.s_against <= 1.0 + 1e-9
+
+
+def test_simm_interval_posterior():
+    from logic.dfi_simm import simm_interval_posterior, simm_bayes_posterior
+
+    # R = 1 is a no-op: the interval is unchanged.
+    b, p, w = simm_interval_posterior(0.30, 0.20, 1.0)
+    assert abs(b - 0.30) < 1e-12 and abs(p - 0.80) < 1e-12 and abs(w - 0.50) < 1e-12
+
+    # R > 1 raises both endpoints; R < 1 lowers both.
+    bu, pu, _ = simm_interval_posterior(0.30, 0.20, 3.0)
+    bd, pd, _ = simm_interval_posterior(0.30, 0.20, 0.3)
+    assert bu > 0.30 and pu > 0.80
+    assert bd < 0.30 and pd < 0.80
+
+    # Interval stays valid, and the POINT posterior at every stance lies inside it.
+    for r in (0.2, 0.8, 1.0, 2.5, 9.0):
+        b, p, w = simm_interval_posterior(0.30, 0.20, r)
+        assert 0.0 <= b <= p <= 1.0 and abs(w - (p - b)) < 1e-12
+        for wt in (0.0, 0.25, 0.5, 0.75, 1.0):
+            pt = simm_bayes_posterior(0.30 + wt * 0.50, r)   # S_for + w*White
+            assert b - 1e-9 <= pt <= p + 1e-9
+
+    # A zero-white prior (Bel == Pl) stays a point after the update.
+    b, p, w = simm_interval_posterior(0.40, 0.60, 5.0)       # White = 0
+    assert abs(b - p) < 1e-12 and abs(w) < 1e-12

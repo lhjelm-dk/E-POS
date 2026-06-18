@@ -744,3 +744,52 @@ def render_r_strength_plot(xs, r_curve, x_cur, r_cur, *, x_label, caption=None,
     st.plotly_chart(figr, use_container_width=True)
     if caption:
         st.caption(caption)
+
+
+def render_interval_posterior(ctx, r: float, *, method_label: str = "", key: str = "") -> None:
+    """Experimental: the **interval-preserving** DFI posterior that keeps the white band.
+
+    A point Bayesian update collapses the geological interval to one number and
+    discards the white (incompleteness). Here the same likelihood ratio ``r`` is
+    applied to **both** edges of the headline interval [Bel, Pl], so the posterior
+    keeps a white band of its own. Shown as prior vs posterior Italian flags with
+    the point posterior marked inside.
+    """
+    from logic.dfi_simm import simm_interval_posterior, simm_bayes_posterior
+    from components.render_helpers import small_flag_html
+
+    s_for = getattr(ctx, "total_for", None)
+    s_against = getattr(ctx, "total_against", None)
+    if s_for is None or s_against is None:
+        return
+    s_for = max(0.0, min(1.0, float(s_for)))
+    s_against = max(0.0, min(1.0 - s_for, float(s_against)))
+    bel0, pl0 = s_for, 1.0 - s_against
+    white0 = max(0.0, pl0 - bel0)
+    bel1, pl1, white1 = simm_interval_posterior(s_for, s_against, r)
+    point_post = simm_bayes_posterior(bel0 + 0.5 * white0, r)   # neutral-stance point
+    direction = ("narrows" if white1 < white0 - 0.005
+                 else "widens" if white1 > white0 + 0.005 else "is unchanged")
+
+    with st.expander("🧪 Experimental — interval-preserving posterior (keeps the white band)",
+                     expanded=False):
+        st.caption(
+            "A point Bayesian update collapses the geological interval to a single number and "
+            "discards the **white** (incompleteness). Here the update is applied to **both** edges "
+            "of the interval (Bel and Pl) with the same R, so the posterior keeps a white band of "
+            "its own. The point posterior P(G | DFI) lies inside it."
+        )
+        c1, c2 = st.columns(2)
+        with c1:
+            st.markdown(f"**Prior** &nbsp; [{bel0*100:.0f}, {pl0*100:.0f}] % · white {white0*100:.0f}%")
+            st.markdown(small_flag_html(bel0, s_against), unsafe_allow_html=True)
+        with c2:
+            st.markdown(f"**Posterior** &nbsp; [{bel1*100:.0f}, {pl1*100:.0f}] % · white {white1*100:.0f}%")
+            st.markdown(small_flag_html(bel1, 1.0 - pl1), unsafe_allow_html=True)
+        st.caption(
+            f"{(method_label + ' · ') if method_label else ''}R = {r:.2f}. The white band {direction} "
+            f"({white0*100:.0f}% → {white1*100:.0f}%); point posterior at neutral stance ≈ "
+            f"{point_post*100:.1f}%. *A sharp Bayesian posterior has no intrinsic incompleteness, so "
+            "the posterior white is a modelling convention: the interval is the image of the prior "
+            "interval under the same update (the headline analogue of attribution Option B).*"
+        )

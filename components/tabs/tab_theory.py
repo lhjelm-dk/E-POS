@@ -1218,6 +1218,15 @@ pragmatic convention used in the conceptual DHI model workbook: update the point
 as a point estimate, and report the prior's Bel/Pl alongside so the reader sees the *original*
 defensible envelope.
 
+**Experimental — keep the envelope.** With a *precise* likelihood ratio R you do not actually need a
+prior-on-the-prior: just push **both** edges of the interval through the same update,
+`Bel_post = simm(Bel, R)` and `Pl_post = simm(Pl, R)`. Because the update is monotone the order is
+preserved, so the posterior carries its own `White_post = Pl_post − Bel_post`, and the point posterior
+at every stance lies inside it. This is the **headline analogue of attribution Option B**, and E-POS
+exposes it as the **🧪 interval-preserving posterior** panel on **DFI Results** for all three sources.
+The honest caveat stands: a sharp Bayesian posterior has no intrinsic incompleteness, so `White_post`
+is a modelling convention (the image of the prior interval under the same R), not a measurement.
+
 ---
 
 ### Step 9 — Attribution back to pillars (Classic)

@@ -44,6 +44,34 @@ def simm_bayes_posterior(prior_pg: float, r: float) -> float:
     return num / den if den > 0 else prior_pg
 
 
+def simm_interval_posterior(s_for: float, s_against: float, r: float
+                            ) -> tuple[float, float, float]:
+    """Interval-preserving ("fuzzy") DFI update of an Italian-Flag headline.
+
+    A point Bayesian update collapses the geological prior to a single number and
+    discards the **White** (incompleteness). Instead, treat the prior as the
+    interval ``[Bel, Pl] = [S_for, 1 - S_against]`` and push **both** endpoints
+    through the same Simm two-state update with likelihood ratio ``r``::
+
+        Bel_post = simm(Bel, r)        Pl_post = simm(Pl, r)
+
+    With a precise ``r`` the update is monotone, so ``Bel_post <= Pl_post`` and the
+    posterior carries its own ``White_post = Pl_post - Bel_post``. The point
+    posterior at any stance ``w`` (``simm(S_for + w*White, r)``) lies inside
+    ``[Bel_post, Pl_post]``, so the interval is a valid envelope of the point
+    answer. This is the headline analogue of the per-pillar attribution Option B.
+
+    Returns ``(bel_post, pl_post, white_post)``.
+    """
+    s_for = max(0.0, min(1.0, s_for))
+    s_against = max(0.0, min(1.0 - s_for, s_against))
+    bel_post = simm_bayes_posterior(s_for, r)
+    pl_post = simm_bayes_posterior(1.0 - s_against, r)
+    if pl_post < bel_post:            # numerical guard; monotone r keeps order
+        bel_post, pl_post = pl_post, bel_post
+    return bel_post, pl_post, max(0.0, pl_post - bel_post)
+
+
 def dhi_score_from_r(r: float) -> float:
     """Monigle-style DHI score in **[0, 1]** = posterior at a neutral prior.
 

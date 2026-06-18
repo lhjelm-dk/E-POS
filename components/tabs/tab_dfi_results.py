@@ -109,6 +109,10 @@ def _render_dfi_results(ctx) -> None:
         "update widens or narrows it."
     )
 
+    from components.dfi_shared import render_interval_posterior
+    render_interval_posterior(ctx, post_esl.r_dfi, method_label="Conceptual DHI Index",
+                              key="ipost_dhi")
+
     st.divider()
 
     # ── Channel-resolved post-DFI attribution (GeoX-style, reservoir vs HC-system) ──
@@ -243,6 +247,8 @@ def _render_dfi_results_characteristic(ctx) -> None:
     )
 
     _render_esl_flag_table_for_r(ctx, r_eff, w_cur)
+    from components.dfi_shared import render_interval_posterior
+    render_interval_posterior(ctx, r_eff, method_label="Characteristic scoring", key="ipost_char")
     st.divider()
 
     # ── Prior → Posterior trajectory across stance w (shared component) ──
@@ -328,6 +334,8 @@ def _render_dfi_results_custom(ctx) -> None:
     )
 
     _render_esl_flag_table_for_r(ctx, r_val, w_cur)
+    from components.dfi_shared import render_interval_posterior
+    render_interval_posterior(ctx, r_val, method_label="Custom R tool", key="ipost_custom")
     st.divider()
 
     st.markdown("##### Posterior trajectory — P(G) vs stance w")
