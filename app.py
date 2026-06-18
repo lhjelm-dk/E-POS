@@ -506,7 +506,7 @@ def _render_prospect_hub(models: dict) -> None:
         st.text_input("Date", value=datetime.date.today().strftime("%d. %m. %Y"), key="meta_date")
     with c_ver:
         if "meta_version" not in st.session_state:
-            st.session_state["meta_version"] = datetime.datetime.utcnow().strftime("v%Y%m%d-%H%M")
+            st.session_state["meta_version"] = datetime.datetime.now(datetime.timezone.utc).strftime("v%Y%m%d-%H%M")
         st.text_input("Version", key="meta_version")
 
     from data.prospect_schema import list_prospects, load_prospect, save_prospect, PROSPECTS_DIR, ProspectData
@@ -604,7 +604,7 @@ def _render_prospect_hub(models: dict) -> None:
         # (meta_title etc.) BEFORE the widgets are re-instantiated, which is the
         # only place Streamlit permits it. Inline (post-widget) assignment raised
         # "st.session_state.meta_title cannot be modified after the widget ...".
-        ts = datetime.datetime.utcnow().strftime("v%Y%m%d-%H%M")
+        ts = datetime.datetime.now(datetime.timezone.utc).strftime("v%Y%m%d-%H%M")
         _am_new = st.session_state.get("active_risk_model")
         if _am_new is not None:
             st.session_state["models"] = _build_rt_models(_am_new)
@@ -626,7 +626,7 @@ def _render_prospect_hub(models: dict) -> None:
                   on_click=_on_new_prospect)
     with r2c5:
         def _on_stamp():
-            st.session_state["meta_version"] = datetime.datetime.utcnow().strftime("v%Y%m%d-%H%M")
+            st.session_state["meta_version"] = datetime.datetime.now(datetime.timezone.utc).strftime("v%Y%m%d-%H%M")
         st.button("Stamp", key="hub_stamp", help="Set version to current UTC timestamp",
                   on_click=_on_stamp)
 

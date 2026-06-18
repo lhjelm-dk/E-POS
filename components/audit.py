@@ -52,7 +52,7 @@ def render_audit_panel(pos: float, method: str, prospect_title: str) -> None:
     )
 
     if st.button(f"Lock assessment — {method} = {pos*100:.1f}%", key=f"audit_lock_{method}"):
-        timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         st.session_state[f"locked_{method}"] = {
             "pos": pos,
             "reviewer": reviewer,

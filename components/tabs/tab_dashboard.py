@@ -743,7 +743,7 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
                 "p_g_esl = ESL aggregated point estimate at current stance w."
             )
             st.dataframe(_prd, use_container_width=True, hide_index=True)
-            _ts = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+            _ts = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
             _full_csv = _build_full_export_csv(
                 models=models, logic_rows=_logic_rows,
                 classic_pos=st.session_state.get("comparison_classic_pos", 0.0),
