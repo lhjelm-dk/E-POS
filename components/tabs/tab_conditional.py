@@ -42,7 +42,7 @@ def _render_conditional_tab(ctx) -> None:
 
     st.caption(
         "Assess conditional risk elements. "
-        "Click **Assess** on any row to open the full CAM detail panel."
+        "Click **Assess** on any row to open the full CCM detail panel."
     )
 
     # Active CAM panel — conditional scope

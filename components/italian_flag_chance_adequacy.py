@@ -1,5 +1,5 @@
 ﻿"""
-Italian Flag — Chance Adequacy Matrix (POS vs committed evidence).
+Italian Flag — Chance–Commitment map (POS vs committed evidence).
 
 Policy POS = S(H) + w × White. Y-axis = committed fraction S_p + S_n (can exceed 100% if overcommitted).
 
@@ -223,7 +223,7 @@ def render_italian_flag_chance_adequacy_matrix() -> None:
         template="plotly_white",
         plot_bgcolor="#ffffff",
         paper_bgcolor="#ffffff",
-        title=f"Chance Adequacy Matrix: {element}",
+        title=f"Chance–Commitment map: {element}",
         xaxis_title="Probability of Success (Policy POS %)",
         yaxis_title="Certainty (S_p + S_n) %",
         xaxis=dict(

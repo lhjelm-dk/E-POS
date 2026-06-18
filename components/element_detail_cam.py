@@ -1,5 +1,5 @@
 """
-Element Detail Assessment — full Chance Adequacy Matrix (CAM) panel.
+Element Detail Assessment — full Chance–Commitment map (CCM) panel.
 
 Integrates the standalone GeoProb/CAM app's full assessment depth into each
 E-POS risk element. Uses a staging pattern: edits live in the panel but are
@@ -427,7 +427,7 @@ def render_element_cam_panel(
     category: str | None = None,
     scope: str = "cond",
 ) -> None:
-    """Render the full Chance Adequacy Matrix assessment panel for one element.
+    """Render the full Chance–Commitment map (CCM) assessment panel for one element.
 
     Call this once at the top of the section (before the overview grid) when
     st.session_state["active_cam_key_prefix"] == key_prefix.
@@ -724,10 +724,10 @@ def render_element_cam_panel(
 
     st.divider()
 
-    # ── Chance Adequacy Matrix ────────────────────────────────────────────────
+    # ── Chance–Commitment map (CCM) ───────────────────────────────────────────
     st.markdown(
         "<div style='font-size:0.8rem;font-weight:600;color:#555;margin-bottom:4px;'>"
-        "Chance Adequacy Matrix</div>",
+        "Chance–Commitment map</div>",
         unsafe_allow_html=True,
     )
     st.caption(

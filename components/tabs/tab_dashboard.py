@@ -120,7 +120,7 @@ def _render_dashboard_tab(ctx) -> None:
 → Controls how uncommitted (white) evidence maps to POS. Default = 0.5 (neutral).
 
 **④ Review results** *(Geological POS tab)*
-→ P(G, ESL), P(G, Classic), sensitivity tornado, and the Chance Adequacy Matrix.
+→ P(G, ESL), P(G, Classic), sensitivity tornado, and the Chance–Commitment map (CCM).
 
 **⑤ Sign off** *(this panel, bottom)*
 → Record analyst name, date, peer review status, and lock the assessment.
@@ -320,7 +320,7 @@ A single probability of 0.40 could mean "strong evidence both ways" or "no data 
                 "This maps the Italian Flag's white segment to a point-estimate POS between Bel (= S_for) "
                 "and Pl (= 1 − S_against).  \n\n"
                 "Set w once for the whole prospect here. Individual risk elements can override it "
-                "in their CAM panel (shown with ⚑ indicator)."))
+                "in their CCM panel (shown with ⚑ indicator)."))
             from logic.pos_policy import DEFAULT_BASE_RATE
             _stance_lbl = {
                 "neutral":   "Neutral — w = 0.5 (split unknowns 50/50, Laplace)",

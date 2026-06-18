@@ -33,7 +33,7 @@ def _render_play_tab(ctx) -> None:
 
     st.caption(
         "Assess the four play-level pillars. "
-        "Click **▶ Assess** on any row to open the full CAM evidence panel."
+        "Click **▶ Assess** on any row to open the full CCM evidence panel."
     )
 
     # Active CAM panel — play scope

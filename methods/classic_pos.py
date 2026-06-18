@@ -58,7 +58,7 @@ def render_classic_pos(models: dict | None = None) -> None:
         render_adequacy_matrix_reference()
 
     st.info(
-        "**Chance Adequacy Matrix** — available per element in the **Play** and **Conditional** tabs. "
+        "**Chance–Commitment map (CCM)** — available per element in the **Play** and **Conditional** tabs. "
         "Click **▶ Assess** on any row to open the full evidence panel."
     )
 

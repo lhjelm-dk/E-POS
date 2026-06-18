@@ -117,7 +117,7 @@ def _render_geo_result(ctx) -> None:
 
 
 def _render_geo_diagnostics(ctx) -> None:
-    """Uncertainty Index, pillar fan, ESL ratio plot, Chance Adequacy Matrix."""
+    """Uncertainty Index, pillar fan, ESL ratio plot, Chance–Commitment map (CCM)."""
     models = ctx.models
     play = ctx.play
     conditional = ctx.conditional
@@ -486,7 +486,7 @@ def _render_geo_diagnostics(ctx) -> None:
             options=_all_eid_labels,
             default=_all_eid_labels,
             key="analysis_leaf_filter",
-            help="Select / deselect individual risk elements. Changes apply to both the Ratio Plot and the CAM scatter.",
+            help="Select / deselect individual risk elements. Changes apply to both the Ratio Plot and the CCM scatter.",
         )
     _sel_eids = {_lbl_to_eid[lb] for lb in _sel_labels} if len(_sel_labels) < len(_all_eids) else None
 
@@ -499,14 +499,16 @@ def _render_geo_diagnostics(ctx) -> None:
         pillar_colors=_pillar_colors,
     )
 
-    # Chance Adequacy Matrix
+    # Chance–Commitment map (CCM)
     st.divider()
-    st.subheader("Chance Adequacy Matrix — All Elements")
+    st.subheader("Chance–Commitment map (CCM) — all elements")
     st.caption(
-        "Each risk element plotted in POS × Commitment / ECI space. "
+        "Each risk element plotted as chance (POS) × evidence **commitment** "
+        "(C = S_for + S_against = 1 − White); switch the Y axis to **ECI** = |S_for − S_against| "
+        "for the for/against imbalance. "
         "Green / red boundaries are auto-set from the element POS distribution. "
         "Use the Element filter above to show/hide individual elements. "
-        "▸ How to read the CAM: **Theory & Guide → \"Chance Adequacy Matrix (CAM) — "
+        "▸ How to read the CCM: **Theory & Guide → \"Chance–Commitment map (CCM) — "
         "interpretation guide\"**."
     )
     _cam_show_labels = st.checkbox("Show labels", value=True, key="cam_all_show_labels")

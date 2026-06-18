@@ -154,7 +154,7 @@ def main() -> int:
             tab("Diagnostics")
             scroll_to("Pillar fan"); shot("29_geo_pillar_fan")
             scroll_to("Evidence Support Logic Ratio"); shot("30_geo_ratio_plot")
-            scroll_to("Chance Adequacy Matrix"); shot("11_cam")
+            scroll_to("Chance–Commitment map"); shot("11_cam")
             tab("Detail")
             scroll_to("Risk Element Hierarchy"); shot("31_geo_hierarchy")
 
@@ -186,9 +186,9 @@ def main() -> int:
             tab("Final Prospect POS"); settle()
             scroll_to("Risk Overview"); shot("19_final_pos")
 
-            # ── CAM with the post-DFI headline-shift overlay (DFI still active) ──
+            # ── CCM with the post-DFI headline-shift overlay (DFI still active) ──
             tab("Geological POS"); tab("Diagnostics")
-            scroll_to("Chance Adequacy Matrix"); shot("20_cam_post_dfi")
+            scroll_to("Chance–Commitment map"); shot("20_cam_post_dfi")
 
             # ── Theory ──
             tab("Theory & Guide"); pg.evaluate("window.scrollTo(0,0)"); settle()

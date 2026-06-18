@@ -400,7 +400,7 @@ def _render_esl_ratio_plot_and_validation(
 
 
 # ---------------------------------------------------------------------------
-# Chance Adequacy Matrix scatter plot
+# Chance–Commitment map (CCM) scatter plot
 # ---------------------------------------------------------------------------
 
 def _render_cam_scatter_plot(
@@ -416,7 +416,7 @@ def _render_cam_scatter_plot(
     show_labels: bool = True,
     dfi_overlay: "tuple | None" = None,
 ) -> None:
-    """Chance Adequacy Matrix — all elements on POS × ECI/C axes.
+    """Chance–Commitment map (CCM) — all elements on POS × Commitment/ECI axes.
 
     ``dfi_overlay`` (optional) is ``(prior_pos, post_pos)`` — the prospect-level
     headline P(G, ESL) before and after the DFI update. When supplied, a toggle adds
@@ -581,7 +581,7 @@ def _render_cam_scatter_plot(
                        showarrow=False, font=dict(color="rgba(170,30,30,0.80)", size=13))
 
     # ── Post-DFI headline shift overlay (Plan B / B3) ──────────────────────────
-    # The CAM is prior-by-design, so this is an opt-in reference: two vertical lines
+    # The CCM is prior-by-design, so this is an opt-in reference: two vertical lines
     # at the prospect-level P(G, ESL) before and after the DFI update, showing which
     # zone the headline lands in pre vs post.
     if dfi_overlay is not None:
@@ -589,7 +589,7 @@ def _render_cam_scatter_plot(
         _show_dfi = st.checkbox(
             "Show post-DFI headline shift", value=True, key="cam_scatter_dfi_shift",
             help="Vertical lines at the prospect P(G, ESL) before (prior) and after the "
-                 "DFI update. The CAM itself stays the geological prior; this is a reference "
+                 "DFI update. The CCM itself stays the geological prior; this is a reference "
                  "overlay of the headline move.")
         if _show_dfi:
             _up = _post_pos >= _pri_pos

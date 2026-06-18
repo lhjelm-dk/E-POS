@@ -9,7 +9,7 @@ def _risking_v_schematic():
 
     The apex is the *symmetric* original Risk Matrix at 0.5 (the "coin") — the model
     the no-go zone belongs to; a marker shows where the base-rate-aware Referenced V
-    shifts it. X-axis reversed (100%→0%) to match the app's Chance Adequacy Matrix;
+    shifts it. X-axis reversed (100%→0%) to match the app's Chance–Commitment map (CCM);
     the feasible region is coloured by the shared CoS probability scale.
     """
     import plotly.graph_objects as go
@@ -70,7 +70,7 @@ def _risking_v_schematic():
                        font=dict(size=11, color="#C00000"))
 
     fig.update_xaxes(title="Chance of adequacy", range=[1.02, -0.02], tickformat=".0%",
-                     gridcolor="#eee")   # reversed to match the app CAM
+                     gridcolor="#eee")   # reversed to match the app CCM
     fig.update_yaxes(title="Confidence", range=[-0.05, 1.12],
                      tickvals=[0, 0.5, 1], ticktext=["Low", "Med", "High"], gridcolor="#eee")
     fig.update_layout(height=340, margin=dict(t=20, b=44, l=58, r=14),
@@ -156,14 +156,14 @@ The Italian Flag makes that quality visible. You enter evidence once, and three 
 > - Set **S_for** = fraction of evidence supporting adequacy.
 > - Set **S_against** = fraction of evidence against adequacy.
 > - White = 1 − S_for − S_against (uncommitted / unknown).
-> - Open **▶ Assess** for the full Chance Adequacy Matrix panel per element.
+> - Open **▶ Assess** for the full Chance–Commitment map (CCM) panel per element.
 
 **Step 3 — Assess the Conditional elements (Conditional tab)**
 > Same inputs, but now for prospect-specific sub-elements within each pillar.
 > Set combination operators (ESL-ALL / ESL-ANY / ESL-IPT) per pillar group.
 
 **Step 4 — Review results (Geological POS tab)**
-> P(G, ESL), Uncertainty Index, CAM scatter, and the P(G, Classic) derived view
+> P(G, ESL), Uncertainty Index, CCM scatter, and the P(G, Classic) derived view
 > all update here — no extra work required.
 
 **Step 5 — Sign off (Dashboard tab, bottom)**
@@ -518,11 +518,11 @@ validity (Pearl and Bareinboim); Simm (2016) on amplitude reliability being rock
 dependent; Blockley (2013) on managing dependence.
 """)
 
-    with _tab_concepts.expander("Chance Adequacy Matrix (CAM) — interpretation guide", expanded=False):
+    with _tab_concepts.expander("Chance–Commitment map (CCM) — interpretation guide", expanded=False):
         st.markdown(r"""
-### What the CAM shows
+### What the CCM shows
 
-The Chance Adequacy Matrix plots each risk element in **(POS × Commitment)** or **(POS × ECI)** space.
+The Chance–Commitment map plots each risk element in **(POS × Commitment)** or **(POS × ECI)** space.
 
 - **X axis (reversed):** Probability of Success — high confidence on the **left**, low on the **right**.
 - **Y axis:** Commitment C = S_for + S_against, or ECI = |S_for − S_against|.
@@ -578,7 +578,7 @@ bar that decomposes the `[Bel, Pl]` envelope. Left → right:
 
 ### Iso-Pg lines
 
-Dashed iso-probability lines at 10/30/50/70/90 % Pg show where in the CAM different probability
+Dashed iso-probability lines at 10/30/50/70/90 % Pg show where in the CCM different probability
 levels lie. Use these to read off the implied Pg for any (POS, C) position.
 
 ### Marker types
@@ -590,7 +590,7 @@ levels lie. Use these to read off the implied Pg for any (POS, C) position.
 | ☆ Outline star | Conditional pillar aggregate (combined ESL) |
 | ★ Filled star | P(G, ESL) (the prospect result) |
 """)
-        st.info("Open the **Geological POS tab → Chance Adequacy Matrix** to interact with the live plot.")
+        st.info("Open the **Geological POS tab → Chance–Commitment map** to interact with the live plot.")
 
     with _tab_concepts.expander("The Risking V & the \"no-go\" zone (Rose / ExxonMobil)", expanded=False):
         st.plotly_chart(_risking_v_schematic(), use_container_width=True)
@@ -598,7 +598,7 @@ levels lie. Use these to read off the implied Pg for any (POS, C) position.
             "**Schematic Risking V.** Apex at the original symmetric **neutral 0.5 — the “coin”** "
             "(no data); rising confidence lets the estimate move out to the **success (1)** or "
             "**failure (0)** corners — the two arms. The fill is coloured by chance on the shared "
-            "CoS scale; the **x-axis is reversed (100%→0%)** to match the app's CAM. The grey "
+            "CoS scale; the **x-axis is reversed (100%→0%)** to match the app's CCM. The grey "
             "upper-centre is the classic **no-go** (confident but middling) — superseded for a "
             "probability. The purple ◆ marks where ExxonMobil's base-rate-aware **Referenced V** "
             "shifts the apex (here, the current base-rate stance)."
@@ -630,7 +630,7 @@ we assume geology is like a coin?"* Knowing nothing, you should revert to the **
 (generally ≠ 0.5)**, not to a neutral 50/50.
 
 **Because E-POS reports P(G) — a probability, not a binary state — the strict no-go zone does not
-apply.** It is shown on the CAM only as a *faint, labelled reference region* ("legacy no-go —
+apply.** It is shown on the CCM only as a *faint, labelled reference region* ("legacy no-go —
 binary-outcome only"), never as a forbidden area.
 
 ### How ESL supersedes the no-go
@@ -638,13 +638,13 @@ binary-outcome only"), never as a forbidden area.
 ESL replaces the binary boundary with a **continuous, visible representation**:
 
 - The **Bel–Pl envelope** `[S_for, 1 − S_against]` **is the pair of V arms** — the defensible POS
-  bounds at the current commitment, drawn directly on the CAM.
+  bounds at the current commitment, drawn directly on the CCM.
 - The **white fraction** and the **stance _w_** make explicit *how much of the point estimate rests
   on the unknown*. A confident-but-middling element simply has a **narrow** interval centred on a
   mid value (a genuine, well-evidenced "uncertain"); a low-commitment element has a **wide**
   interval — the same information the no-go was groping for, but quantified rather than forbidden.
 
-The CAM's **"Risking-V overlay"** toggle draws the V arms, the labelled legacy-no-go reference, and a
+The CCM's **"Risking-V overlay"** toggle draws the V arms, the labelled legacy-no-go reference, and a
 **stance-driven flag** on elements whose POS sits far above Bel (the number leans on the white band).
 
 > **Base rate as the neutral (forward link).** ExxonMobil's "geology is not a coin" critique applies
@@ -2116,7 +2116,7 @@ A single reference for every term in E-POS — the ESL/Classic core and the Baye
 
 | Term | Definition |
 |------|-----------|
-| **CAM** | Chance Adequacy Matrix — POS × Commitment scatter plot |
+| **CCM** | Chance–Commitment map (formerly "CAM") — POS × Commitment scatter plot |
 | **ESL-ALL** | Combination where all elements must be adequate (min/min) |
 | **ESL-ANY** | Combination where any element suffices (max/max) |
 | **ESL-IPT** | Imprecise Probability Theory sufficiency combination (dependency-weighted) |

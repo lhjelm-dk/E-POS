@@ -161,16 +161,16 @@ with their Bel–Pl envelopes and the gap.
 
   ![ESL ratio plot](docs/img/30_geo_ratio_plot.png)
 
-- **Chance Adequacy Matrix (CAM)** — every element in POS × commitment space, with auto-set
+- **Chance–Commitment map (CCM)** — every element in POS × commitment space, with auto-set
   green/red boundaries.
 
-  ![Chance Adequacy Matrix](docs/img/11_cam.png)
+  ![Chance–Commitment map](docs/img/11_cam.png)
 
   When the DFI update is active, an opt-in overlay marks the prospect-level headline
   **before and after** the update (prior P(G, ESL) vs posterior P(G | DFI, ESL)) directly
   on the zone bands:
 
-  ![CAM with post-DFI overlay](docs/img/20_cam_post_dfi.png)
+  ![CCM with post-DFI overlay](docs/img/20_cam_post_dfi.png)
 
 **Detail** — the full risk-element hierarchy, per-element tables, agreement analysis, and the
 Classic POS detail.
@@ -248,7 +248,7 @@ The reportable one-page view: the Italian-flag overview, the **before → after*
 A complete reference: ESL fundamentals, the theoretical foundations (Blockley 2013, FIR and
 the Bayes / Italian-Flag hybrid), Policy P & the Bel–Pl envelope, the full Bayesian DFI
 derivation (including the pillar-resolved update and a note on prior/likelihood conditional
-independence), the characteristic-scoring math, the CAM interpretation guide, the Risking V,
+independence), the characteristic-scoring math, the CCM interpretation guide, the Risking V,
 calibration anchors, a glossary, and the source papers.
 
 ![Theory & Guide](docs/img/23_theory_overview.png)
@@ -282,7 +282,7 @@ toward the failure (0) and success (1) corners as confidence rises.
 The classic **"no-go" zone** (confident-but-middling, upper-centre) is a *binary-state* artefact —
 ExxonMobil's 2018 review notes it is *"only applicable if the state of nature is 0 or 1,"* not for a
 probability. Since E-POS reports **P(G)**, the no-go does not apply: ESL replaces the forbidden
-region with the continuous **Bel–Pl envelope** (the V arms) and the visible white fraction. The CAM
+region with the continuous **Bel–Pl envelope** (the V arms) and the visible white fraction. The CCM
 offers a *labelled, opt-in* Risking-V overlay; the **Base-rate stance** answers the same paper's
 "geology is not a coin" critique. Full discussion + references: **Theory & Guide → "The Risking V"**.
 
