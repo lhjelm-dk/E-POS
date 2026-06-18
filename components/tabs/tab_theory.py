@@ -170,6 +170,23 @@ The Italian Flag makes that quality visible. You enter evidence once, and three 
 > Record analyst, date and QC review in the Audit Trail before exporting.
 """)
 
+    with _tab_concepts.expander("What makes E-POS different — three ideas (start here)", expanded=True):
+        st.markdown(r"""
+Most of E-POS is ordinary prospect risking. Three things are deliberately different, and they are the reason the tool exists.
+
+**1 · The "white band" is a first-class quantity.**
+Every risk element carries three numbers, not one: evidence **for** (green), evidence **against** (red), and an explicit **white band** (the *incompleteness*: the part of the assessment that rests on missing information; you will also see it called the *unknowns* or *don't-know*, same thing). Classical risking collapses all three into a single probability, which quietly conflates *"I am confident it is 0.5"* with *"I have no information, so I will call it 0.5."* Those are different geological situations, and E-POS keeps them distinct. The white band is not decoration; it measures how much of the number is opinion rather than evidence.
+
+**2 · Two probability models are allowed to disagree.**
+The app computes the classic **multiplicative POS** and the evidence-based **ESL roll-up** from the *same* inputs, side by side. The interesting prospects are the ones where the two diverge, which usually means dependency between factors, conflicting evidence, or a large white band. The disagreement is a finding, not an error, and it is exactly the conversation a risk review should have.
+
+**3 · The DHI update is fully traceable.**
+Seismic evidence enters as a visible likelihood ratio R, the update pathway is explicit, and the resulting change can be resolved back onto the geological pillars (reservoir versus the charge / trap / retention system). Nothing happens inside a black box. It can even show a bright amplitude *raising* the headline POS while *lowering* the chance the reservoir is present, which a single headline number can never reveal.
+
+**A corollary worth stating: absence of evidence is evidence.**
+Because the DHI enters as a likelihood ratio, the update works *both ways*. A supportive anomaly raises POS (R > 1); an **expected response that fails to appear**, the flat spot the geology predicts but the seismic does not show, lowers it (R < 1). Most workflows only ever add the upside.
+""")
+
     with _tab_concepts.expander("Why prospect risking is hard — independence, double-dipping & conditional risk",
                                 expanded=False):
         st.markdown(r"""

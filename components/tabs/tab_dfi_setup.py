@@ -174,6 +174,12 @@ def _render_dfi_setup(ctx) -> None:
                   f"(range {DHI_INDEX_MIN_INT} to {DHI_INDEX_MAX_INT}). "
                   "Higher = stronger DFI signal supporting HC presence."),
         )
+        st.caption(
+            "A **high** index is a strong supportive signal (R > 1, raises POS). A **low or "
+            "negative** index represents a weak or **expected-but-absent** response (R < 1) and "
+            "legitimately *lowers* POS: a flat spot the geology predicts but the seismic does not "
+            "show is evidence too. The update works both ways."
+        )
 
         st.session_state.setdefault("dfi_fluid_type", DEFAULT_FLUID_TYPE)
         fluid_type = st.selectbox(
