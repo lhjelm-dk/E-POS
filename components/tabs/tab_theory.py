@@ -1978,6 +1978,11 @@ or your own library.
   (confidence × geological-news) matrix.
 - **SPE/WPC/AAPG/SPEE (2018)** — *Petroleum Resources Management System (PRMS),*
   revised June 2018. Source of the verbal probability scale.
+- **Lowry, D.C., Suttill, R. & Taylor, R. (2005)** — *Advances in Risking Exploration
+  Prospects.* The APPEA Journal 45(1):143–158. DOI 10.1071/AJ04012. Examines shortcomings
+  in published risking procedures and proposes a **Level-of-Knowledge (LOK) vs POS**
+  relationship (an allowed-region graphic) — conceptual kin to the **Commitment** axis of the
+  **Chance–Commitment map (CCM)** and the legacy no-go reference region.
 
 #### 3 · DHI / DFI & seismic-amplitude risking (the Bayesian update)
 - **Simm, R. (2016)** — *Seismic Amplitude and Risk: A Sense Check.* FORCE seminar,
