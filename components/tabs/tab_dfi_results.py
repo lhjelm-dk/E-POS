@@ -353,74 +353,138 @@ def _render_dfi_results_custom(ctx) -> None:
     _R_at = _cfg.r_at
 
     # ── Sensitivity sweep — explore how the posterior moves (custom-tool analogue
-    #    of the conceptual DHI model sweep; stacked Y outputs incl. the DHI volume weight) ──
+    #    of the conceptual DHI model sweep: curve families, method prior, stacked Y) ──
     st.divider()
     st.markdown("##### Sensitivity sweep — explore how the posterior moves")
     from plotly.subplots import make_subplots
     from logic.dfi_simm import dhi_score_from_r
-    from logic.dfi_volumetrics import column_height_weight
+    from logic.dfi_custom import grouped_r
 
+    _multi = bool(_cfg.multicase)
+    _cs1, _cs2 = st.columns([1.5, 1])
+    with _cs1:
+        _fam = st.selectbox(
+            "Curve family (11 curves)",
+            ["None (single curve)", "Water failure fraction", "LSG failure fraction", "Stance w"],
+            key="custom_sens_family",
+            help="Fan out 11 curves. Water / LSG fraction re-weight the failure cases "
+                 "(multi-case mode only); Stance w sweeps the prior (R is unchanged by stance).",
+        )
+    with _cs2:
+        _method = st.radio("Method prior", ["ESL", "Classic"], horizontal=True,
+                           key="custom_sens_method",
+                           help="Which prior the posterior row updates. R and V are prior-independent.")
     _y_opts = st.multiselect(
         "Y outputs (stacked)",
         ["Posterior P(G)", "R", "DHI Volume Weight V"],
         default=["Posterior P(G)"],
         key="custom_sens_y_outputs",
-        help="Sweep the DHI-strength reading across its range (your curves held fixed) and "
-             "watch the posterior, the likelihood ratio R, and the Monigle column-height "
-             "volume weight V = min(0.95, 2·DHI score) respond.",
+        help="Posterior P(G), the likelihood ratio R, and the DHI Volume Weight "
+             "V = R/(R+1) (the 0–1 DHI strength; identical definition to the Conceptual "
+             "DHI Index method).",
     )
+
+    _fluid_fam = _fam in ("Water failure fraction", "LSG failure fraction")
+    if _fluid_fam and not _multi:
+        st.info("**Water / LSG failure-fraction families need multi-case mode** — dual-case "
+                "has no fluid mix, so R does not depend on it. Showing the single curve.")
+        _fam, _fluid_fam = "None (single curve)", False
+
     if not _y_opts:
         st.info("Pick at least one Y output.")
     else:
         xs = np.linspace(-100.0, 100.0, 201)
-        r_curve = [_R_at(float(x)) for x in xs]
-        _r_cur = _R_at(float(slider))
+
+        # Family values + the value matching the current prospect
+        if _fam == "Water failure fraction":
+            fam_vals, fam_cur, fam_lbl = [i / 10 for i in range(11)], _cfg.weights.get("water", 0.5), "water frac"
+        elif _fam == "LSG failure fraction":
+            fam_vals, fam_cur, fam_lbl = [i / 10 for i in range(11)], _cfg.weights.get("lsg", 0.2), "LSG frac"
+        elif _fam == "Stance w":
+            fam_vals, fam_cur, fam_lbl = [i / 10 for i in range(11)], w_cur, "w"
+        else:
+            fam_vals, fam_cur, fam_lbl = [None], None, ""
+
+        def _r_curve_for(fv):
+            """R(strength) and R(current) for one family value."""
+            if _fluid_fam and fv is not None:
+                w = dict(_cfg.weights)
+                if _fam == "Water failure fraction":
+                    w["water"], w["lsg"], w["other"] = float(fv), 1.0 - float(fv), 0.0
+                else:
+                    w["water"], w["lsg"], w["other"] = 1.0 - float(fv), float(fv), 0.0
+                return [grouped_r(float(x), _cfg.cases, w) for x in xs], grouped_r(float(slider), _cfg.cases, w)
+            return [_R_at(float(x)) for x in xs], _R_at(float(slider))
+
+        def _prior_for(fv):
+            """Prior P(G) for one family value (Stance w sweeps it; else current)."""
+            if _fam == "Stance w" and fv is not None:
+                wv = float(fv)
+                return (_esl_rollup_prior_at_w(ctx, wv) if _method == "ESL"
+                        else _classic_prior_pillars_from_ctx(ctx, wv).prior_pg)
+            return esl_prior_pg if _method == "ESL" else prior_classic.prior_pg
+
+        n_fam = len(fam_vals)
+        _base = "#16a34a" if _method == "ESL" else "#1e40af"
+
+        def _color(i):
+            if n_fam <= 1:
+                return _base
+            t = i / max(1, n_fam - 1)
+            return f"rgb({int(40 + 200 * t)},{int(40 + 200 * t)},{int(150 + 70 * t)})"
+
         figs = make_subplots(rows=len(_y_opts), cols=1, shared_xaxes=True,
                              subplot_titles=_y_opts, vertical_spacing=0.09)
+        for i_fam, fv in enumerate(fam_vals):
+            rcurve, _ = _r_curve_for(fv)
+            prior = _prior_for(fv)
+            legend_name = (f"{fv*100:.0f}% {fam_lbl}" if fam_lbl.endswith("frac")
+                           else (f"w = {fv:.1f}" if _fam == "Stance w" else f"{_method} sweep"))
+            for _ri, _yo in enumerate(_y_opts, start=1):
+                if _yo == "Posterior P(G)":
+                    ys = [simm_bayes_posterior(prior, R) * 100 for R in rcurve]
+                    figs.update_yaxes(title_text=f"P(G | DFI, {_method}) %", range=[0, 100], row=_ri, col=1)
+                elif _yo == "R":
+                    ys = rcurve
+                    figs.update_yaxes(title_text="R", row=_ri, col=1)
+                else:  # DHI Volume Weight V = R/(R+1)
+                    ys = [dhi_score_from_r(R) for R in rcurve]
+                    figs.update_yaxes(title_text="V = R/(R+1)", range=[0, 1], row=_ri, col=1)
+                figs.add_trace(go.Scatter(x=xs, y=ys, mode="lines",
+                                          line=dict(color=_color(i_fam), width=2),
+                                          name=legend_name, legendgroup=legend_name,
+                                          showlegend=(_ri == 1 and n_fam > 1)), row=_ri, col=1)
+
+        # Reference lines + ★ current prospect (on the family curve closest to current)
+        i_close = (int(np.argmin([abs(fv - fam_cur) for fv in fam_vals]))
+                   if (fam_cur is not None and n_fam > 1) else 0)
+        _, r_star = _r_curve_for(fam_vals[i_close])
+        prior_star = _prior_for(fam_vals[i_close])
         for _ri, _yo in enumerate(_y_opts, start=1):
             if _yo == "Posterior P(G)":
-                esl_post_s = [simm_bayes_posterior(esl_prior_pg,           R) * 100 for R in r_curve]
-                cls_post_s = [simm_bayes_posterior(prior_classic.prior_pg, R) * 100 for R in r_curve]
-                figs.add_hline(y=esl_prior_pg * 100, line_dash="dot", line_color="#16a34a", row=_ri, col=1)
-                figs.add_hline(y=prior_classic.prior_pg * 100, line_dash="dot", line_color="#1e40af", row=_ri, col=1)
-                figs.add_trace(go.Scatter(x=xs, y=esl_post_s, mode="lines", name="P(G | DFI, ESL)",
-                                          line=dict(color="#16a34a", width=2)), row=_ri, col=1)
-                figs.add_trace(go.Scatter(x=xs, y=cls_post_s, mode="lines", name="P(G | DFI, Classic)",
-                                          line=dict(color="#1e40af", width=2)), row=_ri, col=1)
-                figs.add_trace(go.Scatter(x=[slider, slider], y=[post_esl_pg * 100, post_classic_pg * 100],
-                                          mode="markers", marker=dict(symbol="star", size=14,
-                                          color=["#16a34a", "#1e40af"], line=dict(color="white", width=1)),
-                                          showlegend=False, hoverinfo="skip"), row=_ri, col=1)
-                figs.update_yaxes(title_text="P(G | DFI) %", range=[0, 100], row=_ri, col=1)
+                figs.add_hline(y=prior_star * 100, line_dash="dot", line_color=_base, row=_ri, col=1)
+                star_y = simm_bayes_posterior(prior_star, r_star) * 100
             elif _yo == "R":
                 figs.add_hline(y=1.0, line_dash="dot", line_color="#6b7280", row=_ri, col=1)
-                figs.add_trace(go.Scatter(x=xs, y=r_curve, mode="lines", name="R",
-                                          line=dict(color="#7c3aed", width=2), showlegend=False), row=_ri, col=1)
-                figs.add_trace(go.Scatter(x=[slider], y=[_r_cur], mode="markers",
-                                          marker=dict(symbol="star", size=14, color="#7c3aed",
-                                          line=dict(color="white", width=1)), showlegend=False,
-                                          hoverinfo="skip"), row=_ri, col=1)
-                figs.update_yaxes(title_text="R", row=_ri, col=1)
-            else:  # DHI Volume Weight V
-                v_curve = [column_height_weight(dhi_score_from_r(R)) for R in r_curve]
-                figs.add_trace(go.Scatter(x=xs, y=v_curve, mode="lines", name="V",
-                                          line=dict(color="#0f766e", width=2), showlegend=False), row=_ri, col=1)
-                figs.add_trace(go.Scatter(x=[slider], y=[column_height_weight(dhi_score_from_r(_r_cur))],
-                                          mode="markers", marker=dict(symbol="star", size=14, color="#0f766e",
-                                          line=dict(color="white", width=1)), showlegend=False,
-                                          hoverinfo="skip"), row=_ri, col=1)
-                figs.update_yaxes(title_text="V (0–0.95)", range=[0, 1], row=_ri, col=1)
+                star_y = r_star
+            else:
+                star_y = dhi_score_from_r(r_star)
+            figs.add_trace(go.Scatter(x=[slider], y=[star_y], mode="markers",
+                                      marker=dict(symbol="star", size=15, color="#dc2626",
+                                      line=dict(color="white", width=1.5)),
+                                      name="Current", showlegend=False, hoverinfo="skip"), row=_ri, col=1)
             figs.add_vline(x=slider, line_dash="dash", line_color="#6b7280", row=_ri, col=1)
         figs.update_xaxes(title_text="DHI strength", row=len(_y_opts), col=1)
         figs.update_layout(height=300 * len(_y_opts), margin=dict(t=40, b=40, l=55, r=20),
                            legend=dict(orientation="h", x=0.5, y=-0.12 / len(_y_opts), xanchor="center"))
         st.plotly_chart(figs, use_container_width=True)
         st.caption(
-            "How the posterior, the likelihood ratio **R**, and the **DHI volume weight V** "
-            "(Monigle column-height weight, = min(0.95, 2·DHI score)) move as the **DHI-strength "
-            "reading** changes, with your curves held fixed. Dotted lines on the posterior row are "
-            "the unchanged ESL/Classic priors (crossed where R = 1, the neutral strength); the ★ "
-            f"marks the current reading ({slider:+.0f}). Custom-tool analogue of the conceptual DHI model sweep."
+            f"Posterior on the **{_method}** prior, the likelihood ratio **R**, and the "
+            "**DHI Volume Weight V = R/(R+1)** (the 0–1 DHI strength — same definition as the "
+            "Conceptual DHI Index method) as the **DHI-strength reading** changes, with your "
+            f"curves held fixed. {('Family: ' + _fam + '. ') if _fam != 'None (single curve)' else ''}"
+            f"Dotted line = the {_method} prior (crossed where R = 1, the neutral strength); the "
+            f"★ marks the current reading ({slider:+.0f})."
         )
 
     # ── Prior → Posterior map — iso-R curves (analogue of the iso-DHI plot) ──

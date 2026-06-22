@@ -171,3 +171,17 @@ def test_simm_interval_posterior():
     # A zero-white prior (Bel == Pl) stays a point after the update.
     b, p, w = simm_interval_posterior(0.40, 0.60, 5.0)       # White = 0
     assert abs(b - p) < 1e-12 and abs(w) < 1e-12
+
+
+def test_dhi_volume_weight_equals_r_over_r_plus_1():
+    # The DHI Volume Weight V is, by definition, R/(R+1) = dhi_score_from_r(R) -
+    # the 0-1 DHI strength. The Custom R tool sweep reuses dhi_score_from_r(R),
+    # so the two methods report the same V for the same R. Lock the identity.
+    from logic.dfi_simm import dhi_score_from_r
+    for dhi in (-15.0, 0.0, 8.0, 19.0, 40.0):
+        post = compute_dfi_posterior(_pillars(), dhi, _calib())
+        r = post.r_dfi
+        if r == float("inf"):
+            continue
+        assert post.dhi_volume_weight == pytest.approx(r / (r + 1.0), abs=1e-9)
+        assert post.dhi_volume_weight == pytest.approx(dhi_score_from_r(r), abs=1e-9)
