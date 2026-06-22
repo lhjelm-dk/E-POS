@@ -475,8 +475,15 @@ def _render_dfi_results_custom(ctx) -> None:
                                       name="Current", showlegend=False, hoverinfo="skip"), row=_ri, col=1)
             figs.add_vline(x=slider, line_dash="dash", line_color="#6b7280", row=_ri, col=1)
         figs.update_xaxes(title_text="DHI strength", row=len(_y_opts), col=1)
-        figs.update_layout(height=300 * len(_y_opts), margin=dict(t=40, b=40, l=55, r=20),
-                           legend=dict(orientation="h", x=0.5, y=-0.12 / len(_y_opts), xanchor="center"))
+        # Match the DHI-Index sensitivity sweep exactly (same per-row height and a
+        # compact vertical right-side legend, so the 11-curve family does not balloon
+        # the plot height).
+        figs.update_layout(
+            height=480 * len(_y_opts),
+            margin=dict(t=40, b=60, l=60, r=20),
+            legend=dict(orientation="v", x=1.02, y=1.0,
+                        bordercolor="#e5e7eb", borderwidth=1, font=dict(size=10)),
+        )
         st.plotly_chart(figs, use_container_width=True)
         st.caption(
             f"Posterior on the **{_method}** prior, the likelihood ratio **R**, and the "
