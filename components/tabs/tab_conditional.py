@@ -70,7 +70,9 @@ def _render_conditional_tab(ctx) -> None:
     )
     with st.expander("Operator Settings — how sub-elements are combined", expanded=False):
         _cond_cats = list(conditional.keys())
-        _all_op_opts = list(ESL_MODE_OPTIONS) + ["Product (Π)", "Mean"]
+        # ESL_MODE_OPTIONS already includes "Product (Π)" and "Mean"; do not append
+        # them again or they show up twice in the dropdown.
+        _all_op_opts = list(ESL_MODE_OPTIONS)
         _classic_op_opts = list(_CLASSIC_OP_OPTS)
 
         op_c = st.columns(max(len(_cond_cats), 1))
