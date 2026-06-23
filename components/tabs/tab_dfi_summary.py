@@ -150,7 +150,7 @@ def _render_dfi_summary(ctx) -> None:
             "classic_delta_pp": delta_classic * 100,
             "bel": _bel, "pl": _pl,
             "esl_post_bel": _post_bel, "esl_post_pl": _post_pl,
-            "diagnostics": f"DHI Index={dhi:+.0f} · R_DFI={post_esl.r_dfi:.2f} · "
+            "diagnostics": f"Conceptual DHI Index={dhi:+.0f} · R_DFI={post_esl.r_dfi:.2f} · "
                            f"V={post_esl.dhi_volume_weight:.2f} · "
                            f"∏-pillars Init Pg={prior_esl.prior_pg*100:.1f}% "
                            f"(independent-pillars reference)",

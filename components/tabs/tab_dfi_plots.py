@@ -128,7 +128,7 @@ def _render_sensitivity_sweep(ctx, dhi_cur, calib, fw_cur, sd_mode, fluid_type) 
     with c1:
         x_var = st.selectbox(
             "X-axis (sweep variable)",
-            ["DHI Index",
+            ["Conceptual DHI Index",
              "Reservoir P(combined)", "Charge P(combined)",
              "Closure P(combined)",   "Retention P(combined)",
              "Stance w"],
@@ -138,7 +138,7 @@ def _render_sensitivity_sweep(ctx, dhi_cur, calib, fw_cur, sd_mode, fluid_type) 
         family_var = st.selectbox(
             "Curve family (11 curves)",
             ["Water failure fraction", "LSG failure fraction",
-             "Stance w", "DHI Index", "None (single curve)"],
+             "Stance w", "Conceptual DHI Index", "None (single curve)"],
             key="sens_family_var",
         )
     with c3:
@@ -167,7 +167,7 @@ def _render_sensitivity_sweep(ctx, dhi_cur, calib, fw_cur, sd_mode, fluid_type) 
 
     # Build X sweep values + current-X marker value
     def _x_values(var: str) -> tuple[list[float], float, str]:
-        if var == "DHI Index":
+        if var == "Conceptual DHI Index":
             return list(np.linspace(-23, 50, 30)), float(dhi_cur), "Conceptual DHI Index"
         if var == "Stance w":
             return list(np.linspace(0.0, 1.0, 21)), w_cur, "Stance w"
@@ -194,7 +194,7 @@ def _render_sensitivity_sweep(ctx, dhi_cur, calib, fw_cur, sd_mode, fluid_type) 
             return [i / 10 for i in range(11)], fw_cur.lsg, "LSG frac"
         if var == "Stance w":
             return [i / 10 for i in range(11)], w_cur, "w"
-        if var == "DHI Index":
+        if var == "Conceptual DHI Index":
             return list(np.linspace(-20, 50, 11)), float(dhi_cur), "DHI"
         return [None], None, ""
 
@@ -212,7 +212,7 @@ def _render_sensitivity_sweep(ctx, dhi_cur, calib, fw_cur, sd_mode, fluid_type) 
             nonlocal pillars, dhi_v, fw_v, w_v
             if val is None or var == "None (single curve)":
                 return
-            if var == "DHI Index":
+            if var == "Conceptual DHI Index":
                 dhi_v = float(val)
             elif var == "Stance w":
                 w_v = float(val)
@@ -439,10 +439,10 @@ def _render_iso_dhi_plot(ctx, dhi_cur, calib, fw, sd_mode, fluid_type) -> None:
         "Each curve is one Conceptual DHI Index value; the dotted diagonal is the no-change line "
         "(posterior = prior). Curves **above** the diagonal mean that DHI value *raises* "
         "P(G); curves **below** mean it *lowers* it. The ★ is this prospect at its current "
-        f"DHI Index ({dhi_cur:+.0f}). The failure-mode mix (water/LSG/other) is held at the "
+        f"Conceptual DHI Index ({dhi_cur:+.0f}). The failure-mode mix (water/LSG/other) is held at the "
         "prospect's current values, so the curves show how a prior of any quality would be "
         "updated by the same seismic evidence. Note the curves cross the diagonal at low "
-        "DHI — a weak DHI Index downgrades an otherwise-strong prior."
+        "DHI, a weak Conceptual DHI Index downgrades an otherwise-strong prior."
     )
 
 

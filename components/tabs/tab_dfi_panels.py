@@ -39,7 +39,7 @@ def _render_geox_pdfi_panel(dhi, calib, sd_mode, fluid_type) -> None:
     st.markdown("##### 📤 GeoX hand-off — the 6 P(DFI | case) inputs")
     st.caption(
         f"Type these six values into the **DFI Assessment** tab of SLB **GeoX** "
-        f"(at DHI Index = **{dhi:+.0f}**, SD mode = **{sd_mode}**, "
+        f"(at Conceptual DHI Index = **{dhi:+.0f}**, SD mode = **{sd_mode}**, "
         f"success class = **{succ_disp}**). Values are shown to **one decimal place** — "
         f"GeoX accepts a single decimal on input. The three non-evaluable-reservoir cases "
         f"share the Reservoir_failure class, so they take the same value."
@@ -71,8 +71,8 @@ def _render_geox_pdfi_panel(dhi, calib, sd_mode, fluid_type) -> None:
             "---\n"
             "**What is P(DFI | case)?**  \n"
             "For each possible outcome (\"case\"), the conceptual DHI model database gives a bell curve (Gaussian) "
-            "describing *what DHI Index that kind of prospect tends to produce*. **P(DFI | case)** is "
-            "simply the **height of that bell curve at your observed DHI Index** — how well your DHI "
+            "describing *what Conceptual DHI Index that kind of prospect tends to produce*. **P(DFI | case)** is "
+            "simply the **height of that bell curve at your observed Conceptual DHI Index**, how well your DHI "
             "score \"fits\" each case. A high value means *\"a prospect of this type would readily "
             "produce the DHI I'm seeing\"*; a low value means *\"this type rarely looks like this\"*.  \n\n"
             f"So at DHI = **{dhi:+.0f}**, the success (HC) curve is much taller than the water curve → "
@@ -86,7 +86,7 @@ def _render_geox_pdfi_panel(dhi, calib, sd_mode, fluid_type) -> None:
         )
         st.latex(r"P(\text{DFI} \mid \text{case}) \;=\; \text{Gaussian density} \times 20")
         st.markdown(
-            "The factor 20 corresponds to a ≈ 5 %-wide DHI-Index bin (1 ÷ 0.05 = 20): it turns the "
+            "The factor 20 corresponds to a ≈ 5 %-wide Conceptual DHI Index bin (1 ÷ 0.05 = 20): it turns the "
             "*density* into the *probability mass in a small bin around the observed DHI*. For the two "
             "cases above:  \n"
             f"- HC density ≈ **{raw_hc:.2f}**  → × 20 =  **{v_hc*100:.1f}%**  (the GeoX number)  \n"
@@ -112,7 +112,7 @@ def _render_geox_pdfi_panel(dhi, calib, sd_mode, fluid_type) -> None:
 
     # Copy-friendly block + download
     txt = (
-        f"GeoX P(DFI|case) inputs — DHI Index {dhi:+.0f}, SD mode {sd_mode}, "
+        f"GeoX P(DFI|case) inputs: Conceptual DHI Index {dhi:+.0f}, SD mode {sd_mode}, "
         f"success class {succ_disp}, calibration v.{calib.version}"
         f"{' (placeholder)' if calib.is_placeholder else ''}\n"
         + "\n".join(f"  {lbl:<32} {val}" for lbl, val, _src in rows)
@@ -197,7 +197,7 @@ def _render_calibration_editor(calib) -> None:
     import json
     from logic.dfi_calibration import ALL_CLASSES, CLASS_DISPLAY
 
-    st.markdown("**Per-class calibration parameters** *(units: DHI Index / 100)*")
+    st.markdown("**Per-class calibration parameters** *(units: Conceptual DHI Index / 100)*")
 
     rows = []
     for cn in ALL_CLASSES:

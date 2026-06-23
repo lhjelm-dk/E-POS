@@ -172,7 +172,7 @@ def _render_dfi_results(ctx) -> None:
     st.divider()
 
     # ── Prior→Posterior map with iso-DHI curves (workbook "DHI adjustment of POS") ──
-    st.markdown("##### Prior → Posterior map — iso-DHI Index curves")
+    st.markdown("##### Prior → Posterior map: iso-Conceptual DHI Index curves")
     _render_iso_dhi_plot(ctx, dhi, calib, fw, sd_mode, fluid_type)
 
     # ── DHI → volumetrics integration recommendation (Monigle 2025) ──
@@ -543,9 +543,9 @@ def _render_dfi_results_custom(ctx) -> None:
         "line (posterior = prior). Curves **above** the diagonal raise P(G), **below** lower "
         "it. The violet curve is your **current R**; the ★ is this prospect at its ESL prior. "
         "Because R is a constant multiplicative shift in log-odds, every curve has the "
-        "characteristic S-shape — the update bites hardest near a 50 % prior and vanishes at "
+        "characteristic S-shape: the update bites hardest near a 50 % prior and vanishes at "
         "the 0 %/100 % extremes. This is the custom-tool analogue of the conceptual DHI model iso-DHI map "
-        "(R replaces the DHI Index as the family parameter)."
+        "(R replaces the Conceptual DHI Index as the family parameter)."
     )
 
     # ── DHI → volumetrics integration recommendation (Monigle 2025) ──

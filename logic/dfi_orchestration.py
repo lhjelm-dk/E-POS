@@ -73,13 +73,13 @@ def _pillars_at_w(ctx, w: float, method: str):
 def _dhi_strength_interpretation(r: float, v: float) -> str:
     """One-line plain-English read of the DHI Strength + Volume Weight pair."""
     if r >= 3.0 and v >= 0.70:
-        verdict = "**Strong DFI signal in favour of HC** — the DHI Index is far more probable under HC success than under any failure mode."
+        verdict = "**Strong DFI signal in favour of HC.** The Conceptual DHI Index is far more probable under HC success than under any failure mode."
     elif r >= 1.5 and v >= 0.55:
-        verdict = "**Moderate DFI signal in favour of HC** — the DHI Index is more probable under success than failure, but not decisively so."
+        verdict = "**Moderate DFI signal in favour of HC.** The Conceptual DHI Index is more probable under success than failure, but not decisively so."
     elif 0.7 <= r < 1.5:
-        verdict = "**Weak / ambiguous DFI signal** — the DHI Index is roughly equally probable under success and failure; the posterior is only marginally shifted from the prior."
+        verdict = "**Weak / ambiguous DFI signal.** The Conceptual DHI Index is roughly equally probable under success and failure; the posterior is only marginally shifted from the prior."
     elif r < 0.7:
-        verdict = "**DFI signal against HC** — the DHI Index is more probable under failure than success; the posterior is shifted **down** from the prior."
+        verdict = "**DFI signal against HC.** The Conceptual DHI Index is more probable under failure than success; the posterior is shifted **down** from the prior."
     else:
         verdict = ""
     return (f"{verdict}  *Interpretation thresholds: R≥3.0 strong, R≥1.5 moderate, "
@@ -110,7 +110,7 @@ def _build_decision_narrative(prior_e, post_e, prior_c, post_c,
         "uncertainty propagation responds to the DFI evidence."
     )
     return (
-        f"At DHI Index = **{dhi:+.0f}**, the DFI evidence produces a **{magnitude} "
+        f"At Conceptual DHI Index = **{dhi:+.0f}**, the DFI evidence produces a **{magnitude} "
         f"{direction}** update of the geological prior.  \n"
         f"- **P(G, ESL)** moved from {prior_e*100:.1f}% to **{post_e*100:.1f}%** ({de:+.1f}pp)\n"
         f"- **P(G, Classic)** moved from {prior_c*100:.1f}% to **{post_c*100:.1f}%** ({dc:+.1f}pp)\n\n"
@@ -177,7 +177,7 @@ def _build_summary_text(prospect_title, analyst, basin, review_date, w_cur,
     lines.append("=" * 72)
     lines.append("")
     lines.append("DFI INPUTS")
-    lines.append(f"  DHI Index:                  {dhi:+.0f}")
+    lines.append(f"  Conceptual DHI Index:       {dhi:+.0f}")
     lines.append(f"  HC fluid type (DHI class): {CLASS_DISPLAY.get(fluid_type, fluid_type)}")
     lines.append(f"  SD mode:                    {sd_mode}")
     lines.append(f"  Fluid failure weights:      water {fw.water:.0%},  "

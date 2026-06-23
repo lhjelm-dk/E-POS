@@ -126,7 +126,7 @@ def render_comparison_dfi(
         dhi_strip = (
             f"<div style='background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;"
             f"padding:6px 10px;margin-bottom:8px;font-size:0.82rem;color:#1e3a8a;'>"
-            f"<b>DFI update active</b> &nbsp;·&nbsp; DHI Index = <b>{dhi_index:+.0f}</b>"
+            f"<b>DFI update active</b> &nbsp;·&nbsp; Conceptual DHI Index = <b>{dhi_index:+.0f}</b>"
         )
         if dhi_strength is not None:
             dhi_strip += f" &nbsp;·&nbsp; R_DFI = <b>{dhi_strength:.2f}</b>"

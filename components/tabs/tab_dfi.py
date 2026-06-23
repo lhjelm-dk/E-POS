@@ -129,7 +129,7 @@ def _render_disabled_placeholder(sub_page_name: str) -> None:
         "Enable the **DFI-capable prospect?** toggle on the **Dashboard** (next to the "
         "Stance slider) to activate the DFI Bayesian update for this prospect.  \n\n"
         "When enabled, default values will be applied:  \n"
-        "• DHI Index = **8**  \n"
+        "• Conceptual DHI Index = **8**  \n"
         "• Fluid failure probabilities: water **50%**, LSG **20%**, other **30%**  \n"
         "• HC fluid type = **Success** (aggregate)  \n"
         "• ESL per-pillar attribution = **B (Bel/Pl-preserving)**  \n"

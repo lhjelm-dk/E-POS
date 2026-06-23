@@ -229,8 +229,8 @@ def _render_dfi_setup(ctx) -> None:
                 st.caption(f"Sum = {total_w:.2f} ✓")
             st.caption(
                 "💡 Not sure about the fluid mix? Use the **Sensitivity sweep** on the "
-                "**DFI Results** tab (X = DHI Index, family = Water failure fraction) to "
-                "stress-test it — if the curves bunch together, your choice barely matters; "
+                "**DFI Results** tab (X = Conceptual DHI Index, family = Water failure fraction) to "
+                "stress-test it. If the curves bunch together, your choice barely matters; "
                 "if they fan out, justify it in the audit trail."
             )
 
@@ -314,9 +314,9 @@ def _render_dfi_setup(ctx) -> None:
             x_label="Conceptual DHI Index",
             y_label="R_DFI = L(success) / E[L | failure]",
             caption=(
-                "R_DFI across the DHI-Index axis with the **Simm rule-of-thumb bands**. "
-                "The ★ is your current DHI reading — the same R_DFI shown in the metrics "
-                "below. Holds the fluid mix fixed; only the DHI Index varies. Capped to "
+                "R_DFI across the Conceptual DHI Index axis with the **Simm rule-of-thumb bands**. "
+                "The ★ is your current DHI reading, the same R_DFI shown in the metrics "
+                "below. Holds the fluid mix fixed; only the Conceptual DHI Index varies. Capped to "
                 "[0.02, 50]."
             ),
         )
