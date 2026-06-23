@@ -169,7 +169,7 @@ def _render_dfi_summary(ctx) -> None:
         f"flex-wrap:wrap;gap:10px;'>"
         f"<b style='color:#1e3a8a;font-size:1.0rem;'>DFI Bayesian Update</b>"
         f"<span style='font-size:0.82rem;color:#1e40af;'>"
-        f"DHI Index <b>{dhi:+.0f}</b> &nbsp;·&nbsp; "
+        f"Conceptual DHI Index <b>{dhi:+.0f}</b> &nbsp;·&nbsp; "
         f"HC <b>{CLASS_DISPLAY.get(fluid_type, fluid_type)}</b> &nbsp;·&nbsp; "
         f"SD mode <b>{sd_mode}</b> &nbsp;·&nbsp; "
         f"Fluid mix water <b>{fw.water:.0%}</b> · LSG <b>{fw.lsg:.0%}</b> · "

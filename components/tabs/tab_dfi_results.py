@@ -380,7 +380,7 @@ def _render_dfi_results_custom(ctx) -> None:
         default=["Posterior P(G)"],
         key="custom_sens_y_outputs",
         help="Posterior P(G), the likelihood ratio R, and the DHI Volume Weight "
-             "V = R/(R+1) (the 0–1 DHI strength; identical definition to the Conceptual "
+             "V = R/(R+1) (the 0–1 DHI score; identical definition to the Conceptual "
              "DHI Index method).",
     )
 
@@ -487,7 +487,7 @@ def _render_dfi_results_custom(ctx) -> None:
         st.plotly_chart(figs, use_container_width=True)
         st.caption(
             f"Posterior on the **{_method}** prior, the likelihood ratio **R**, and the "
-            "**DHI Volume Weight V = R/(R+1)** (the 0–1 DHI strength — same definition as the "
+            "**DHI Volume Weight V = R/(R+1)** (the 0–1 DHI score, same definition as the "
             "Conceptual DHI Index method) as the **DHI-strength reading** changes, with your "
             f"curves held fixed. {('Family: ' + _fam + '. ') if _fam != 'None (single curve)' else ''}"
             f"Dotted line = the {_method} prior (crossed where R = 1, the neutral strength); the "

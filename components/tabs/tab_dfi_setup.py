@@ -126,13 +126,14 @@ def _render_dfi_setup(ctx) -> None:
     # ── Method warning: conceptual model; needs a *pure* DFI-strength input ──
     st.markdown("### Conceptual DHI Index (experimental)")
     st.error(
-        "⚠️ **Conceptual model — and do not enter a raw composite DHI index here.**\n\n"
-        "This pathway is an **illustrative, conceptual representation**: its likelihood "
-        "curves are round, hand-set values, **not calibrated to any dataset**, and are "
+        "⚠️ **Conceptual model. Do not enter a raw composite DHI index here.**\n\n"
+        "The **DHI Index** in this pathway is a *conceptual* index: it is built to behave like "
+        "the industry **DHI Consortium** calibrated DHI Index, but it is **not** that index. Its "
+        "likelihood curves are round, hand-set values, **not calibrated to any dataset**, and are "
         "editable below. A raw composite DHI index (the kind a scoring workflow books for a "
         "prospect) **cannot be used directly** in this Bayesian update, because such an index "
         "bundles the *geological* chance together with the seismic signal. The geology must be "
-        "**stripped out** before the number is valid here — otherwise it is double-counted "
+        "**stripped out** before the number is valid here, otherwise it is double-counted "
         "against the ESL prior, which already carries it.\n\n"
         "The input below must therefore be a **pure DFI-strength indicator** (seismic amplitude "
         "evidence only). Treat it as an *illustrative* strength. **For a decision-grade update, "
@@ -166,12 +167,12 @@ def _render_dfi_setup(ctx) -> None:
         # the default on rerun (the DHI-Index "stuck at 19" desync) — so don't.
         st.session_state.setdefault("dfi_index", int(DEFAULT_DHI))
         dhi = st.slider(
-            "**DHI Index**",
+            "**Conceptual DHI Index**",
             min_value=DHI_INDEX_MIN_INT,
             max_value=DHI_INDEX_MAX_INT,
             step=1, key="dfi_index",
-            help=(f"DHI Index from DHI scoring "
-                  f"(range {DHI_INDEX_MIN_INT} to {DHI_INDEX_MAX_INT}). "
+            help=(f"Conceptual DHI Index (range {DHI_INDEX_MIN_INT} to {DHI_INDEX_MAX_INT}): an "
+                  "illustrative DFI-strength reading, not the DHI Consortium's calibrated index. "
                   "Higher = stronger DFI signal supporting HC presence."),
         )
         st.caption(

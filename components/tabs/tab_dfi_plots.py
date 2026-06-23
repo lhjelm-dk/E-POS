@@ -168,7 +168,7 @@ def _render_sensitivity_sweep(ctx, dhi_cur, calib, fw_cur, sd_mode, fluid_type) 
     # Build X sweep values + current-X marker value
     def _x_values(var: str) -> tuple[list[float], float, str]:
         if var == "DHI Index":
-            return list(np.linspace(-23, 50, 30)), float(dhi_cur), "DHI Index"
+            return list(np.linspace(-23, 50, 30)), float(dhi_cur), "Conceptual DHI Index"
         if var == "Stance w":
             return list(np.linspace(0.0, 1.0, 21)), w_cur, "Stance w"
         # Combined pillar Pg sweep — start at the current prior_pg (workbook style)
@@ -323,7 +323,7 @@ def _render_sensitivity_sweep(ctx, dhi_cur, calib, fw_cur, sd_mode, fluid_type) 
                     "Closure POS (combined) %"    if x_var == "Closure P(combined)" else
                     "Retention POS (combined) %"  if x_var == "Retention P(combined)" else
                     "Stance w (%)"                if x_var == "Stance w" else
-                    "DHI Index")
+                    "Conceptual DHI Index")
     fig.update_xaxes(title_text=x_axis_label, row=len(y_outputs), col=1)
     for k, yo in enumerate(y_outputs):
         fig.update_yaxes(title_text=(yo + (" (%)" if yo == "Posterior P(G)" else "")),
@@ -436,7 +436,7 @@ def _render_iso_dhi_plot(ctx, dhi_cur, calib, fw, sd_mode, fluid_type) -> None:
     )
     st.plotly_chart(fig, use_container_width=True)
     st.caption(
-        "Each curve is one DHI Index value; the dotted diagonal is the no-change line "
+        "Each curve is one Conceptual DHI Index value; the dotted diagonal is the no-change line "
         "(posterior = prior). Curves **above** the diagonal mean that DHI value *raises* "
         "P(G); curves **below** mean it *lowers* it. The ★ is this prospect at its current "
         f"DHI Index ({dhi_cur:+.0f}). The failure-mode mix (water/LSG/other) is held at the "

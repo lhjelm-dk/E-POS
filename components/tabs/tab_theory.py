@@ -2101,7 +2101,7 @@ A single reference for every term in E-POS — the ESL/Classic core and the Baye
 |---------|-----------|---------|
 | **DFI** | Direct Fluid Indicator | Any seismic attribute that responds directly to hydrocarbons (AVO, flat spot, dim/bright spot, etc.). Umbrella term. |
 | **DHI** | Direct Hydrocarbon Indicator | Synonym for DFI, more common in older literature. |
-| **DHI Index** | Composite DHI score | A single scalar (typical range −23 … +50) summarising the strength and consistency of all observed DFIs for one prospect. Computed by the DHI/amplitude scoring workflow. |
+| **DHI Index** | Composite DHI score | A single scalar (typical range −23 … +50) summarising the strength and consistency of all observed DFIs for one prospect. Computed by the DHI/amplitude scoring workflow. In E-POS it is a *conceptual* index: illustrative, not the calibrated DHI Consortium index. |
 | **DFI update** | Bayesian update | Conditioning the prior on the DFI observation. Can **raise or lower** P(G) — a strong DFI lifts it; an absent/weak DFI where one was expected lowers it. |
 | **R_DFI** | DHI-Index strength | Likelihood ratio = $L_\text{success} / E[L \mid \text{failure}]$. R_DFI > 1 favours success; R_DFI < 1 against. |
 | **V** | DHI Volume Weight | Bounded version of R = $L_\text{success}/(L_\text{success}+E[L\mid\text{failure}])$. Range 0..1; 0.5 = neutral. Also the weight on a DFI-derived volume constraint. |
