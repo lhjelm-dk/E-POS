@@ -83,3 +83,13 @@ def test_uncertainty_conflict():
     u, conflict = calculate_uncertainty(0.7, 0.6)
     assert u == pytest.approx(0.0)   # clamped, never negative
     assert conflict is True
+
+
+def test_esl_uncertainty_index_equals_pl_minus_bel():
+    # The ESL Uncertainty Index shown on the Analysis tab is the headline white
+    # band, which is exactly Pl - Bel (Bel = S_for, Pl = 1 - S_against).
+    s_for, s_against = 0.55, 0.20
+    white, conflict = calculate_uncertainty(s_for, s_against)
+    bel, pl = s_for, 1.0 - s_against
+    assert conflict is False
+    assert white == pytest.approx(pl - bel)   # 0.25

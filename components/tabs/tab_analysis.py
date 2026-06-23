@@ -174,7 +174,44 @@ def _render_geo_diagnostics(ctx) -> None:
     _ui_low_pct    = _ui_low   * 100
     _ui_high_pct   = _ui_high  * 100
 
-    st.subheader("Risk Summary: Uncertainty Index & Key Drivers")
+    st.subheader("Risk Summary: ESL Uncertainty, Weakest-Link Adequacy & Key Drivers")
+
+    # ── ESL Uncertainty Index — the native ESL uncertainty (headline white band) ──
+    # Distinct from the weakest-link adequacy trajectory below: this measures how much
+    # of the headline rests on the *unknown* (white) band. It is Pl − Bel =
+    # 1 − S_for − S_against and, unlike the adequacy check, does NOT depend on stance w.
+    from logic.esl_logic import calculate_uncertainty
+    _esl_white, _esl_conflict = calculate_uncertainty(total_for, total_against)
+    _bel_head = total_for * 100
+    _pl_head  = (1.0 - total_against) * 100
+    if _esl_conflict:
+        _eu_color, _eu_bg = "#b45309", "#fef3c7"
+        _eu_head = (f"ESL Uncertainty Index: ⚠️ overcommitted by "
+                    f"{(total_for + total_against - 1.0) * 100:.1f}%")
+        _eu_body = ("Support-for + support-against exceed 1, so the evidence is in conflict "
+                    "(the yellow Italian-flag case). No genuine unknown is left to score; "
+                    "revisit the conflicting elements rather than reading an incompleteness here.")
+    else:
+        _eu_color, _eu_bg = "#475569", "#f1f5f9"
+        _eu_head = f"ESL Uncertainty Index: {_esl_white * 100:.1f}% unknown (white band)"
+        _eu_body = (f"{_esl_white * 100:.1f}% of the headline rests on the <b>unknown</b> band, not "
+                    f"on evidence. Defensible interval [Bel, Pl] = [{_bel_head:.1f}%, {_pl_head:.1f}%]; "
+                    "its width <i>is</i> this index. It is fixed by the evidence and does not change "
+                    "with the stance w.")
+    st.markdown(
+        f"<div style='background:{_eu_bg};border-left:5px solid {_eu_color};"
+        f"padding:12px 16px;border-radius:6px;margin-bottom:6px;'>"
+        f"<b style='color:{_eu_color};font-size:1.1rem;'>{_eu_head}</b><br>"
+        f"<span style='color:#374151;'>{_eu_body}</span></div>",
+        unsafe_allow_html=True,
+    )
+    st.caption(
+        "**These are two different measures.** The **ESL Uncertainty Index** above is "
+        "*incompleteness* (the white band), and is independent of stance. The "
+        "**Weakest-Link Adequacy** below is a *point-estimate* check — whether your two "
+        "weakest pillar chances are jointly strong enough — and it moves with the stance w. "
+        "Weakest-Link Adequacy is also the metric shown on the Classic POS page."
+    )
 
     # ── Stance trajectory sweep: 21 points w = 0.00 … 1.00 ──────────────────
     # At each w, compute (P(G, ESL), UI) for the prospect. The curve passes
@@ -276,12 +313,12 @@ def _render_geo_diagnostics(ctx) -> None:
         dfi_overlay=_dfi_overlay_esl,
         extra_caption=(
             f"**Theoretical envelopes** ({_n_pillars}-pillar, exact). "
-            f"Dark-grey dashed curve `UI = 2·x^(1/{_n_pillars}) − 1` is the upper bound "
+            f"Dark-grey dashed curve `WLA = 2·x^(1/{_n_pillars}) − 1` is the upper bound "
             "(all pillars equal, no white). "
             "Grey curves are the analytical lower bounds at w ∈ {0, 0.10, 0.25, 0.50, 0.75, 0.90, 1} — "
             "two weakest pillars carry all uncertainty, rest committed-positive. "
-            "Each lower curve's vertex sits at `(x = w, UI = 2w − 1)` on the diagonal. "
-            "At w = 0 and w = 1 the lower bound collapses to the Classic Rose bound `UI = 2·√x − 1`. "
+            "Each lower curve's vertex sits at `(x = w, WLA = 2w − 1)` on the diagonal. "
+            "At w = 0 and w = 1 the lower bound collapses to the Classic Rose bound `WLA = 2·√x − 1`. "
             "The trajectory star must lie inside the envelope at its current stance."
         ),
     )

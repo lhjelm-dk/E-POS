@@ -163,7 +163,7 @@ The Italian Flag makes that quality visible. You enter evidence once, and three 
 > Set combination operators (ESL-ALL / ESL-ANY / ESL-IPT) per pillar group.
 
 **Step 4 — Review results (Geological POS tab)**
-> P(G, ESL), Uncertainty Index, CCM scatter, and the P(G, Classic) derived view
+> P(G, ESL), ESL Uncertainty Index, Weakest-Link Adequacy, CCM scatter, and the P(G, Classic) derived view
 > all update here — no extra work required.
 
 **Step 5 — Sign off (Dashboard tab, bottom)**
@@ -361,8 +361,12 @@ three:
 | Axis | Blockley | In E-POS |
 |---|---|---|
 | **F** — fuzziness (vagueness of definition) | verbal "levels of definition" | verbal categories, discernibility buckets, the CoS scale |
-| **I** — incompleteness ("don't know") | the **white** of the flag | `White`, the stance `w`, the Bel/Pl envelope, the Uncertainty Index |
+| **I** — incompleteness ("don't know") | the **white** of the flag | `White`, the stance `w`, the Bel/Pl envelope, the **ESL Uncertainty Index** (= Pl − Bel = white) |
 | **R** — randomness | classical probability | the Bayes DFI likelihoods (Gaussian densities), volumetrics |
+
+> **ESL Uncertainty Index vs Weakest-Link Adequacy — two different things.**
+> The **ESL Uncertainty Index** measures *incompleteness*: `Pl − Bel = 1 − S_for − S_against`, the headline white band. It is fixed by the evidence and does **not** depend on the stance `w`.
+> **Weakest-Link Adequacy** (after MacKay 1995) is a *point-estimate adequacy* check: `MIN(P_pillar) + 2nd-MIN(P_pillar) − 1`, i.e. whether the two weakest pillar chances are jointly strong enough. It **does** move with `w`, and it is the metric on both the ESL and the Classic POS trajectory plots.
 
 ### 2 · Why the Italian Flag (not plain probability)
 Classical probability carries a **completeness axiom**: beliefs on the sample space must sum

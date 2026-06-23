@@ -200,12 +200,12 @@ def render_classic_pos(models: dict | None = None) -> None:
     from components.prospect_hub import _compute_p_g_classic_trajectory
     _traj = _compute_p_g_classic_trajectory(models, n_steps=21)
 
-    # ── 1. P(G, Classic) vs Uncertainty Index — stance trajectory ───────────
+    # ── 1. P(G, Classic) vs Weakest-Link Adequacy — stance trajectory ───────
     # (Order matches the ESL Analysis tab: trajectory first, then pillar fan.)
     if _traj is not None:
         st.divider()
         with st.container(border=True):
-            st.subheader("P(G, Classic) vs Uncertainty Index — stance trajectory")
+            st.subheader("P(G, Classic) vs Weakest-Link Adequacy — stance trajectory")
 
             _ws_arr_ui     = _traj["ws"]
             _total_arr_ui  = _traj["total"]
