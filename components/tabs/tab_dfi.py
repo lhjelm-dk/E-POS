@@ -78,7 +78,7 @@ def _render_dfi_tab(ctx) -> None:
         "<b style='font-size:1.1rem;'>Bayesian DFI Update</b><br>"
         "<span style='font-size:0.85rem;opacity:0.9;'>"
         "Update the geological prior probability with a quantitative seismic "
-        "observation (DHI Index) — the update can raise <b>or</b> lower the prior. "
+        "observation (Conceptual DHI Index), the update can raise <b>or</b> lower the prior. "
         "Posterior values: <b>P(G | DFI, ESL)</b> and <b>P(G | DFI, Classic)</b>."
         "</span></div>",
         unsafe_allow_html=True,

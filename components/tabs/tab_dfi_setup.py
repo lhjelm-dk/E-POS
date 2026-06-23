@@ -252,7 +252,7 @@ def _render_dfi_setup(ctx) -> None:
 
     # ─── Column B: 5 bell curves ─────────────────────────────────────────
     with col_viz:
-        st.markdown("##### Likelihood distributions — P(DFI Index | outcome class)")
+        st.markdown("##### Likelihood distributions: P(Conceptual DHI Index | outcome class)")
 
         # Curve definitions (5 outcome categories; Other shares LSG_failure stats)
         curves = [
@@ -283,7 +283,7 @@ def _render_dfi_setup(ctx) -> None:
             annotation_font=dict(size=11, color="#1f2937"),
         )
         fig.update_layout(
-            xaxis=dict(title="DHI Index", range=[DHI_INDEX_MIN_INT - 1, DHI_INDEX_MAX_INT + 1],
+            xaxis=dict(title="Conceptual DHI Index", range=[DHI_INDEX_MIN_INT - 1, DHI_INDEX_MAX_INT + 1],
                        dtick=5, showgrid=True, gridcolor="#e5e7eb"),
             yaxis=dict(title="P(DFI | class) — Gaussian PDF",
                        showgrid=True, gridcolor="#e5e7eb"),
@@ -300,7 +300,7 @@ def _render_dfi_setup(ctx) -> None:
         )
 
         # ── R_DFI across the DHI-Index axis (Simm bands) — parallel to the custom tool ──
-        st.markdown("##### R_DFI vs DHI Index")
+        st.markdown("##### R_DFI vs Conceptual DHI Index")
         from components.dfi_shared import render_r_strength_plot as _render_r_plot
         from logic.dfi_bayes import compute_dfi_posterior as _cdp, FluidWeights as _FW
         _fw_sweep = _FW(water=water, lsg=lsg, other=other)
@@ -311,7 +311,7 @@ def _render_dfi_setup(ctx) -> None:
         _r_now = _cdp(_prior_sweep, dhi, calib, _fw_sweep, sd_mode, fluid_type).r_dfi
         _render_r_plot(
             _xr, _rr, dhi, _r_now,
-            x_label="DHI Index",
+            x_label="Conceptual DHI Index",
             y_label="R_DFI = L(success) / E[L | failure]",
             caption=(
                 "R_DFI across the DHI-Index axis with the **Simm rule-of-thumb bands**. "
