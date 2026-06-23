@@ -190,7 +190,9 @@ Three **mutually-exclusive evidence sources** derive the DFI strength as a likel
 
 **Custom R tool** — define the success/failure curves (multi-case: oil/gas/oil+gas vs
 water/LSG/other + non-reservoir, with a DHI-style `P(fluid | failure)` mix), read R off a
-DHI-strength slider:
+DHI-strength slider, and explore how the posterior, R and the DHI volume weight `V = R/(R+1)`
+respond with a stacked sensitivity sweep (curve families for water/LSG failure fraction or
+stance *w*, on either the ESL or Classic prior):
 
 ![Custom R tool](docs/img/12_dfi_custom_setup.png)
 
@@ -402,10 +404,10 @@ tests/                     # pytest suite
 python -m pytest -q
 ```
 
-The suite (**114 tests**) locks the core math: ESL operators, Policy P, the Simm 2-state and
-8-outcome Bayes updates, the characteristic naive-Bayes product + correlation discount + score
-densities, the GeoX hand-off mapping, the Dempster–Shafer prototype, and prospect save/load
-round-trips.
+The suite (**163 tests**) locks the core math: ESL operators, Policy P, the Simm 2-state and
+8-outcome Bayes updates, the per-pillar DFI attribution and interval-preserving posterior, the
+characteristic naive-Bayes product + correlation discount + score densities, the GeoX hand-off
+mapping, the Dempster–Shafer prototype, and prospect save/load round-trips.
 
 ---
 
