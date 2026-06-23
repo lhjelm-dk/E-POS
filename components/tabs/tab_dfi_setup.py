@@ -196,8 +196,8 @@ def _render_dfi_setup(ctx) -> None:
         # ── Advanced / Research controls (demoted — sensible defaults apply) ──
         st.caption(
             "Standard inputs above drive the update. The defaults below "
-            "(water-dominated failure mix, attribution A) suit "
-            "most prospects — open **Advanced** only to override them."
+            "(water-dominated failure mix, attribution B) suit "
+            "most prospects. Open **Advanced** only to override them."
         )
         with st.expander("Advanced / Research inputs — fluid mix · attribution",
                          expanded=False):
