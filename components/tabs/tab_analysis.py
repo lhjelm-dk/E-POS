@@ -313,16 +313,16 @@ def _render_geo_diagnostics(ctx) -> None:
         envelope_data=_esl_envelope,
         dfi_overlay=_dfi_overlay_esl,
         extra_caption=(
-            f"**Theoretical envelopes** ({_n_pillars}-pillar, exact). "
-            f"Dark-grey dashed curve `UI = 2·x^(1/{_n_pillars}) − 1` is the upper bound "
-            "(all pillars equal, no white). "
-            "Grey curves are the analytical lower bounds at w ∈ {0, 0.10, 0.25, 0.50, 0.75, 0.90, 1} — "
-            "two weakest pillars carry all uncertainty, rest committed-positive. "
-            "Each lower curve's vertex sits at `(x = w, UI = 2w − 1)` on the diagonal. "
-            "At w = 0 and w = 1 the lower bound collapses to the Classic Rose bound `UI = 2·√x − 1`. "
-            "The trajectory star must lie inside the envelope at its current stance. "
-            "The Classic POS page shows this same Uncertainty Index against P(G, Classic), which "
-            "sits lower-left because of the ESL − Classic gap (Classic is a product of pillars)."
+            f"**Envelopes** ({_n_pillars}-pillar). The dark-grey dashed **upper** curve "
+            f"`UI = 2·x^(1/{_n_pillars}) − 1` (all pillars equal, no white) is an exact upper bound "
+            "for ESL too. The grey **lower** family at w ∈ {0, 0.10, 0.25, 0.50, 0.75, 0.90, 1} "
+            "(two weakest pillars carry the uncertainty) is the **product-coordinate (Classic) "
+            "reference**: it is exact only at w = 0, w = 1, and where there is no white. "
+            "Because P(G, ESL) combines the masses and applies Policy P **once** (linear in w) rather "
+            "than multiplying pillar chances, the ESL trajectory can sit **below** the lower curve in "
+            "the mid-stances. That vertical gap is the ESL − Classic difference, not an error. "
+            "The Classic POS page plots the same Uncertainty Index against P(G, Classic), where the "
+            "lower family **is** an exact bound."
         ),
     )
 
