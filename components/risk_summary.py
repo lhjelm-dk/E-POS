@@ -418,9 +418,9 @@ def render_pg_ui_trajectory(
             ))
 
     fig.update_layout(
-        title=f"Stance trajectory — P(G, {method_label}) vs Uncertainty Index",
+        title=f"Stance trajectory — P(G, {method_label}) vs Uncertainty Index ({method_label})",
         xaxis_title=f"P(G, {method_label}) (%)",
-        yaxis_title="Uncertainty Index (%)",
+        yaxis_title=f"Uncertainty Index ({method_label}) (%)",
         xaxis=dict(range=[0, 100], dtick=10),
         yaxis=dict(range=[-100, 100], dtick=20),
         height=760, margin=dict(t=40, b=190, l=50, r=20),
