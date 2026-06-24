@@ -209,6 +209,7 @@ def render_pg_ui_trajectory(
     extra_caption: str = "",
     envelope_data: "dict | None" = None,
     dfi_overlay: "dict | None" = None,
+    reading_guide: bool = True,
 ) -> None:
     """Render the shared stance-trajectory plot for P(G, METHOD) vs UI.
 
@@ -418,7 +419,7 @@ def render_pg_ui_trajectory(
             ))
 
     fig.update_layout(
-        title=f"Stance trajectory — P(G, {method_label}) vs Uncertainty Index ({method_label})",
+        title=f"Stance trajectory — P(G, {method_label}) vs Uncertainty Index ({method_label}{' · experimental' if method_label == 'ESL' else ''})",
         xaxis_title=f"P(G, {method_label}) (%)",
         yaxis_title=f"Uncertainty Index ({method_label}) (%)",
         xaxis=dict(range=[0, 100], dtick=10),
@@ -452,19 +453,21 @@ def render_pg_ui_trajectory(
         unsafe_allow_html=True,
     )
 
-    # Full reading guide hidden behind expander
-    with st.expander("Reading this plot", expanded=False):
-        st.markdown(
-            "**Blue curve:** stance trajectory — sweeps w from 0 to 1 in 21 steps, each point is "
-            f"`(P(G, {method_label}), UI)` at that stance. "
-            "★ = current prospect at your stance setting.  \n"
-            "**Grey dashed lines:** theoretical envelope.  \n"
-            "**Background:** red (UI = −100%) → white (UI = 0) → green (UI = +100%).  \n"
-            "**Diagnosis flip:** if the trajectory crosses the `UI = 0` horizontal, the "
-            "diagnosis (robust vs risk-driven) depends on the stance choice."
-        )
-        if extra_caption:
-            st.markdown(extra_caption)
+    # Full reading guide hidden behind expander. Callers may suppress this and
+    # render their own combined explanation instead (e.g. the ESL trajectory).
+    if reading_guide:
+        with st.expander("Reading this plot", expanded=False):
+            st.markdown(
+                "**Blue curve:** stance trajectory — sweeps w from 0 to 1 in 21 steps, each point is "
+                f"`(P(G, {method_label}), UI)` at that stance. "
+                "★ = current prospect at your stance setting.  \n"
+                "**Grey dashed lines:** theoretical envelope.  \n"
+                "**Background:** red (UI = −100%) → white (UI = 0) → green (UI = +100%).  \n"
+                "**Diagnosis flip:** if the trajectory crosses the `UI = 0` horizontal, the "
+                "diagnosis (robust vs risk-driven) depends on the stance choice."
+            )
+            if extra_caption:
+                st.markdown(extra_caption)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
