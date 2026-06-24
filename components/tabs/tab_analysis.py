@@ -251,12 +251,10 @@ def _render_geo_diagnostics(ctx) -> None:
     # ── ESL theoretical envelopes (analytical upper & lower) ───────────────
     from components.risk_summary import (
         render_pg_ui_trajectory, render_top5_weakest,
-        compute_esl_envelope_analytical,
+        compute_esl_envelope_exact,
     )
     _n_pillars = len(r.pillar_for)
-    _esl_envelope_curves = compute_esl_envelope_analytical(
-        n_pillars=_n_pillars, w=uncertainty_weight,
-    )
+    _esl_envelope_curves = compute_esl_envelope_exact(n_pillars=_n_pillars)
     _esl_envelope = {
         "curves": [
             {"x": c["x"].tolist(), "y": c["y"].tolist(),
@@ -313,16 +311,14 @@ def _render_geo_diagnostics(ctx) -> None:
         envelope_data=_esl_envelope,
         dfi_overlay=_dfi_overlay_esl,
         extra_caption=(
-            f"**Envelopes** ({_n_pillars}-pillar). The dark-grey dashed **upper** curve "
-            f"`UI = 2·x^(1/{_n_pillars}) − 1` (all pillars equal, no white) is an exact upper bound "
-            "for ESL too. The grey **lower** family at w ∈ {0, 0.10, 0.25, 0.50, 0.75, 0.90, 1} "
-            "(two weakest pillars carry the uncertainty) is the **product-coordinate (Classic) "
-            "reference**: it is exact only at w = 0, w = 1, and where there is no white. "
-            "Because P(G, ESL) combines the masses and applies Policy P **once** (linear in w) rather "
-            "than multiplying pillar chances, the ESL trajectory can sit **below** the lower curve in "
-            "the mid-stances. That vertical gap is the ESL − Classic difference, not an error. "
-            "The Classic POS page plots the same Uncertainty Index against P(G, Classic), where the "
-            "lower family **is** an exact bound."
+            f"**ESL envelope** ({_n_pillars}-pillar). The **lower** diagonal `UI = 2·x − 1` "
+            "(two pillars committed-positive, two fully unknown) is the **exact lower bound**: the "
+            "ESL trajectory never drops below it. The **upper** curve "
+            f"`UI = 2·x^(1/{_n_pillars}) − 1` (all pillars equal, no white) is a **balanced reference**, "
+            "not a hard cap — a single strongly-vetoing pillar can push the trajectory above it. The "
+            "lower diagonal is simpler than the curved family on the **Classic POS** page because "
+            "P(G, ESL) combines the masses and applies Policy P **once** (linear in w), whereas "
+            "P(G, Classic) multiplies the pillar chances."
         ),
     )
 

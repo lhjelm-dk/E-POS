@@ -93,3 +93,22 @@ def test_incompleteness_equals_pl_minus_bel():
     bel, pl = s_for, 1.0 - s_against
     assert conflict is False
     assert white == pytest.approx(pl - bel)   # 0.25
+
+
+def test_esl_trajectory_above_exact_lower_bound():
+    # Property: the ESL stance trajectory (headline x = Policy P of the combined
+    # masses, linear in w; UI = two-weakest-pillar adequacy) never drops below the
+    # exact lower bound UI = 2x - 1. (The upper "all equal" curve 2*x**(1/N) - 1 is
+    # only a balanced reference, NOT a bound: a vetoing pillar can exceed it.)
+    import numpy as np
+    rng = np.random.default_rng(7)
+    N = 4
+    for _ in range(50000):
+        bel = rng.uniform(0.0, 1.0, N)
+        pl = bel + rng.uniform(0.0, 1.0, N) * (1.0 - bel)
+        w = rng.uniform(0.0, 1.0)
+        pg = bel + w * (pl - bel)
+        s = np.sort(pg)
+        ui = s[0] + s[1] - 1.0
+        x = float(np.prod(bel) + w * (np.prod(pl) - np.prod(bel)))
+        assert ui >= 2.0 * x - 1.0 - 1e-9   # exact lower bound

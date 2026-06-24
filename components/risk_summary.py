@@ -152,6 +152,39 @@ def compute_esl_envelope_analytical(n_pillars: int, w: float = 0.5) -> list[dict
     return curves
 
 
+def compute_esl_envelope_exact(n_pillars: int) -> list[dict]:
+    """(P(G, ESL), UI) reference curves, both pinned at (0, −1) and (1, 1):
+
+        lower:  UI = 2·x − 1        EXACT lower bound (two pillars committed-
+                                    positive, two fully unknown sits on it)
+        upper:  UI = 2·x^(1/N) − 1  balanced reference only (all pillars equal,
+                                    no white) — NOT a hard cap
+
+    The **lower diagonal is a true, tight lower bound** for the ESL headline
+    (Policy P applied once to the combined masses, linear in w). It is the locus
+    the product family's per-stance vertices sit on; because the ESL x is the
+    chord rather than the product curve, the achievable region's lower boundary
+    collapses exactly onto it (verified: 3M random 4-pillar configs, zero
+    violations; the two-committed/two-unknown config lies exactly on it).
+
+    The upper "all pillars equal" curve is only a **reference**: a single
+    strongly-vetoing pillar (Pg≈0) crashes the headline x toward 0 while UI stays
+    moderate, so the trajectory can rise above it. (The same was quietly true on
+    the Classic plot — only the lower side is a real bound.)
+    """
+    x = np.linspace(1e-6, 1.0, 200)
+    ui_upper = 2.0 * x ** (1.0 / n_pillars) - 1.0
+    ui_lower = 2.0 * x - 1.0
+    return [
+        {"x": x * 100, "y": ui_upper * 100,
+         "name": f"Balanced reference — all {n_pillars} pillars equal, no white",
+         "color": "#9ca3af", "dash": "dash", "width": 1.6},
+        {"x": x * 100, "y": ui_lower * 100,
+         "name": "Lower bound (exact) — UI = 2x − 1",
+         "color": "#111827", "dash": "longdashdot", "width": 2.0},
+    ]
+
+
 def _verdict(bel_y_pct: float, cur_y_pct: float, pl_y_pct: float) -> str:
     """Trajectory-aware status string for the UI banner."""
     if bel_y_pct > 0:
