@@ -322,6 +322,36 @@ def _render_geo_diagnostics(ctx) -> None:
         ),
     )
 
+    with st.expander("📐 The ESL envelope — and why its floor differs from the Classic UI", expanded=False):
+        st.markdown(
+            "The envelope marks where a prospect *can* land in "
+            "**(P(G, ESL), Uncertainty Index)** space.\n\n"
+            "**Lower bound — `UI = 2·x − 1` (exact, hard).** The worst case for weakest-link "
+            "adequacy: two pillars committed-positive (Pg = 1) and two pillars carrying all the "
+            "uncertainty. At stance *w* those two unknowns sit at Pg = *w*, so the headline is "
+            "P(G, ESL) = *w* and UI = 2*w* − 1. Eliminating *w* gives the straight diagonal. The "
+            "trajectory can **never** drop below it (verified over millions of pillar configs).\n\n"
+            "**Upper curve — `UI = 2·x^(1/4) − 1` (balanced reference, not a hard cap).** The "
+            "best-balanced case: all four pillars equal, no white. It caps any ordinary prospect, "
+            "but a single near-veto pillar (one pillar almost certain to fail, Pg ≈ 0) crashes the "
+            "headline toward 0 while the other pillars keep UI moderate, so the point can rise "
+            "above it at very low P(G). (That is also a reminder that the two-weakest UI "
+            "under-reflects a single decisive veto.)\n\n"
+            "**Why the ESL floor differs from the classical (Rose) UI floor.** Take the same "
+            "worst-case prospect (two pillars solid, two unknown) at the neutral stance w = 0.5:\n\n"
+            "| | combine rule | headline | UI |\n"
+            "|---|---|---|---|\n"
+            "| **Classic** | multiply: `w · w = w²` | **25%** | 0% |\n"
+            "| **ESL** | combine masses, Policy P once: `w` | **50%** | 0% |\n\n"
+            "Same prospect, same UI, but it plots at **25% on the Classic axis and 50% on the "
+            "ESL axis**. Eliminating *w*: Classic has `x = w²` → **`UI = 2·√x − 1`** (a curve), "
+            "while ESL has `x = w` → **`UI = 2·x − 1`** (a straight line). The only difference is "
+            "the **squaring**: Classic multiplies the two uncertain pillars (compressing the "
+            "headline to *w²*, which bends the floor into a √-curve); ESL keeps the headline at "
+            "*w*, so its floor is the straight diagonal. That horizontal shift between the two "
+            "axes is the **ESL − Classic gap**."
+        )
+
     # ── Pillar fan — P(pillar, ESL) and P(G, ESL) vs stance w ──────────────
     st.divider()
     with st.container(border=True):

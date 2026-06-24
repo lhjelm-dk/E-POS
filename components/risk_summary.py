@@ -181,7 +181,7 @@ def compute_esl_envelope_exact(n_pillars: int) -> list[dict]:
          "color": "#9ca3af", "dash": "dash", "width": 1.6},
         {"x": x * 100, "y": ui_lower * 100,
          "name": "Lower bound (exact) — UI = 2x − 1",
-         "color": "#111827", "dash": "longdashdot", "width": 2.0},
+         "color": "#9ca3af", "dash": "longdashdot", "width": 1.8},
     ]
 
 
