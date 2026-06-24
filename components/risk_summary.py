@@ -219,18 +219,17 @@ def render_pg_ui_trajectory(
         f"<div style='background:{ui_bg};border-left:5px solid {ui_color};"
         f"padding:12px 16px;border-radius:6px;margin-bottom:12px;'>"
         f"<b style='color:{ui_color};font-size:1.1rem;'>"
-        f"Weakest-Link Adequacy ({method_label}): {current_y:+.1f}% &nbsp;"
+        f"Uncertainty Index ({method_label}): {current_y:+.1f}% &nbsp;"
         f"<small style='color:#6b7280;font-weight:400;'>"
         f"[defensible range: {bel_y_pct:+.1f}% — {pl_y_pct:+.1f}%]</small></b><br>"
         f"<span style='color:#374151;'>{status_text}</span></div>",
         unsafe_allow_html=True,
     )
     st.caption(
-        f"**Weakest-Link Adequacy (WLA) = MIN(P(pillar)) + 2nd-MIN(P(pillar)) − 1.** "
-        f"A point-estimate adequacy check (after MacKay 1995): are the two weakest pillar "
-        f"chances jointly strong enough? This is **not** a measure of incompleteness "
-        f"(incompleteness is the ESL white band / the ESL Uncertainty Index). The curve shows how "
-        f"WLA and P(G, {method_label}) co-vary as the stance w sweeps from 0 (pessimistic) to 1 "
+        f"**Uncertainty Index (UI) = MIN(P(pillar)) + 2nd-MIN(P(pillar)) − 1** (after MacKay 1995). "
+        f"A point-estimate adequacy check: are the two weakest pillar chances jointly strong enough? "
+        f"It is distinct from **Incompleteness** (the ESL white band, Pl − Bel). The trajectory shows "
+        f"how UI and P(G, {method_label}) co-vary as the stance w sweeps from 0 (pessimistic) to 1 "
         f"(optimistic); the ★ is the current point, the bracket-marked endpoints are the defensible bounds."
     )
 
@@ -306,7 +305,7 @@ def render_pg_ui_trajectory(
         line=dict(color="#1e40af", width=3),
         name="Stance trajectory (w: 0 → 1)",
         hovertemplate=(
-            f"P(G, {method_label}): %{{x:.1f}}%<br>WLA: %{{y:+.1f}}%<extra>trajectory</extra>"
+            f"P(G, {method_label}): %{{x:.1f}}%<br>UI: %{{y:+.1f}}%<extra>trajectory</extra>"
         ),
     ))
 
@@ -332,7 +331,7 @@ def render_pg_ui_trajectory(
     # UI = 0 reference line
     fig.add_hline(
         y=0, line_width=1.5, line_dash="dot", line_color="#1f2937",
-        annotation_text="WLA = 0  (balanced)", annotation_position="right",
+        annotation_text="UI = 0  (balanced)", annotation_position="right",
         annotation_font=dict(size=10, color="#1f2937"),
     )
 
@@ -346,7 +345,7 @@ def render_pg_ui_trajectory(
         name="Current (prior)",
         hovertemplate=(
             f"<b>Current stance — prior</b><br>w = {current_w:.2f}<br>"
-            f"P(G, {method_label}): %{{x:.1f}}%<br>WLA: %{{y:+.1f}}%<extra></extra>"
+            f"P(G, {method_label}): %{{x:.1f}}%<br>UI: %{{y:+.1f}}%<extra></extra>"
         ),
     ))
 
@@ -360,7 +359,7 @@ def render_pg_ui_trajectory(
                 line=dict(color="#f59e0b", width=2.5, dash="dash"),
                 name=f"P(G | DFI, {method_label})  — posterior",
                 hovertemplate=(
-                    f"P(G | DFI, {method_label}): %{{x:.1f}}%<br>WLA: %{{y:+.1f}}%"
+                    f"P(G | DFI, {method_label}): %{{x:.1f}}%<br>UI: %{{y:+.1f}}%"
                     f"<extra>posterior</extra>"
                 ),
             ))
@@ -381,14 +380,14 @@ def render_pg_ui_trajectory(
                 name="Current (posterior)",
                 hovertemplate=(
                     f"<b>Current stance — DFI posterior</b><br>w = {current_w:.2f}<br>"
-                    f"P(G | DFI, {method_label}): %{{x:.1f}}%<br>WLA: %{{y:+.1f}}%<extra></extra>"
+                    f"P(G | DFI, {method_label}): %{{x:.1f}}%<br>UI: %{{y:+.1f}}%<extra></extra>"
                 ),
             ))
 
     fig.update_layout(
-        title=f"Stance trajectory — P(G, {method_label}) vs Weakest-Link Adequacy",
+        title=f"Stance trajectory — P(G, {method_label}) vs Uncertainty Index",
         xaxis_title=f"P(G, {method_label}) (%)",
-        yaxis_title="Weakest-Link Adequacy (%)",
+        yaxis_title="Uncertainty Index (%)",
         xaxis=dict(range=[0, 100], dtick=10),
         yaxis=dict(range=[-100, 100], dtick=20),
         height=760, margin=dict(t=40, b=190, l=50, r=20),
@@ -405,18 +404,18 @@ def render_pg_ui_trajectory(
     # Headline caption (always visible, one line)
     st.caption(
         f"★ = current stance · blue curve = trajectory as w sweeps 0→1 · "
-        f"dashed = theoretical envelope · background red→green by WLA sign."
+        f"dashed = theoretical envelope · background red→green by UI sign."
     )
 
     # Compact inline pill readout of the three key points
     st.markdown(
         f"<div style='font-size:0.86rem;color:#374151;margin-top:4px;'>"
         f"<span style='background:#fee2e2;padding:2px 8px;border-radius:10px;'>"
-        f"<b>Bel</b> (w=0): P={bel_x_pct:.1f}% · WLA={bel_y_pct:+.1f}%</span> &nbsp; "
+        f"<b>Bel</b> (w=0): P={bel_x_pct:.1f}% · UI={bel_y_pct:+.1f}%</span> &nbsp; "
         f"<span style='background:#fff7ed;padding:2px 8px;border-radius:10px;'>"
-        f"<b>Current</b> (w={current_w:.2f}): P={current_x:.1f}% · WLA={current_y:+.1f}%</span> &nbsp; "
+        f"<b>Current</b> (w={current_w:.2f}): P={current_x:.1f}% · UI={current_y:+.1f}%</span> &nbsp; "
         f"<span style='background:#dcfce7;padding:2px 8px;border-radius:10px;'>"
-        f"<b>Pl</b> (w=1): P={pl_x_pct:.1f}% · WLA={pl_y_pct:+.1f}%</span></div>",
+        f"<b>Pl</b> (w=1): P={pl_x_pct:.1f}% · UI={pl_y_pct:+.1f}%</span></div>",
         unsafe_allow_html=True,
     )
 
@@ -424,11 +423,11 @@ def render_pg_ui_trajectory(
     with st.expander("Reading this plot", expanded=False):
         st.markdown(
             "**Blue curve:** stance trajectory — sweeps w from 0 to 1 in 21 steps, each point is "
-            f"`(P(G, {method_label}), WLA)` at that stance. "
+            f"`(P(G, {method_label}), UI)` at that stance. "
             "★ = current prospect at your stance setting.  \n"
             "**Grey dashed lines:** theoretical envelope.  \n"
-            "**Background:** red (WLA = −100%) → white (WLA = 0) → green (WLA = +100%).  \n"
-            "**Diagnosis flip:** if the trajectory crosses the `WLA = 0` horizontal, the "
+            "**Background:** red (UI = −100%) → white (UI = 0) → green (UI = +100%).  \n"
+            "**Diagnosis flip:** if the trajectory crosses the `UI = 0` horizontal, the "
             "diagnosis (robust vs risk-driven) depends on the stance choice."
         )
         if extra_caption:

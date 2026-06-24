@@ -200,12 +200,12 @@ def render_classic_pos(models: dict | None = None) -> None:
     from components.prospect_hub import _compute_p_g_classic_trajectory
     _traj = _compute_p_g_classic_trajectory(models, n_steps=21)
 
-    # ── 1. P(G, Classic) vs Weakest-Link Adequacy — stance trajectory ───────
+    # ── 1. P(G, Classic) vs Uncertainty Index — stance trajectory ───────────
     # (Order matches the ESL Analysis tab: trajectory first, then pillar fan.)
     if _traj is not None:
         st.divider()
         with st.container(border=True):
-            st.subheader("P(G, Classic) vs Weakest-Link Adequacy — stance trajectory")
+            st.subheader("P(G, Classic) vs Uncertainty Index — stance trajectory")
 
             _ws_arr_ui     = _traj["ws"]
             _total_arr_ui  = _traj["total"]
@@ -266,7 +266,15 @@ def render_classic_pos(models: dict | None = None) -> None:
                 except Exception:
                     _dfi_overlay_cls = None
 
-            from components.risk_summary import render_pg_ui_trajectory
+            from components.risk_summary import (
+                render_pg_ui_trajectory, compute_esl_envelope_analytical,
+            )
+            _cl_env_curves = compute_esl_envelope_analytical(n_pillars=len(_per_pillar_ui))
+            _cl_envelope = {"curves": [
+                {"x": c["x"].tolist(), "y": c["y"].tolist(), "name": c["name"],
+                 "color": c["color"], "dash": c["dash"], "width": c["width"]}
+                for c in _cl_env_curves
+            ]}
             render_pg_ui_trajectory(
                 traj_x=_traj_x_cl, traj_y=_traj_y_cl,
                 ws=_ws_arr_ui,
@@ -274,15 +282,18 @@ def render_classic_pos(models: dict | None = None) -> None:
                 current_x=_traj_x_cl[_idx_cur_cl],
                 current_y=_traj_y_cl[_idx_cur_cl],
                 method_label="Classic",
+                envelope_data=_cl_envelope,
                 dfi_overlay=_dfi_overlay_cls,
                 extra_caption=(
-                    "**Caveat:** when the recommended Classic operator (Min) is used for all groups, "
-                    "the per-pillar P(pillar) values match the ESL method, so this trajectory looks "
-                    "identical to the ESL UI trajectory in the Analysis tab. The two diverge only "
-                    "when you pick a non-Min Classic operator (e.g. Product or Mean) at the "
-                    "group/pillar level — in which case the difference between this curve and the "
-                    "ESL one is itself a diagnostic of how much your operator choice changes the "
-                    "diagnosis."
+                    "**Envelopes** (4-pillar, exact for the product POS): the upper bound "
+                    "`UI = 2·x^(1/4) − 1` (all pillars equal, no white) and the grey lower family "
+                    "at w ∈ {0, 0.10, 0.25, 0.50, 0.75, 0.90, 1} (two weakest pillars carry the "
+                    "uncertainty). **Why this trajectory sits lower-left of the ESL one:** "
+                    "P(G, Classic) is the *product* of four pillar chances, whereas P(G, ESL) "
+                    "applies Policy P *once* to the combined masses, so the Classic headline is "
+                    "smaller. That horizontal distance is the **ESL − Classic gap**; the Uncertainty "
+                    "Index (y) can also differ because the per-pillar chance is aggregated "
+                    "differently by each method."
                 ),
             )
 

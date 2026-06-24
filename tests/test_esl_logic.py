@@ -85,8 +85,8 @@ def test_uncertainty_conflict():
     assert conflict is True
 
 
-def test_esl_uncertainty_index_equals_pl_minus_bel():
-    # The ESL Uncertainty Index shown on the Analysis tab is the headline white
+def test_incompleteness_equals_pl_minus_bel():
+    # The Incompleteness index shown on the Analysis tab is the headline white
     # band, which is exactly Pl - Bel (Bel = S_for, Pl = 1 - S_against).
     s_for, s_against = 0.55, 0.20
     white, conflict = calculate_uncertainty(s_for, s_against)
