@@ -72,10 +72,14 @@ pillars or a data-quality issue, not an error.
 ## Quick start
 
 ```bash
-# 1. install
+# 1. get the code
+git clone https://github.com/lhjelm-dk/E-POS.git
+cd E-POS
+
+# 2. install
 pip install -r requirements.txt
 
-# 2. run
+# 3. run
 streamlit run app.py
 ```
 
