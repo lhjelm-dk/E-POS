@@ -855,7 +855,7 @@ in the risk narrative, not hidden in a single number.
             "Visual representation of how evidence flows from sub-elements through pillar combinations to P(G)."
         )
         from components.hierarchy_chart import render_esl_hierarchy
-        render_esl_hierarchy(play, conditional)
+        render_esl_hierarchy(play, conditional, key_prefix="theory")
 
     # ═══════════════════════════════════════════════════════════════════════
     # 🌊 BAYESIAN DFI UPLIFT — full theory + workflow + pitfalls + reporting

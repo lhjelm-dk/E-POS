@@ -417,7 +417,8 @@ def render_element_tree(play: dict, conditional: dict) -> None:
 
 # ── Public render functions ───────────────────────────────────────────────────
 
-def render_esl_hierarchy(play: dict | None = None, conditional: dict | None = None) -> None:
+def render_esl_hierarchy(play: dict | None = None, conditional: dict | None = None,
+                         key_prefix: str = "esl") -> None:
     """ESL hierarchy diagram — always matches the active risk model."""
     pillars = _get_model_pillars()
     n = len(pillars)
@@ -441,14 +442,15 @@ def render_esl_hierarchy(play: dict | None = None, conditional: dict | None = No
         method_note=method_note,
         height=680 if has_data else 420,
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key=f"{key_prefix}_esl_hierarchy")
 
     if play and conditional:
         st.divider()
         render_element_tree(play, conditional)
 
 
-def render_classic_pos_hierarchy(play: dict | None = None, conditional: dict | None = None) -> None:
+def render_classic_pos_hierarchy(play: dict | None = None, conditional: dict | None = None,
+                                 key_prefix: str = "classic") -> None:
     """Classic POS hierarchy diagram — matches the active risk model."""
     pillars = _get_model_pillars()
     n = len(pillars)
@@ -460,7 +462,7 @@ def render_classic_pos_hierarchy(play: dict | None = None, conditional: dict | N
         method_note="Pillars: product (Π).  Sub-elements: min (weakest link).",
         height=None,
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key=f"{key_prefix}_classic_hierarchy")
     if play and conditional:
         st.divider()
         render_element_tree(play, conditional)

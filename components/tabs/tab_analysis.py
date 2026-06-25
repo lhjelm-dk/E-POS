@@ -1008,7 +1008,7 @@ def _render_geo_detail(ctx) -> None:
 
     with st.expander("Combination hierarchy", expanded=False):
         from components.hierarchy_chart import render_esl_hierarchy
-        render_esl_hierarchy(play, conditional)
+        render_esl_hierarchy(play, conditional, key_prefix="detail")
 
     with st.expander("Agreement Analysis & Download Summary", expanded=False):
         from components.comparison import render_comparison_agreement
