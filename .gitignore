@@ -51,6 +51,7 @@ data/prospects/*.csv
 *.ppt
 *.doc
 
-# Internal design specs — kept locally for reference, not published in the repo
+# Internal design specs + article draft — kept locally for reference, not published in the repo
 docs/dfi_pillar_update_spec.md
 docs/dfi_pillar_update_plan_b_spec.md
+docs/linkedin_article.md
